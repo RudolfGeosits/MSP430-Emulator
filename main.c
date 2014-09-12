@@ -7,11 +7,11 @@ char program_name[50];
 void load_program(char*, unsigned char*);
 void reg_num_to_name(unsigned int, char*);
 
-#include "msp_memspace.c"
-#include "cpu/msp_registers.c"
+#include "devices/memory/memspace.c"
+#include "devices/cpu/registers.c"
 #include "utils.c"
-#include "debugger.c"
-#include "cpu/decoder.c"
+#include "debugger/debugger.c"
+#include "devices/cpu/decoder.c"
 
 int main(char** argv, int argc){
   initialize_msp_memspace();
@@ -21,12 +21,13 @@ int main(char** argv, int argc){
   scanf("%s", program_name);
 
   load_program(program_name, ROM);
-  decoder(ROM);
+  decode(ROM);
 
   uninitialize_msp_memspace();
   return 0;
 }
 
+//##########+++ Load binary into memory +++##########
 void load_program(char* program_name, unsigned char* MEM){
   int size, result;
   printf("Executing Program name: %s\n", program_name);

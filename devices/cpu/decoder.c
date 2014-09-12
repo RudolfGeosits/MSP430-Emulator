@@ -1,6 +1,7 @@
 #include "decoder.h"
+#include "formatI.c"
 
-void decoder(unsigned char* MEM){
+void decode(unsigned char* MEM){
   char reg_name[10];
   unsigned char opcode;
   int done = 0;

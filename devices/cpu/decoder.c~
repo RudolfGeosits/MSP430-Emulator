@@ -1,10 +1,16 @@
-void decode(void* MEM){
+#include "decoder.h"
+
+void fetch(){
+  
+}
+
+void decode(unsigned char* MEM){
   char reg_name[10];
   unsigned char opcode;
   int done = 0;
 
   while( !done ){
-    opcode = *( (unsigned char*)MEM + 1 ) >> 4;
+    opcode = *( MEM + 1 ) >> 4;
     memset(reg_name, 0, sizeof(reg_name));
     printf("Got opcode 0x%X\n", opcode);
 
@@ -14,7 +20,7 @@ void decode(void* MEM){
       unsigned char bw_flag = ( instruction & 0x0040 ) >> 6;
       unsigned char as_flag = ( instruction & 0x0030 ) >> 4;
       unsigned char source_reg = ( instruction & 0x000F );
-      
+
       reg_num_to_name(source_reg, reg_name);      
 
       switch(opcode){

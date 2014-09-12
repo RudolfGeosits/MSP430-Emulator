@@ -21,15 +21,15 @@ void command_loop(){
     unsigned int start_addr;                                                                     
                                                                                                    
     scanf("%X", &start_addr);                                                                    
-    dump_memory(FLASH, 32000, start_addr, "b");                                                  
+    dump_memory(MEMSPACE, 0xFFFF, start_addr, "b");
   }                                               
 
   //# dw ADDRESS, dump words starting from ADDRESS
   else if(strncmp("dw", command, sizeof("dw")) == 0){                                            
-    unsigned int start_addr;                                                                     
+    unsigned int start_addr;                                                   
     
     scanf("%X", &start_addr);                                                                    
-    dump_memory(FLASH, 32000, start_addr, "w");                                                  
+    dump_memory(MEMSPACE, 0xFFFF, start_addr, "w");
   }                                                                                              
 
 }

@@ -6,7 +6,7 @@ void decoder(unsigned char* MEM){
   int done = 0;
 
   while( !done ){
-    opcode = *( (unsigned char*)MEM + 1 ) >> 4;
+    opcode = *( MEM + 1 ) >> 4;
     memset(reg_name, 0, sizeof(reg_name));
     printf("Got opcode 0x%X\n", opcode);
 
@@ -16,7 +16,7 @@ void decoder(unsigned char* MEM){
       unsigned char bw_flag = ( instruction & 0x0040 ) >> 6;
       unsigned char as_flag = ( instruction & 0x0030 ) >> 4;
       unsigned char source_reg = ( instruction & 0x000F );
-      
+
       reg_num_to_name(source_reg, reg_name);      
 
       switch(opcode){

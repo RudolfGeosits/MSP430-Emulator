@@ -26,8 +26,8 @@ short r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r14, r15;
 //##########+++ MSP430 Register initialization +++##########
 void initialize_msp_registers(){
 
-  //# Initialize Program Counter to 0xFFFE
-  PC = 0xFFFE;
+  //# Initialize Program Counter to 0xFFFE at boot or reset
+  PC = 0x0400;
 
   //# Stack pointer typically begins at the top of RAM after reset
   SP = 0;

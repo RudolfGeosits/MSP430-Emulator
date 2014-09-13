@@ -1,5 +1,23 @@
 #include "utils.h"
 
+//##########+++ Load binary into memory +++##########                                              
+void load_program(char* program_name, unsigned char* MEM){
+  int size, result;
+  printf("Executing Program name: %s\n", program_name);
+  FILE* fd = fopen(program_name, "rb+");
+
+  // obtain file size                                                                              
+  fseek(fd, 0, SEEK_END);
+  size = ftell(fd);
+  rewind(fd);
+
+  result = fread(MEM, 1, size, fd);
+  printf("Placed %d bytes into flash\n\n\n", result);
+
+  fclose(fd);
+}
+
+//###########+++ Register number to name +++#########
 void reg_num_to_name(unsigned int source_reg, char* reg_name){
   
   switch(source_reg){

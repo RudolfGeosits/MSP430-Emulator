@@ -5,15 +5,24 @@ unsigned int i = 0;
 void main(void){
 
   asm(
-      "RRC @R7\n"   //Indirect register mode
-      "RRC @R7+\n"  //Indirect autoincrement
-      "RRC R7\n"    //Register mode
-      "RRC.B R7\n"  //Register mode byte
-      "SWPB R7\n"
-      "SWPB R7\n"
-      "RRC R4\n"
+      "CALL R5\n"
+      "CALL 0x10(R5)\n"
+      "CALL @R5\n"
+      "CALL @R5+\n"
       "SXT R5\n"
-      "PUSH R8\n"
+      "SXT 0x10(R5)\n"
+      "SXT @R5\n"
+      "SXT @R5+\n"
+      "SXT #0xFFFF\n"
+      "PUSH R5\n"
+      "PUSH 0x10(R5)\n"
+      "PUSH @R5\n"
+      "PUSH @R5+\n"
+      "SWPB 0x10(R5)\n"
+      "RRC R5\n"
+      "RRC 0x10(R5)\n"
+      "RRC @R5\n"
+      "RRC @R5+\n"
   );
   
   // Stop the watchdog timer

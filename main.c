@@ -7,9 +7,9 @@ char program_name[50];
 void load_program(char*, unsigned char*);
 void reg_num_to_name(unsigned int, char*);
 
-#include "utils.c"
 #include "devices/memory/memspace.c"
 #include "devices/cpu/registers.c"
+#include "utils.c"
 #include "debugger/debugger.c"
 #include "devices/cpu/decoder.c"
 

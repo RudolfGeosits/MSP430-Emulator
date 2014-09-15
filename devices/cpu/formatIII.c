@@ -21,7 +21,7 @@ void decode_formatIII( unsigned short instruction ){
   char source_reg[10], dest_reg[10];
 
   printf("Source: %04X\nas_flag: %02X\nDest: %04X\nad_flag: %X\nbw_flag: %X\n",
-	 source, as_flag, destination, ad_flag, bw_flag);
+  source, as_flag, destination, ad_flag, bw_flag);
 
   switch( opcode ){
   
@@ -34,6 +34,11 @@ void decode_formatIII( unsigned short instruction ){
       reg_num_to_name(source, source_reg);
       reg_num_to_name(destination, dest_reg);
       printf("%s, %s\n", source_reg, dest_reg);
+
+      short *s = get_reg_ptr(source);
+      short *d = get_reg_ptr(destination);
+
+      *d = *s;
 
       break;
     }
@@ -53,7 +58,7 @@ void decode_formatIII( unsigned short instruction ){
     }
 
     //# Indexed mode for only source operand
-    else if( as_flag == 1 & ad_flag == 0 ){
+    else if( as_flag == 1 && ad_flag == 0 ){
       
       unsigned short source_offset;
       reg_num_to_name(source, source_reg);
@@ -66,7 +71,7 @@ void decode_formatIII( unsigned short instruction ){
     }
 
     //# Indexed mode for only destination operand
-    else if( as_flag == 0 & ad_flag == 1 ){
+    else if( as_flag == 0 && ad_flag == 1 ){
       
       unsigned short dest_offset;
       reg_num_to_name(source, source_reg);
@@ -79,7 +84,7 @@ void decode_formatIII( unsigned short instruction ){
     }
 
     //# Constant mode for only source operand
-    else if( as_flag == 3 & ad_flag == 0 ){
+    else if( as_flag == 3 && ad_flag == 0 ){
       short source_const;
       reg_num_to_name(destination, dest_reg);
       
@@ -89,8 +94,19 @@ void decode_formatIII( unsigned short instruction ){
       break;
     }
 
+    //# SRC = Constant, DST = Address
+    else if( as_flag == 3 && ad_flag == 1 ){
+      short source_const;
+      unsigned short dest_addr;
+      
+      source_const = fetch();
+      dest_addr = fetch();
+      printf("#0x%04X, &0x%04X\n", source_const, dest_addr);
+
+    }
+
     //# Indirect register mode for only source operand
-    else if( as_flag == 2 & ad_flag == 0 ){
+    else if( as_flag == 2 && ad_flag == 0 ){
       short source_const;
       reg_num_to_name(destination, dest_reg);
       reg_num_to_name(source, source_reg);

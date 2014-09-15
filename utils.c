@@ -18,6 +18,66 @@ void load_program(char* program_name, unsigned char* MEM){
 }
 
 //###########+++ Register number to name +++#########
+short* get_reg_ptr(unsigned char reg){
+  
+ switch( reg ){
+ 
+  case 0x0:{
+    return &PC;
+  }
+  case 0x1:{
+    return &SP;
+  }
+  case 0x2:{
+    return 0;
+  }
+  case 0x3:{
+    return 0;
+  }
+  case 0x4:{
+    return &r4;
+  }
+  case 0x5:{
+    return &r5;
+  }
+  case 0x6:{
+    return &r6;
+  }
+  case 0x7:{
+    return &r7;
+  }
+  case 0x8:{
+    return &r8;
+  }
+  case 0x9:{
+    return &r9;
+  }
+  case 0xA:{
+    return &r10;
+  }
+  case 0xB:{
+    return &r11;
+  }
+  case 0xC:{
+    return &r12;
+  }
+  case 0xD:{
+    return &r13;
+  }
+  case 0xE:{
+    return &r14;
+  }
+  case 0xF:{
+    return &r15;
+  }
+  default:{
+    return 0;
+  }  
+ }
+
+}
+
+//###########+++ Register number to name +++#########
 void reg_num_to_name(unsigned int source_reg, char* reg_name){
   
   switch(source_reg){

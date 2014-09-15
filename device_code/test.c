@@ -5,15 +5,7 @@ unsigned int i = 0;
 void main(void){
 
   asm(
-      "SWPB @R7\n"   //Indirect register mode
-      "SWPB @R7+\n"  //Indirect autoincrement
-      "SWPB R7\n"    //Register mode
-      "SWPB R7\n"
-      "SWPB R7\n"
-      "SWPB R7\n"
-      "RRC R4\n"
-      "SXT R5\n"
-      "PUSH R8\n"
+      "MOV @R5, 0x8(R8)\n"
   );
   
   // Stop the watchdog timer

@@ -86,15 +86,15 @@ void reg_num_to_name(unsigned int source_reg, char* reg_name){
   switch(source_reg){
   
   case 0x0:{
-    strncpy(reg_name, "R0\0", 3);
+    strncpy(reg_name, "PC\0", 3);
     return;
   }
   case 0x1:{
-    strncpy(reg_name, "R1\0", 3);
+    strncpy(reg_name, "SP\0", 3);
     return;
   }
   case 0x2:{
-    strncpy(reg_name, "R2\0", 3);
+    strncpy(reg_name, "SR\0", 3);
     return;
   }
   case 0x3:{

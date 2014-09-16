@@ -29,7 +29,7 @@ void decode_formatIII( unsigned short instruction ){
   case 0x4:{
     bw_flag == 0 ? printf("MOV ") : printf("MOV.B ");
 
-    //# Both operands are register contents
+    //# SRC = reg contents; DST = reg contents
     if( as_flag == 0 && ad_flag == 0 ){
       reg_num_to_name(source, source_reg);
       reg_num_to_name(destination, dest_reg);
@@ -43,8 +43,7 @@ void decode_formatIII( unsigned short instruction ){
       break;
     }
 
-    //# Indexed mode X(Rn) (Rn+X) points to the operand
-    //# X is stored in the next word
+    //# SRC = absolute addr; DST = absolute addr
     else if( as_flag == 1 && ad_flag == 1 ){
       unsigned short source_offset, dest_offset;
       reg_num_to_name(source, source_reg);
@@ -52,12 +51,18 @@ void decode_formatIII( unsigned short instruction ){
       
       source_offset = fetch();
       dest_offset = fetch();
-      printf("0x%04X(%s), 0x%04X(%s)\n", source_offset, source_reg, dest_offset, dest_reg);
+      
+      if(source == 2){
+	printf("&0x%04X, &0x%04X\n", source_offset, dest_offset);      
+      }
+      else{
+	printf("0x%04X(%s), 0x%04X(%s)\n", source_offset, source_reg, dest_offset, dest_reg);
+      }
 
       break;
     }
 
-    //# Indexed mode for only source operand
+    //# SRC = absolute addr; DST = register contents
     else if( as_flag == 1 && ad_flag == 0 ){
       unsigned short source_offset, source_contents;
       unsigned short* source_ptr;
@@ -66,14 +71,14 @@ void decode_formatIII( unsigned short instruction ){
       reg_num_to_name(source, source_reg);
       reg_num_to_name(destination, dest_reg);
       
+      //# Here, source reg is acting as a constant generator
       source_offset = fetch();
-      printf("0x%04X(%s), %s\n", source_offset, source_reg, dest_reg);
+      printf("&0x%04X, %s\n", source_offset, dest_reg);
 
       source_ptr = get_reg_ptr(source);
       dest_ptr = get_reg_ptr(destination);
       source_contents = *source_ptr;
 
-      printf("Got contents 0x%04X\n", source_contents + source_offset);
       void* addr = (void*)MEMSPACE;
       addr += (source_contents + source_offset);
 
@@ -82,7 +87,7 @@ void decode_formatIII( unsigned short instruction ){
       break;
     }
 
-    //# Indexed mode for only destination operand
+    //# SRC = reg contents, DST = absolute address
     else if( as_flag == 0 && ad_flag == 1 ){
       
       unsigned short dest_offset;
@@ -90,23 +95,23 @@ void decode_formatIII( unsigned short instruction ){
       reg_num_to_name(destination, dest_reg);
       
       dest_offset = fetch();
-      printf("%s, 0x%04X(%s)\n", source_reg, dest_offset, dest_reg);
+      printf("%s, &0x%04X\n", source_reg, dest_offset);
 
       break;
     }
 
-    //# Constant mode for only source operand
+    //# SRC = Constant; DST = register contents
     else if( as_flag == 3 && ad_flag == 0 ){
       short source_const;
       reg_num_to_name(destination, dest_reg);
       
       source_const = fetch();
-      printf("0x%04X, %s\n", source_const, dest_reg);
+      printf("#0x%04X, %s\n", source_const, dest_reg);
 
       break;
     }
 
-    //# SRC = Constant, DST = Address
+    //# SRC = Constant, DST = Absolute Addressing mode
     else if( as_flag == 3 && ad_flag == 1 ){
       short source_const;
       unsigned short dest_addr;
@@ -117,7 +122,7 @@ void decode_formatIII( unsigned short instruction ){
 
     }
 
-    //# Indirect register mode for only source operand
+    //# SRC = Indirect Register; DST = Register Contents
     else if( as_flag == 2 && ad_flag == 0 ){
       short source_const;
       reg_num_to_name(destination, dest_reg);

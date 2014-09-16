@@ -20,6 +20,8 @@ void load_program(char* program_name, unsigned char* MEM){
 //###########+++ Register number to name +++#########
 short* get_reg_ptr(unsigned char reg){
   
+  static short r2 = 0;
+
  switch( reg ){
  
   case 0x0:{
@@ -29,7 +31,8 @@ short* get_reg_ptr(unsigned char reg){
     return &SP;
   }
   case 0x2:{
-    return 0;
+    r2 = sr_to_value();
+    return &r2;
   }
   case 0x3:{
     return 0;

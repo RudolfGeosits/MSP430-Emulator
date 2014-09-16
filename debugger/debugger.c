@@ -36,12 +36,15 @@ void command_loop(){
 
 //##########+++ Dump Memory Function +++##########
 void display_registers(){
+  unsigned short r2;
+  r2 = sr_to_value();
+
   printf("\n%%R0:%04X %%r1:%04X %%r2:%04X %%r3:%04X %%r4:%04X\n" \
          "%%r5:%04X %%r6:%04X %%r7:%04X %%r8:%04X %%r9:%04X\n" \
 	 "%%r10:%04X   %%r11:%04X  %%r12:%04X   %%r13:%04X\n" \
 	 "%%r14:%04X   %%r15:%04X  V:%d  N:%d  Z:%d  C:%d\n",
 	 
-	 PC, SP, 0xDEAD, CG2, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
+	 PC, SP, r2, CG2, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
 	 SR.overflow, SR.negative, SR.zero, SR.carry
 	 );
 }

@@ -35,10 +35,10 @@ void decode_formatIII( unsigned short instruction ){
       reg_num_to_name(destination, dest_reg);
       printf("%s, %s\n", source_reg, dest_reg);
 
-      short *s = get_reg_ptr(source);
-      short *d = get_reg_ptr(destination);
+      short *source_reg = get_reg_ptr(source);
+      short *dest_reg = get_reg_ptr(destination);
 
-      *d = *s;
+      *dest_reg = *source_reg;
 
       break;
     }
@@ -59,13 +59,25 @@ void decode_formatIII( unsigned short instruction ){
 
     //# Indexed mode for only source operand
     else if( as_flag == 1 && ad_flag == 0 ){
-      
-      unsigned short source_offset;
+      unsigned short source_offset, source_contents;
+      unsigned short* source_ptr;
+      short* dest_ptr;
+
       reg_num_to_name(source, source_reg);
       reg_num_to_name(destination, dest_reg);
       
       source_offset = fetch();
       printf("0x%04X(%s), %s\n", source_offset, source_reg, dest_reg);
+
+      source_ptr = get_reg_ptr(source);
+      dest_ptr = get_reg_ptr(destination);
+      source_contents = *source_ptr;
+
+      printf("Got contents 0x%04X\n", source_contents + source_offset);
+      void* addr = (void*)MEMSPACE;
+      addr += (source_contents + source_offset);
+
+      *dest_ptr = *( (short*)addr );
 
       break;
     }

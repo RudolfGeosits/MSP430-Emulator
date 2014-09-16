@@ -10,7 +10,7 @@ void command_loop(){
 
   //# st X, step X instructions forward, defaults to 1
   if( strncmp("st", command, sizeof("st")) == 0 ){                                               
-    
+    /*Just continue, nothing to see here.*/
   }                                 
   else if(strncmp("r", command, sizeof("r")) == 0){                                            
     display_registers();

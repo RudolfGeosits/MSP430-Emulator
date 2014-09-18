@@ -1,27 +1,23 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
-
-char program_name[50];
-
-void load_program(char*, unsigned char*);
-void reg_num_to_name(unsigned int, char*);
-
 #include "devices/memory/memspace.c"
 #include "devices/cpu/registers.c"
 #include "utils.c"
 #include "debugger/debugger.c"
 #include "devices/cpu/decoder.c"
 
-int main(char** argv, int argc){
+int main(int argc, char** argv){
+
+  if(argv[1] == NULL){
+    display_help();
+    exit(1);
+  }
 
   initialize_msp_memspace();
   initialize_msp_registers();
 
-  printf("Program Name: ");
-  scanf("%s", program_name);
-
-  load_program(program_name, ROM);
+  load_program( argv[1], ROM );
 
   //# Main CPU fetch/decode/execute
   while(1){
@@ -30,6 +26,6 @@ int main(char** argv, int argc){
   }
 
   uninitialize_msp_memspace();
-
   return 0;
+
 }

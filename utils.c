@@ -1,12 +1,12 @@
 #include "utils.h"
 
-//##########+++ Load binary into memory +++##########                                              
+//##########+++ Load binary into memory +++##########       
 void load_program(char* program_name, unsigned char* MEM){
   int size, result;
   printf("Executing Program name: %s\n", program_name);
   FILE* fd = fopen(program_name, "rb+");
 
-  // obtain file size                                                                              
+  // obtain file size
   fseek(fd, 0, SEEK_END);
   size = ftell(fd);
   rewind(fd);
@@ -22,7 +22,7 @@ short* get_reg_ptr(unsigned char reg){
   
   static short r2 = 0;
 
- switch( reg ){
+  switch( reg ){
  
   case 0x0:{
     return &PC;
@@ -75,7 +75,8 @@ short* get_reg_ptr(unsigned char reg){
   }
   default:{
     return 0;
-  }  
+  } 
+
  }
 
 }
@@ -155,4 +156,17 @@ void reg_num_to_name(unsigned int source_reg, char* reg_name){
   }
 
   } //# End of switch
+}
+
+//##########+++ Display the menu for this program +++##########
+void display_help(){
+
+  printf("****************************************"\
+         "****************************************\n");
+
+  printf("*\t\tMSP430-Emulator\n*\n*\tUsage: ./msp430 [BINARY FILE]\n*\n");
+
+  printf("****************************************"\
+         "****************************************\n");
+
 }

@@ -73,7 +73,13 @@ void decode_formatIII( unsigned short instruction ){
       
       //# Here, source reg is acting as a constant generator
       source_offset = fetch();
-      printf("&0x%04X, %s\n", source_offset, dest_reg);
+
+      if(source == 0x2){
+	printf("&0x%04X, %s\n", source_offset, dest_reg);
+      }
+      else{
+	printf("0x%04X(%s), %s\n", source_offset, source_reg, dest_reg);
+      }
 
       source_ptr = get_reg_ptr(source);
       dest_ptr = get_reg_ptr(destination);

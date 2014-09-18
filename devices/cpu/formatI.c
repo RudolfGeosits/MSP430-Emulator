@@ -19,15 +19,16 @@ void decode_formatI( unsigned short instruction ){
 
   switch(opcode){
     
-  //# RRC Rotate right through carry                                                              
+  //# RRC Rotate right through carry      
   case 0x0:{
 
     bw_flag == 0 ? printf("RRC ") : printf("RRC.B ");
 
-    //# direct register                                                                      
+    //# direct register
     if(as_flag == 0x0){
       printf("%s\n", reg_name);
     }
+
     //# Indexed register
     else if(as_flag == 0x1){
       short source_offset;
@@ -35,11 +36,13 @@ void decode_formatI( unsigned short instruction ){
       source_offset = fetch();
       printf("0x%04X(%s)\n", source_offset, reg_name);
     }
-    //# indirect register                                                                    
+
+    //# indirect register
     else if(as_flag == 0x2){
       printf("@%s\n", reg_name);
     }
-    //# Indirect autoincrement                                                               
+
+    //# Indirect autoincrement 
     else if(as_flag == 0x3){
       printf("@%s+\n", reg_name);
     }
@@ -47,13 +50,15 @@ void decode_formatI( unsigned short instruction ){
     break;
   }
   
-  //# SWPB Swap bytes                                                                        
-  //# bw flag always 0 (word)                                                                
+  //# SWPB Swap bytes
+  //# bw flag always 0 (word)
   case 0x1:{
+
     //# Direct register
     if( as_flag == 0x0 ){
       printf("SWPB %s\n", reg_name);
     }
+
     //# Indexed register
     else if( as_flag == 0x1 ){
       short source_offset;
@@ -61,10 +66,12 @@ void decode_formatI( unsigned short instruction ){
       source_offset = fetch();
       printf("SWPB 0x%04X(%s)\n", source_offset, reg_name);
     }
+
     //# indirect register
     else if( as_flag == 0x2 ){
       printf("SWPB @%s\n", reg_name);
     }
+
     //# Indirect register autoincrement
     else if( as_flag == 0x3 ){
       printf("SWPB @%s+\n", reg_name);
@@ -73,7 +80,7 @@ void decode_formatI( unsigned short instruction ){
     break;
   }
   
-  //# RRA Rotate right arithmetic                                                            
+  //# RRA Rotate right arithmetic 
   case 0x2:{
 
     bw_flag == 0 ? printf("RRA ") : printf("RRA.B ");
@@ -97,8 +104,8 @@ void decode_formatI( unsigned short instruction ){
     break;
   }
 
-  //# SXT Sign extend byte to word                                                           
-  //# bw flag always 0 (word)                                                                
+  //# SXT Sign extend byte to word
+  //# bw flag always 0 (word)
   case 0x3:{
 
     if(as_flag == 0x0){
@@ -120,7 +127,7 @@ void decode_formatI( unsigned short instruction ){
     break;
   }
   
-  //# PUSH push value on to the stack                                                        
+  //# PUSH push value on to the stack
   case 0x4:{
 
     bw_flag == 0 ? printf("PUSH ") : printf("PUSH.B ");    
@@ -144,7 +151,7 @@ void decode_formatI( unsigned short instruction ){
     break;
   }
 
-  //# Call subroutine; push PC and move source to PC                                         
+  //# Call subroutine; push PC and move source to PC
   case 0x5:{
 
     printf("CALL ");
@@ -168,7 +175,7 @@ void decode_formatI( unsigned short instruction ){
     break;
   }
   
-  //# RETI Return from interrupt: Pop SR then pop PC                                         
+  //# RETI Return from interrupt: Pop SR then pop PC
   case 0x6:{
     printf("RETI\n");
     break;
@@ -180,3 +187,4 @@ void decode_formatI( unsigned short instruction ){
   } //# End of Switch
   
 }
+

@@ -8,8 +8,8 @@
 //#       A = Addressing mode for source
 //#       S = Source 
 //########################################################
-void decode_formatI( unsigned short instruction ){
-
+void decode_formatI( unsigned short instruction )
+{
   char reg_name[10];
   unsigned char opcode = ( instruction & 0x0380 ) >> 7;
   unsigned char bw_flag = ( instruction & 0x0040 ) >> 6;

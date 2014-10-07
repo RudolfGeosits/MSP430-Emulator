@@ -7,8 +7,8 @@
 //# Where C = Condition, X = 10-bit signed offset 
 //# 
 //########################################################
-void decode_formatII( unsigned short instruction ){
-
+void decode_formatII( unsigned short instruction )
+{
   unsigned char condition = ( instruction & 0x1C00 ) >> 10;
   short signed_offset = ( instruction & 0x03FF );
 

@@ -1,41 +1,56 @@
 #include "debugger.h"
 
 //##########+++ Main Command Loop +++##########
-void command_loop(){
-
+void command_loop()
+{
   char command[32];                                                                              
-  memset(command, 0, sizeof(command));                                                           
-                                                                                                  
-  scanf("%s", command);                                                                          
 
-  //# st X, step X instructions forward, defaults to 1
-  if( strncmp("st", command, sizeof("st")) == 0 ){                                               
-    /*Just continue, nothing to see here.*/
-  }                                 
-  else if(strncmp("r", command, sizeof("r")) == 0){                                            
-    display_registers();
-  }
+  while(1){
+    memset(command, 0, sizeof(command));
+    scanf("%s", command);                                                                          
 
-  //# db ADDRESS, dump bytes starting from ADDRESS 
-  else if(strncmp("db", command, sizeof("db")) == 0){                                            
-    unsigned int start_addr;                                                                     
+    //# st X, step X instructions forward, defaults to 1
+    if( strncmp("st", command, sizeof("st")) == 0 ){                                               
+      /*Just continue, nothing to see here.*/
+    }                                 
+    else if(strncmp("r", command, sizeof("r")) == 0){                                            
+      display_registers();
+    }
+
+    //# db ADDRESS, dump bytes starting from ADDRESS 
+    else if(strncmp("db", command, sizeof("db")) == 0){                                            
+      unsigned int start_addr;                                                                     
                                                                                                  
-    scanf("%X", &start_addr);                                                                    
-    dump_memory(MEMSPACE, 0xFFFF, start_addr, "b");
-  }                                               
+      scanf("%X", &start_addr);                                                                    
+      dump_memory(MEMSPACE, 0xFFFF, start_addr, "b");
+    }                                               
 
-  //# dw ADDRESS, dump words starting from ADDRESS
-  else if(strncmp("dw", command, sizeof("dw")) == 0){                                            
-    unsigned int start_addr;                                                   
+    //# dw ADDRESS, dump words starting from ADDRESS
+    else if(strncmp("dw", command, sizeof("dw")) == 0){                                            
+      unsigned int start_addr;                                                   
     
-    scanf("%X", &start_addr);                                                                    
-    dump_memory(MEMSPACE, 0xFFFF, start_addr, "w");
-  }                                                                                
+      scanf("%X", &start_addr);                                                                    
+      dump_memory(MEMSPACE, 0xFFFF, start_addr, "w");
+    }                                                                                
+    //# set REG VAL, set a register to some value
+    else if(strncmp("set", command, sizeof("set")) == 0){
+      int value = 0;
+      char reg[10];
+      
+      scanf("%s %X", reg, &value);
+      printf("Command: set %s %04X\n", reg, value);
 
+      //get_reg_ptr( reg_name_to_num );
+    }
+    //# End the command loop, next instruction
+    else
+      break;
+  }
 }
 
 //##########+++ Dump Memory Function +++##########
-void display_registers(){
+void display_registers()
+{
   unsigned short r2;
   r2 = sr_to_value();
 
@@ -50,7 +65,8 @@ void display_registers(){
 }
 
 //##########+++ Dump Memory Function +++##########
-void dump_memory(unsigned char* MEM, int size, unsigned int start_addr, char* chunks){
+void dump_memory(unsigned char* MEM, int size, unsigned int start_addr, char* chunks)
+{
   unsigned int i, msp_addr = start_addr;
   MEM += start_addr;
 
@@ -77,5 +93,4 @@ void dump_memory(unsigned char* MEM, int size, unsigned int start_addr, char* ch
   }
 
   puts("");
-
 }

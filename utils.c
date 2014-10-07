@@ -1,7 +1,8 @@
 #include "utils.h"
 
 //##########+++ Load binary into memory +++##########       
-void load_program(char* program_name, unsigned char* MEM){
+void load_program(char* program_name, unsigned char* MEM)
+{
   int size, result;
   printf("Executing Program name: %s\n", program_name);
   FILE* fd = fopen(program_name, "rb+");
@@ -18,12 +19,11 @@ void load_program(char* program_name, unsigned char* MEM){
 }
 
 //###########+++ Register number to name +++#########
-short* get_reg_ptr(unsigned char reg){
-  
+short* get_reg_ptr(unsigned char reg)
+{  
   static short r2 = 0;
 
   switch( reg ){
- 
   case 0x0:{
     return &PC;
   }
@@ -73,19 +73,18 @@ short* get_reg_ptr(unsigned char reg){
   case 0xF:{
     return &r15;
   }
+  
   default:{
     return 0;
-  } 
+  }
 
- }
-
+  }
 }
 
 //###########+++ Register number to name +++#########
-void reg_num_to_name(unsigned int source_reg, char* reg_name){
-  
-  switch(source_reg){
-  
+void reg_num_to_name(unsigned int source_reg, char* reg_name)
+{  
+  switch(source_reg){ 
   case 0x0:{
     strncpy(reg_name, "PC\0", 3);
     return;
@@ -159,8 +158,8 @@ void reg_num_to_name(unsigned int source_reg, char* reg_name){
 }
 
 //##########+++ Display the menu for this program +++##########
-void display_help(){
-
+void display_help()
+{
   printf("****************************************"\
          "****************************************\n");
 
@@ -168,5 +167,4 @@ void display_help(){
 
   printf("****************************************"\
          "****************************************\n");
-
 }

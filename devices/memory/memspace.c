@@ -8,8 +8,8 @@ unsigned char* PER16;
 unsigned char* PER8;
 unsigned char* SFRS;
 
-void initialize_msp_memspace(){
-
+void initialize_msp_memspace()
+{
   MEMSPACE = (unsigned char*) malloc(0xFFFF);
   
   IVT = MEMSPACE + 0xFFE0;
@@ -18,11 +18,9 @@ void initialize_msp_memspace(){
   PER16 = MEMSPACE + 0x0100;
   PER8 = MEMSPACE + 0x0010;
   SFRS = MEMSPACE + 0x0;
-
 }
 
-void uninitialize_msp_memspace(){
-
+void uninitialize_msp_memspace()
+{
   free(MEMSPACE);
-
 }

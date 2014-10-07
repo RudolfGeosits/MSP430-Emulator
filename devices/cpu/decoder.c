@@ -4,19 +4,18 @@
 #include "formatIII.c"
 
 //##########+++ CPU Fetch Cycle +++##########
-unsigned short fetch(){
-
+unsigned short fetch()
+{
   unsigned short word;
   word = *( (unsigned short*)(MEMSPACE + PC) );
   PC += 2;
 
   return word;
-
 }
 
 //##########+++ CPU Decode Cycle +++##########
-void decode(unsigned short instruction){
-  
+void decode(unsigned short instruction)
+{  
   int done = 0;
   unsigned char format_id;
 
@@ -41,5 +40,4 @@ void decode(unsigned short instruction){
     decode_formatIII(instruction);
 
   }
-
 }

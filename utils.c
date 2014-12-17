@@ -1,11 +1,15 @@
-#include "utils.h"
-
 //##########+++ Load binary into memory +++##########       
-void load_program(char* program_name, unsigned char* MEM)
+void load_program(char *program_name, uint8_t *MEM)
 {
   int size, result;
-  printf("Executing Program name: %s\n", program_name);
-  FILE* fd = fopen(program_name, "rb+");
+  printf("Loading Program: ( %s )\n", program_name);
+
+  FILE *fd = fopen(program_name, "rb+");
+  
+  if (fd == NULL) {
+    printf("Could not open %s, exiting.\n", program_name);
+    exit(1);
+  }
 
   // obtain file size
   fseek(fd, 0, SEEK_END);
@@ -19,9 +23,9 @@ void load_program(char* program_name, unsigned char* MEM)
 }
 
 //###########+++ Register number to name +++#########
-short* get_reg_ptr(unsigned char reg)
+int16_t *get_reg_ptr(uint8_t reg)
 {  
-  static short r2 = 0;
+  static int16_t r2 = 0;
 
   switch( reg ){
   case 0x0:{
@@ -82,7 +86,7 @@ short* get_reg_ptr(unsigned char reg)
 }
 
 //###########+++ Register number to name +++#########
-void reg_num_to_name(unsigned int source_reg, char* reg_name)
+void reg_num_to_name(uint8_t source_reg, char *reg_name)
 {  
   switch(source_reg){ 
   case 0x0:{

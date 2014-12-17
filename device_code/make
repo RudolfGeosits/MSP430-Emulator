@@ -1,3 +1,2 @@
 msp430-gcc -mmcu=msp430g2553 test.c -o test
-msp430-objcopy -O binary test grr
-
+msp430-objcopy -O binary test ../test.bin

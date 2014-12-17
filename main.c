@@ -2,26 +2,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include "devices/memory/memspace.c"
-#include "devices/cpu/registers.c"
-#include "utils.c"
-#include "debugger/debugger.c"
-#include "devices/cpu/decoder.c"
+#include "devices/memory/memspace.h"
+#include "devices/cpu/registers.h"
+#include "utils.h"
+#include "debugger/debugger.h"
+#include "devices/cpu/decoder.h"
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
-  if(argv[1] == NULL){
+  if (argv[1] == NULL) {
     display_help();
     exit(1);
   }
 
   initialize_msp_memspace();
   initialize_msp_registers();
+  load_program(argv[1], ROM);
 
-  load_program( argv[1], ROM );
-
-  //# Main CPU fetch/decode/execute
-  while(1){
+  while (1) { /* CPU Fetch-Decode-Execute */
     decode( fetch() );
     command_loop();
   }

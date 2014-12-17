@@ -1,5 +1,10 @@
-void decode_formatI(unsigned short instruction);
-void decode_formatII(unsigned short instruction);
-void deocde_formatIII(unsigned short instruction);
-void decode(unsigned short instruction);
-unsigned short fetch();
+void decode_formatI(uint16_t instruction);
+void decode_formatII(uint16_t instruction);
+void deocde_formatIII(uint16_t instruction);
+void decode(uint16_t instruction);
+uint16_t fetch();
+
+#include "formatI.c"
+#include "formatII.c"
+#include "formatIII.c"
+#include "decoder.c"

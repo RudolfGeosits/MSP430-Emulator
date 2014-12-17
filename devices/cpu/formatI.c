@@ -1,5 +1,3 @@
-#include "decoder.h"
-
 //##########+++ Decode Format I Instructions +++##########
 //# Format I are single operand of the form:
 //#   [0001][00CC][CBAA][SSSS]
@@ -8,16 +6,16 @@
 //#       A = Addressing mode for source
 //#       S = Source 
 //########################################################
-void decode_formatI( unsigned short instruction )
+void decode_formatI( uint16_t instruction )
 {
   char reg_name[10];
-  unsigned char opcode = ( instruction & 0x0380 ) >> 7;
-  unsigned char bw_flag = ( instruction & 0x0040 ) >> 6;
-  unsigned char as_flag = ( instruction & 0x0030 ) >> 4;
-  unsigned char source_reg = ( instruction & 0x000F );
+  uint8_t opcode = ( instruction & 0x0380 ) >> 7;
+  uint8_t bw_flag = ( instruction & 0x0040 ) >> 6;
+  uint8_t as_flag = ( instruction & 0x0030 ) >> 4;
+  uint8_t source_reg = ( instruction & 0x000F );
   reg_num_to_name(source_reg, reg_name);
 
-  switch(opcode){
+  switch (opcode) {
     
   //# RRC Rotate right through carry      
   case 0x0:{
@@ -25,25 +23,25 @@ void decode_formatI( unsigned short instruction )
     bw_flag == 0 ? printf("RRC ") : printf("RRC.B ");
 
     //# direct register
-    if(as_flag == 0x0){
+    if (as_flag == 0x0) {
       printf("%s\n", reg_name);
     }
 
     //# Indexed register
-    else if(as_flag == 0x1){
-      short source_offset;
+    else if (as_flag == 0x1) {
+      int16_t source_offset;
 
       source_offset = fetch();
       printf("0x%04X(%s)\n", source_offset, reg_name);
     }
 
     //# indirect register
-    else if(as_flag == 0x2){
+    else if (as_flag == 0x2) {
       printf("@%s\n", reg_name);
     }
 
     //# Indirect autoincrement 
-    else if(as_flag == 0x3){
+    else if (as_flag == 0x3) {
       printf("@%s+\n", reg_name);
     }
 
@@ -55,25 +53,25 @@ void decode_formatI( unsigned short instruction )
   case 0x1:{
 
     //# Direct register
-    if( as_flag == 0x0 ){
+    if (as_flag == 0x0) {
       printf("SWPB %s\n", reg_name);
     }
 
     //# Indexed register
-    else if( as_flag == 0x1 ){
-      short source_offset;
+    else if (as_flag == 0x1) {
+      int16_t source_offset;
 
       source_offset = fetch();
       printf("SWPB 0x%04X(%s)\n", source_offset, reg_name);
     }
 
     //# indirect register
-    else if( as_flag == 0x2 ){
+    else if (as_flag == 0x2) {
       printf("SWPB @%s\n", reg_name);
     }
 
     //# Indirect register autoincrement
-    else if( as_flag == 0x3 ){
+    else if (as_flag == 0x3) {
       printf("SWPB @%s+\n", reg_name);
     }
 
@@ -85,19 +83,19 @@ void decode_formatI( unsigned short instruction )
 
     bw_flag == 0 ? printf("RRA ") : printf("RRA.B ");
 
-    if(as_flag == 0x0){
+    if (as_flag == 0x0) {
       printf("%s\n", reg_name);
     }
-    else if(as_flag == 0x1){
-      short source_offset;
+    else if (as_flag == 0x1) {
+      int16_t source_offset;
 
       source_offset = fetch();
       printf("0x%04X(%s)\n", source_offset, reg_name);
     }
-    else if(as_flag == 0x2){
+    else if (as_flag == 0x2) {
       printf("@%s\n", reg_name);
     }
-    else if(as_flag == 0x3){
+    else if (as_flag == 0x3) {
       printf("@%s+\n", reg_name);
     }
 
@@ -112,7 +110,7 @@ void decode_formatI( unsigned short instruction )
       printf("SXT %s\n", reg_name);
     }
     else if(as_flag == 0x1){
-      short source_offset;
+      int16_t source_offset;
       
       source_offset = fetch();
       printf("SXT 0x%04X(%s)\n", source_offset, reg_name);
@@ -136,7 +134,7 @@ void decode_formatI( unsigned short instruction )
       printf("%s\n", reg_name);
     }
     else if(as_flag == 0x1){
-      short source_offset;
+      int16_t source_offset;
 
       source_offset = fetch();
       printf("0x%04X(%s)\n", source_offset, reg_name);
@@ -160,7 +158,7 @@ void decode_formatI( unsigned short instruction )
       printf("%s\n", reg_name);
     }
     else if(as_flag == 0x1){
-      short source_offset;
+      int16_t source_offset;
 
       source_offset = fetch();
       printf("0x%04X(%s)\n", source_offset, reg_name);

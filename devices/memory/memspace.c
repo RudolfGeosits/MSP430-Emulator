@@ -1,25 +1,26 @@
-#include "memspace.h"
 
-unsigned char* MEMSPACE;
-unsigned char* IVT;
-unsigned char* ROM;
-unsigned char* RAM;
-unsigned char* PER16;
-unsigned char* PER8;
-unsigned char* SFRS;
-
+/* Initialize Address Space Locations
+** 
+** Allocate and set MSP430 Memory space
+** Some of these locations vary by model
+*/
 void initialize_msp_memspace()
 {
-  MEMSPACE = (unsigned char*) malloc(0xFFFF);
+  /* 64 KB Address Space */
+  MEMSPACE = (uint8_t *) malloc(0xFFFF);
   
-  IVT = MEMSPACE + 0xFFE0;
-  ROM = MEMSPACE + 0x0400;
-  RAM = MEMSPACE + 0x0200;
-  PER16 = MEMSPACE + 0x0100;
-  PER8 = MEMSPACE + 0x0010;
-  SFRS = MEMSPACE + 0x0;
+  IVT = MEMSPACE +   0xFFE0;   /* 0xFFE0 - 0xFFFF */
+  ROM = MEMSPACE +   0x0400;   /* 0x400 - 0xFFDF {Varies with device} */
+  RAM = MEMSPACE +   0x0200;   /* 0x200 - 0x3FF {Varies with device} */
+  PER16 = MEMSPACE + 0x0100;   /* 0x0100 - 0x01FF */
+  PER8 = MEMSPACE +  0x0010;   /* 0x0010 - 0x00FF */
+  SFRS = MEMSPACE +  0x0;      /* 0x0 - 0x0F */
 }
 
+
+/* 
+** Free MSP430 virtual memory
+*/
 void uninitialize_msp_memspace()
 {
   free(MEMSPACE);

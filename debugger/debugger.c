@@ -34,10 +34,13 @@ void command_loop()
     //# set REG VAL, set a register to some value
     else if ( strncmp("set", command, sizeof("set")) == 0 ) {
       int value = 0;
-      char reg[10];
+      char reg_name[10];
       
-      scanf("%s %X", reg, &value);
-      printf("Command: set %s %04X\n", reg, value);
+      scanf("%s %X", reg_name, &value);
+      printf("Command: set %s %04X\n", reg_name, value);
+
+      uint16_t *reg = get_reg_ptr( reg_name_to_num(reg_name) );
+      *reg = value;
     }
     //# End the command loop, next instruction
     else {

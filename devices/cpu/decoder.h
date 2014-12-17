@@ -4,6 +4,8 @@ void deocde_formatIII(uint16_t instruction);
 void decode(uint16_t instruction);
 uint16_t fetch();
 
+enum { WORD, BYTE };
+
 #include "formatI.c"
 #include "formatII.c"
 #include "formatIII.c"

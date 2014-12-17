@@ -5,15 +5,11 @@ unsigned int i = 0;
 void main(void){
 
   asm(
-      "MOV &0x3030, R5\n"
-      "MOV R5, &0x3030\n"
-      "MOV R5, R8\n"
-      "MOV 0x10(R5), R8\n"
-      "MOV R5, 0x10(R8)\n"
-      "MOV 0x10(R5), 0x10(R8)\n"
-      "MOV &0x1010, &0x2020\n"
-      "MOV @R5, R8\n"
-      "MOV R5, @R8\n"
+      "RRC R5\n"
+      "RRC.B R5\n"
+      "RRC 0xF(R5)\n"
+      "RRC @R5\n"
+      "RRC @R5+\n"
   );
   
   // Stop the watchdog timer

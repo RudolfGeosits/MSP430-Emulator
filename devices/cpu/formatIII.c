@@ -101,25 +101,8 @@ void decode_formatIII( uint16_t instruction )
  
       if (destination == 0x2) {
 	printf("%s, &0x%04X\n", source_reg, dst_offset);
-	int16_t* dst_addr = (int16_t*)((void*)MEMSPACE + dst_offset);
-        int16_t* src_reg = get_reg_ptr(source);
-	
-	*dst_addr = *src_reg;
       }
-      else {
-	r5 = 0x4567;
-	printf("%s, 0x%04X(%s)\n", source_reg, dst_offset, dst_reg);
-	int16_t *src_reg = get_reg_ptr(source);
-	int16_t *dst_reg = get_reg_ptr(destination);
-
-	int16_t dst_reg_val = *dst_reg;
-	void* ptr = (void*)(uintptr_t)(dst_reg_val + dst_offset + MEMSPACE);
-	printf("0x%04X\nptr = %p\n", dst_reg_val + dst_offset, ptr);
-	int16_t* real_ptr = (int16_t*)ptr;
-
-	*real_ptr = *src_reg;
-      }
-
+      
       break;
     }
 

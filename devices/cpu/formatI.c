@@ -13,35 +13,46 @@ void decode_formatI( uint16_t instruction )
   uint8_t bw_flag = ( instruction & 0x0040 ) >> 6;
   uint8_t as_flag = ( instruction & 0x0030 ) >> 4;
   uint8_t source_reg = ( instruction & 0x000F );
+  
   reg_num_to_name(source_reg, reg_name);
+  uint16_t *reg = get_reg_ptr(source_reg);
 
   switch (opcode) {
     
   //# RRC Rotate right through carry      
   case 0x0:{
+    bw_flag == WORD ? printf("RRC ") : printf("RRC.B ");
+    
+    uint8_t CF = SR.carry;
 
-    bw_flag == 0 ? printf("RRC ") : printf("RRC.B ");
+    if (as_flag == 0x0) {   /* RRC Rn */
+      printf("%s = %X\n", reg_name, *reg);
 
-    //# direct register
-    if (as_flag == 0x0) {
-      printf("%s\n", reg_name);
+      if (bw_flag == WORD) {
+	SR.carry = *reg & 0x0001;
+	*reg >>= 1;
+	
+	CF ? *reg & 0x1000 : 0;
+      }
+      else if (bw_flag == BYTE) {
+	/*  */
+      }
+
+      printf("Now: %X\n", *reg);
     }
 
-    //# Indexed register
-    else if (as_flag == 0x1) {
+    else if (as_flag == 0x1) {   /* RRC 0x0(Rn) */
       int16_t source_offset;
 
       source_offset = fetch();
       printf("0x%04X(%s)\n", source_offset, reg_name);
     }
 
-    //# indirect register
-    else if (as_flag == 0x2) {
+    else if (as_flag == 0x2) {   /* RRC @Rn */
       printf("@%s\n", reg_name);
     }
 
-    //# Indirect autoincrement 
-    else if (as_flag == 0x3) {
+    else if (as_flag == 0x3) {   /* RRC @Rn+ */
       printf("@%s+\n", reg_name);
     }
 

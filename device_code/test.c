@@ -7,9 +7,12 @@ void main(void){
   asm(
       "RRC R5\n"
       "RRC.B R5\n"
-      "RRC 0xF(R5)\n"
       "RRC @R5\n"
+      "RRC.B @R5\n"
       "RRC @R5+\n"
+      "RRC.B @R5+\n"
+      "RRC.B 0xF(R5)\n"
+      "RRC -0x4(R5)\n"
   );
   
   // Stop the watchdog timer
@@ -21,7 +24,7 @@ void main(void){
 
   while(1){
     P1OUT ^= 0x10;
-    for(i = 0;i < 15000;i++);
+    for(i = 0;i < 30000;i++);
   }
  
 }

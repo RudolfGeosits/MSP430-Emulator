@@ -26,35 +26,139 @@ void decode_formatI( uint16_t instruction )
     uint8_t CF = SR.carry;
 
     if (as_flag == 0x0) {   /* RRC Rn */
-      printf("%s = %X\n", reg_name, *reg);
 
       if (bw_flag == WORD) {
-	SR.carry = *reg & 0x0001;
-	*reg >>= 1;
-	
-	CF ? *reg & 0x1000 : 0;
+	SR.carry = *reg & 0x0001;   /* Set Carry flag from LSB */
+	*reg >>= 1;                 /* Shift register one right */
+	CF ? *reg |= 0x8000 : 0;    /* Set MSB from previous Carry flag */
+
+	*reg == 0 ? SR.zero = 1 : (SR.zero = 0);
+	*reg < 0 ? SR.negative = 1 : (SR.negative = 0);
       }
       else if (bw_flag == BYTE) {
-	/*  */
+	uint8_t low_byte = *reg & 0x00FF;
+
+	SR.carry = low_byte & 0x01; /* Set Carry flag from LSB */
+	low_byte >>= 1;             /* Shift register's low byte one right */
+	CF ? low_byte |= 0x80 : 0;  /* Set MSB of low byte from previous CF */
+	
+	*reg &= 0xFF00;
+	*reg |= low_byte;           /* Set low byte of register */
+
+	low_byte == 0 ? SR.zero = 1 : (SR.zero = 0);
+	low_byte < 0 ? SR.negative = 1 : (SR.negative = 0);
       }
 
-      printf("Now: %X\n", *reg);
     }
 
     else if (as_flag == 0x1) {   /* RRC 0x0(Rn) */
-      int16_t source_offset;
+      int16_t source_offset = fetch();
+      printf("0x%04X(%s)\n", (uint16_t)source_offset, reg_name);
 
-      source_offset = fetch();
-      printf("0x%04X(%s)\n", source_offset, reg_name);
+      if (bw_flag == WORD) {
+	uint16_t *address = (uint16_t *)
+	  ( (void *)MEMSPACE + *reg+source_offset );
+	
+	uint16_t val = *address;
+	
+	SR.carry = val & 0x0001;    /* Set Carry flag from LSB */
+	val >>= 1;                  /* Shift mem value one right */
+	CF ? val |= 0x8000 : 0;     /* Set MSB from previous Carry flag */
+
+	val == 0 ? SR.zero = 1 : (SR.zero = 0);
+	val < 0 ? SR.negative = 1 : (SR.negative = 0);
+ 
+	*address = val;            /* Set adjusted value back in mem loc */ 
+      }
+      else if (bw_flag == BYTE) {
+	uint8_t *address = (uint8_t *)
+	  ( (void *)MEMSPACE + *reg + source_offset ); 
+	
+	uint8_t val = *address;
+
+	printf("Address is %p, value is now 0x%04X\n", address, *address);
+
+	SR.carry = val & 0x01;    /* Set Carry flag from LSB */
+	val >>= 1;                /* Shift mem value one right */
+	CF ? val |= 0x80 : 0;     /* Set MSB from previous Carry flag */
+
+	val == 0 ? SR.zero = 1 : (SR.zero = 0);
+	val < 0 ? SR.negative = 1 : (SR.negative = 0);
+ 
+	*address = val;            /* Set adjusted value back in mem loc */ 
+
+	printf("Address is %p, value is 0x%04X\n", address, *address);
+      }
     }
 
     else if (as_flag == 0x2) {   /* RRC @Rn */
       printf("@%s\n", reg_name);
+
+      if (bw_flag == WORD) {
+	uint16_t *address = (uint16_t *) ( (void *)MEMSPACE + *reg );
+	uint16_t val = *address;
+	
+	SR.carry = val & 0x0001;    /* Set Carry flag from LSB */
+	val >>= 1;                  /* Shift mem value one right */
+	CF ? val |= 0x8000 : 0;     /* Set MSB from previous Carry flag */
+
+	val == 0 ? SR.zero = 1 : (SR.zero = 0);
+	val < 0 ? SR.negative = 1 : (SR.negative = 0);
+ 
+	*address = val;            /* Set adjusted value back in mem loc */ 
+      }
+      else if (bw_flag == BYTE) {
+	uint8_t *address = (uint8_t *) ( (void *)MEMSPACE + *reg );
+	uint8_t val = *address;
+
+	SR.carry = val & 0x01;    /* Set Carry flag from LSB */
+	val >>= 1;                /* Shift mem value one right */
+	CF ? val |= 0x80 : 0;     /* Set MSB from previous Carry flag */
+
+	val == 0 ? SR.zero = 1 : (SR.zero = 0);
+	val < 0 ? SR.negative = 1 : (SR.negative = 0);
+ 
+	*address = val;            /* Set adjusted value back in mem loc */ 
+      }
     }
 
     else if (as_flag == 0x3) {   /* RRC @Rn+ */
       printf("@%s+\n", reg_name);
+      
+      if (bw_flag == WORD) {
+	uint16_t *address = (uint16_t *) ( (void *)MEMSPACE + *reg );
+	uint16_t val = *address;
+	
+	SR.carry = val & 0x0001;    /* Set Carry flag from LSB */
+	val >>= 1;                  /* Shift mem value one right */
+	CF ? val |= 0x8000 : 0;     /* Set MSB from previous Carry flag */
+
+	val == 0 ? SR.zero = 1 : (SR.zero = 0);
+	val < 0 ? SR.negative = 1 : (SR.negative = 0);
+ 
+	*address = val;            /* Set adjusted value back in mem loc */ 
+	*reg += 2;                 /* Increment register value by 2 */
+      }
+      else if (bw_flag == BYTE) {
+	uint8_t *address = (uint8_t *) ( (void *)MEMSPACE + *reg );
+	uint8_t val = *address;
+
+	printf("Address is %p, value is 0x%04X\n", address, *address);
+
+	SR.carry = val & 0x01;    /* Set Carry flag from LSB */
+	val >>= 1;                /* Shift mem value one right */
+	CF ? val |= 0x80 : 0;     /* Set MSB from previous Carry flag */
+
+	val == 0 ? SR.zero = 1 : (SR.zero = 0);
+	val < 0 ? SR.negative = 1 : (SR.negative = 0);
+ 
+	*address = val;            /* Set adjusted value back in mem loc */ 
+	*reg += 1;                 /* Increment register value by 1 */
+	printf("Address is %p, value is now 0x%04X\n", address, *address);
+      }
     }
+    
+    SR.overflow = 0;             /* Reset Overflow flag */
 
     break;
   }

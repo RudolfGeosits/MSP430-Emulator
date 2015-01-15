@@ -8,5 +8,6 @@ uint8_t *RAM;        /* Random Access Memory */
 uint8_t *PER16;      /* 16-bit peripherals */
 uint8_t *PER8;       /* 8-bit peripherals */
 uint8_t *SFRS;       /* Special Function Registers */
+uint8_t *LOAD_POS;
 
 #include "memspace.c"

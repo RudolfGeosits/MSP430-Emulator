@@ -30,10 +30,10 @@ int16_t r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r14, r15;
 void initialize_msp_registers()
 {
   //# Initialize Program Counter to 0xFFFE at boot or reset
-  PC = 0x400;
+  PC = 0xC000;
 
   //# Stack pointer typically begins at the top of RAM after reset
-  SP = 0x200;
+  SP = 0x400;
 
   //# Initialize the status register
   memset( &SR, 0, sizeof(SR) );

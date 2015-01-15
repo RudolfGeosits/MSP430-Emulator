@@ -33,16 +33,22 @@ void command_loop()
       dump_memory(MEMSPACE, 0xFFFF, start_addr, "w");
     }                                                                    
 
-    //# set REG VAL, set a register to some value
-    else if ( strncmp("set", command, sizeof("set")) == 0 ) {
+    //# setr REG VAL, set a register to some value
+    else if ( strncmp("setr", command, sizeof("setr")) == 0 ) {
       int value = 0;
       char reg_name[10];
       
       scanf("%s %X", reg_name, &value);
-      printf("Command: set %s %04X\n", reg_name, value);
 
       uint16_t *reg = get_reg_ptr( reg_name_to_num(reg_name) );
       *reg = value;
+    }
+    //# setr MEMLOC VAL, set a memory location to some value
+    else if ( strncmp("setr", command, sizeof("setr")) == 0 ) {
+      int value = 0;
+      char memory_loc[10];
+      
+      scanf("%s %X", memory_loc, &value);
     }
     //# End the command loop, next instruction
     else {
@@ -81,7 +87,7 @@ void dump_memory(uint8_t *MEM, int size, uint32_t start_addr, char *chunks)
     printf("0x%04X:\t", msp_addr);
 
     if ( strncmp(chunks, "b", sizeof("b")) == 0 ) {
-      printf("0x%02X  0x%02X  0x%02X  0x%02X " \
+      printf("0x%02X  0x%02X  0x%02X  0x%02X  " \
 	     "0x%02X  0x%02X  0x%02X  0x%02X\n",
              *(MEM+0),*(MEM+1),*(MEM+2),*(MEM+3),
 	     *(MEM+4),*(MEM+5),*(MEM+6),*(MEM+7));

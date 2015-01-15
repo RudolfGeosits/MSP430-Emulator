@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 
   initialize_msp_memspace();
   initialize_msp_registers();
-  load_program(argv[1], ROM);
+  load_program(argv[1], LOAD_POS);
 
   while (1) { /* CPU Fetch-Decode-Execute */
     decode( fetch() );

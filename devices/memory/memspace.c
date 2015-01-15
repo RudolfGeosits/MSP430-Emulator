@@ -15,6 +15,8 @@ void initialize_msp_memspace()
   PER16 = MEMSPACE + 0x0100;   /* 0x0100 - 0x01FF */
   PER8 = MEMSPACE +  0x0010;   /* 0x0010 - 0x00FF */
   SFRS = MEMSPACE +  0x0;      /* 0x0 - 0x0F */
+
+  LOAD_POS = MEMSPACE + 0xC000;
 }
 
 

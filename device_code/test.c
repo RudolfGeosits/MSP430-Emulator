@@ -5,6 +5,11 @@ unsigned int i = 0;
 void main(void){
 
   asm(
+      //      "CALL R5\n"
+      "CALL 0x2(R5)\n"
+      //"CALL @R5\n"
+      //"CALL @R5+\n"
+
       "PUSH R5\n"
       "PUSH.B R5\n"
       "PUSH 0x2(R5)\n"

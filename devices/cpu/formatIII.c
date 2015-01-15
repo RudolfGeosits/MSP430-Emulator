@@ -27,17 +27,18 @@
 //########################################################
 void decode_formatIII( uint16_t instruction )
 {
-  uint8_t opcode = ( instruction & 0xF000 ) >> 12;
-  uint8_t source_reg = ( instruction & 0x0F00 ) >> 8;
-  uint8_t as_flag = (instruction & 0x0030 ) >> 4;
-  uint8_t destination = ( instruction & 0x000F );
-  uint8_t ad_flag = (instruction & 0x0080 ) >> 7;
-  uint8_t bw_flag = (instruction & 0x0040 ) >> 6;
+  uint8_t opcode = (instruction & 0xF000) >> 12;
+  uint8_t source_reg = (instruction & 0x0F00) >> 8;
+  uint8_t as_flag = (instruction & 0x0030) >> 4;
+  uint8_t destination = (instruction & 0x000F);
+  uint8_t ad_flag = (instruction & 0x0080) >> 7;
+  uint8_t bw_flag = (instruction & 0x0040) >> 6;
 
-  char source_reg_reg[10], dst_reg[10];
+  char source_reg[10], dst_reg[10];
 
-  printf("Source_Reg: %04X\nas_flag: %02X\nDest: %04X\nad_flag: %X\nbw_flag: %X\n",
-  source_reg, as_flag, destination, ad_flag, bw_flag);
+  printf("Source_Reg: %04X\nas_flag: %02X\nDest: %04X\nad_flag: %X\n" \
+	 "bw_flag: %X\n",
+	 source_reg, as_flag, destination, ad_flag, bw_flag);
 
   /* Spot CG1 and CG2 Constant generator instructions */
   if (source_reg == 2 && as_flag > 0) {
@@ -53,24 +54,23 @@ void decode_formatIII( uint16_t instruction )
   case 0x4:{
     bw_flag == 0 ? printf("MOV ") : printf("MOV.B ");
 
-    //# SRC = reg contents; DST = reg contents
-    if (as_flag == 0 && ad_flag == 0) {
-      reg_num_to_name(source_reg, source_reg_reg);
+    if (as_flag == 0 && ad_flag == 0) {   /* mov Rs, Rd */
+      reg_num_to_name(source_reg, source_reg);
       reg_num_to_name(destination, dst_reg);
-      printf("%s, %s\n", source_reg_reg, dst_reg);
+      printf("%s, %s\n", source_reg, dst_reg);
 
-      int16_t *source_reg_reg = get_reg_ptr(source_reg);
+      int16_t *source_reg = get_reg_ptr(source_reg);
       int16_t *dst_reg = get_reg_ptr(destination);
 
-      *dst_reg = *source_reg_reg;
+      *dst_reg = *source_reg;
 
       break;
     }
 
     //# SRC = absolute addr; DST = absolute addr
-    else if (as_flag == 1 && ad_flag == 1) {
+    else if (as_flag == 1 && ad_flag == 1) {   /* 0xADDRs, 0xADDRd */
       uint16_t source_reg_offset, dst_offset;
-      reg_num_to_name(source_reg, source_reg_reg);
+      reg_num_to_name(source_reg, source_reg);
       reg_num_to_name(destination, dst_reg);
       
       source_reg_offset = fetch();
@@ -80,7 +80,7 @@ void decode_formatIII( uint16_t instruction )
 	printf("&0x%04X, &0x%04X\n", source_reg_offset, dst_offset);      
       }
       else{
-	printf("0x%04X(%s), 0x%04X(%s)\n", source_reg_offset, source_reg_reg, 
+	printf("0x%04X(%s), 0x%04X(%s)\n", source_reg_offset, source_reg, 
 	       dst_offset, dst_reg);
       }
 
@@ -93,7 +93,7 @@ void decode_formatIII( uint16_t instruction )
       uint16_t* source_reg_ptr;
       int16_t* dst_ptr;
 
-      reg_num_to_name(source_reg, source_reg_reg);
+      reg_num_to_name(source_reg, source_reg);
       reg_num_to_name(destination, dst_reg);
       
       //# Here, source_reg reg is acting as a constant generator
@@ -102,7 +102,7 @@ void decode_formatIII( uint16_t instruction )
       if(source_reg == 0x2)
 	printf("&0x%04X, %s\n", source_reg_offset, dst_reg);
       else
-	printf("0x%04X(%s), %s\n", source_reg_offset, source_reg_reg, dst_reg);
+	printf("0x%04X(%s), %s\n", source_reg_offset, source_reg, dst_reg);
 
       source_reg_ptr = get_reg_ptr(source_reg);
       dst_ptr = get_reg_ptr(destination);
@@ -120,13 +120,13 @@ void decode_formatIII( uint16_t instruction )
     //# Check for constant generator
     else if (as_flag == 0 && ad_flag == 1) {      
       int16_t dst_offset;
-      reg_num_to_name(source_reg, source_reg_reg);
+      reg_num_to_name(source_reg, source_reg);
       reg_num_to_name(destination, dst_reg);
       
       dst_offset = fetch();
  
       if (destination == 0x2) {
-	printf("%s, &0x%04X\n", source_reg_reg, dst_offset);
+	printf("%s, &0x%04X\n", source_reg, dst_offset);
       }
       
       break;
@@ -158,9 +158,9 @@ void decode_formatIII( uint16_t instruction )
     else if (as_flag == 2 && ad_flag == 0) {
       int16_t source_reg_const;
       reg_num_to_name(destination, dst_reg);
-      reg_num_to_name(source_reg, source_reg_reg);
+      reg_num_to_name(source_reg, source_reg);
 
-      printf("@%s, %s\n", source_reg_reg, dst_reg);
+      printf("@%s, %s\n", source_reg, dst_reg);
 
       break; 
     }

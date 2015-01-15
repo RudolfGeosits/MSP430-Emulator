@@ -49,6 +49,7 @@ void command_loop()
 
       scanf("%X", &start_addr);                         
       dump_memory(MEMSPACE, 0xFFFF, start_addr, "w");
+      continue;
     }                                                                    
 
     //# setr REG VAL, set a register to some value
@@ -60,6 +61,8 @@ void command_loop()
 
       uint16_t *reg = get_reg_ptr( reg_name_to_num(reg_name) );
       *reg = value;
+      
+      continue;
     }
     //# setr MEMLOC VAL, set a memory location to some value
     else if ( strncmp("setr", command, sizeof("setr")) == 0 ) {
@@ -67,6 +70,7 @@ void command_loop()
       char memory_loc[10];
       
       scanf("%s %X", memory_loc, &value);
+      continue;
     }
     //# End the command loop, next instruction
     else {

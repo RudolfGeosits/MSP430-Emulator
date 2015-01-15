@@ -27,10 +27,10 @@
 void decode_formatI( uint16_t instruction )
 {
   char reg_name[10];
-  uint8_t opcode = ( instruction & 0x0380 ) >> 7;
-  uint8_t bw_flag = ( instruction & 0x0040 ) >> 6;
-  uint8_t as_flag = ( instruction & 0x0030 ) >> 4;
-  uint8_t source_reg = ( instruction & 0x000F );
+  uint8_t opcode = (instruction & 0x0380) >> 7;
+  uint8_t bw_flag = (instruction & 0x0040) >> 6;
+  uint8_t as_flag = (instruction & 0x0030) >> 4;
+  uint8_t source_reg = (instruction & 0x000F);
   
   reg_num_to_name(source_reg, reg_name);
   uint16_t *reg = get_reg_ptr(source_reg);
@@ -285,6 +285,7 @@ void decode_formatI( uint16_t instruction )
       }
 
     }
+
     else if (as_flag == 0x1) {   /* RRA 0x0(Rn) */
       int16_t source_offset = fetch();
       printf("0x%04X(%s)\n", source_offset, reg_name);
@@ -322,6 +323,7 @@ void decode_formatI( uint16_t instruction )
         *address |= low_byte;
       }
     }
+
     else if (as_flag == 0x2) {   /* RRA @Rn */
       printf("@%s\n", reg_name);
 
@@ -355,6 +357,7 @@ void decode_formatI( uint16_t instruction )
         *address |= low_byte;
       }
     }
+
     else if (as_flag == 0x3) {   /* RRA @Rn+ */
       printf("@%s+\n", reg_name);
 
@@ -410,6 +413,7 @@ void decode_formatI( uint16_t instruction )
       (int16_t)*reg < 0 ? SR.negative = 1 : (SR.negative = 0);
       *reg == 0 ? SR.zero = 1 : (SR.zero = 0, SR.carry = 1);
     }
+
     else if(as_flag == 0x1){   /* SXT 0x0(Rn) */
       int16_t source_offset = fetch();      
       printf("SXT 0x%04X(%s)\n", (uint16_t)source_offset, reg_name);
@@ -423,6 +427,7 @@ void decode_formatI( uint16_t instruction )
       (int16_t)*address < 0 ? SR.negative = 1 : (SR.negative = 0);
       *address == 0 ? SR.zero = 1 : (SR.zero = 0, SR.carry = 1);
     }
+
     else if(as_flag == 0x2){   /* SXT @Rn */
       printf("SXT @%s\n", reg_name);
 
@@ -433,6 +438,7 @@ void decode_formatI( uint16_t instruction )
       (int16_t)*address < 0 ? SR.negative = 1 : (SR.negative = 0);
       *address == 0 ? SR.zero = 1 : (SR.zero = 0, SR.carry = 1);
     }
+
     else if(as_flag == 0x3){   /* SXT @Rn+ */
       printf("SXT @%s+\n", reg_name);
 
@@ -462,52 +468,98 @@ void decode_formatI( uint16_t instruction )
       printf("%s\n", reg_name);
 
       if (bw_flag == WORD) {
-	*stack_addr = *reg;
+        *stack_addr = *reg;
       }
       else if (bw_flag == BYTE) {
-	
-      }
-      
+        *stack_addr &= 0xFF00;   /* Zero out bottom half for pushed byte */
+        *stack_addr |= (uint8_t) *reg;
+      }      
     }
+
     else if(as_flag == 0x1){   /* PUSH 0x0(Rn) */
       int16_t source_offset = fetch();
       printf("0x%04X(%s)\n", (uint16_t)source_offset, reg_name);
 
+      uint16_t *address = (uint16_t *) 
+        ((void *) MEMSPACE + *reg + source_offset);
 
+      if (bw_flag == WORD) {
+        *stack_addr = *address;
+      }
+      else if (bw_flag == BYTE) {
+        *stack_addr &= 0xFF00;
+        *stack_addr |= (uint8_t) *address;
+      }
     }
+
     else if(as_flag == 0x2){   /* PUSH @Rn */
       printf("@%s\n", reg_name);
 
+      uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
 
+      if (bw_flag == WORD) {
+        *stack_addr = *address;
+      }
+      else if (bw_flag == BYTE) {
+        *stack_addr &= 0xFF00;
+        *stack_addr |= (uint8_t) *address;
+      }
     }
+
     else if(as_flag == 0x3){   /* PUSH @Rn+ */
       printf("@%s+\n", reg_name);
 
+      uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
 
+      if (bw_flag == WORD) {
+        *stack_addr = *address;
+	*reg += 2;
+      }
+      else if (bw_flag == BYTE) {
+        *stack_addr &= 0xFF00;
+        *stack_addr |= (uint8_t) *address;
+	*reg += 1;
+      }
     }
 
     break;
   }
 
-  //# Call subroutine; push PC and move source to PC
+  //# Call subroutine; push PC and move source to PC: Always word inst
   case 0x5:{
-
     printf("CALL ");
+
+    SP -= 2;              /* Decrement Stack pointer by a word */
+    uint16_t* stack_addr = get_stack_ptr();    
+    *stack_addr = PC;     /* Place old PC onto stack */
 
     if(as_flag == 0x0){   /* CALL Rn */
       printf("%s\n", reg_name);
+
+      PC = *reg;          /* PC updated to new address */
     }
     else if(as_flag == 0x1){   /* CALL 0x0(Rn) */
-      int16_t source_offset;
-
-      source_offset = fetch();
+      int16_t source_offset = fetch();
       printf("0x%04X(%s)\n", (uint16_t)source_offset, reg_name);
+    
+      uint16_t *address = (uint16_t *)
+	((void *) MEMSPACE + *reg + source_offset);
+      
+      PC = *address;
     }
     else if(as_flag == 0x2){   /* CALL @Rn */
       printf("@%s\n", reg_name);
+
+      uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
+      PC = *address;
     }
     else if(as_flag == 0x3){   /* CALL @Rn+ */
       printf("@%s+\n", reg_name);
+
+      uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
+      PC = *address;
+      
+      *reg += 2;
     }
 
     break;
@@ -516,6 +568,7 @@ void decode_formatI( uint16_t instruction )
   //# RETI Return from interrupt: Pop SR then pop PC
   case 0x6:{
     printf("RETI\n");
+   
     break;
   }
   default:{

@@ -21,5 +21,6 @@ int16_t *get_reg_ptr(uint8_t reg);
 void load_program(char *program_name, uint8_t *MEM);
 uint8_t reg_name_to_num(char *name);
 uint16_t *get_stack_ptr();
+uint16_t *get_addr_ptr(uint16_t addr);
 
 #include "utils.c"

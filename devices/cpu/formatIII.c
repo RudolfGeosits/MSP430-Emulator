@@ -19,123 +19,166 @@ along with this program. If not, see <http://www.gnu.org/licenses
 //#
 //# Where C = Opcode, B = Byte/Word flag,
 //# A = Addressing mode for destination
-//# a = Addressing mode for source_reg
-//# S = Source_Reg, D = Destination
+//# a = Addressing mode for s_reg_name
+//# S = S_Reg_Name, D = Destination
 //########################################################
 
 void decode_formatIII( uint16_t instruction )
 {
-  uint8_t opcode = ( instruction & 0xF000 ) >> 12;
-  uint8_t source_reg = ( instruction & 0x0F00 ) >> 8;
-  uint8_t as_flag = (instruction & 0x0030 ) >> 4;
-  uint8_t destination = ( instruction & 0x000F );
-  uint8_t ad_flag = (instruction & 0x0080 ) >> 7;
-  uint8_t bw_flag = (instruction & 0x0040 ) >> 6;
-  char source_reg_reg[10], dst_reg[10];
+  uint8_t opcode = (instruction & 0xF000) >> 12;
+  uint8_t source = (instruction & 0x0F00) >> 8;
+  uint8_t as_flag = (instruction & 0x0030) >> 4;
+  uint8_t destination = (instruction & 0x000F);
+  uint8_t ad_flag = (instruction & 0x0080) >> 7;
+  uint8_t bw_flag = (instruction & 0x0040) >> 6;
+  char s_reg_name[10], d_reg_name[10];
 
-  printf("Source_Reg: %04X\nas_flag: %02X\nDest: %04X\nad_flag: %X\n" \
+  printf("S_Reg_Name: %04X\nas_flag: %02X\nDest: %04X\nad_flag: %X\n" \
 	 "bw_flag: %X\n",
-	 source_reg, as_flag, destination, ad_flag, bw_flag);
+	 source, as_flag, destination, ad_flag, bw_flag);
 
   /* Spot CG1 and CG2 Constant generator instructions */
-  if (source_reg == 2 && as_flag > 0) {
+  if (source == 2 && as_flag > 0) {
     printf("CG1 using %%r2\n");
   }
-  else if (source_reg == 3) {
+  else if (source == 3) {
     printf("CG2 using %%r3\n");
   }
 
   switch (opcode) {
 
-    //# MOV source_reg to destination
-  case 0x4:{
+  case 0x4:{   /* MOV SOURCE, DEST */
     bw_flag == 0 ? printf("MOV ") : printf("MOV.B ");
-    //# SRC = reg contents; DST = reg contents
-    if (as_flag == 0 && ad_flag == 0) {
-      reg_num_to_name(source_reg, source_reg_reg);
-      reg_num_to_name(destination, dst_reg);
-      printf("%s, %s\n", source_reg_reg, dst_reg);
-      int16_t *source_reg_reg = get_reg_ptr(source_reg);
-      int16_t *dst_reg = get_reg_ptr(destination);
-      *dst_reg = *source_reg_reg;
-      break;
-    }
-    //# SRC = absolute addr; DST = absolute addr
-    else if (as_flag == 1 && ad_flag == 1) {
-      uint16_t source_reg_offset, dst_offset;
-      reg_num_to_name(source_reg, source_reg_reg);
-      reg_num_to_name(destination, dst_reg);
-      source_reg_offset = fetch();
-      dst_offset = fetch();
-      if(source_reg == 2){
-	printf("&0x%04X, &0x%04X\n", source_reg_offset, dst_offset);
+
+    if (as_flag == 0 && ad_flag == 0) {   /* MOV Rs, Rd */
+      int16_t *s_reg = get_reg_ptr(source);
+      int16_t *d_reg = get_reg_ptr(destination);
+	
+      reg_num_to_name(source, s_reg_name);
+      reg_num_to_name(destination, d_reg_name);
+      
+      printf("%s, %s\n", s_reg_name, d_reg_name);
+      
+      if (bw_flag == WORD) {		
+	*d_reg = *s_reg;
       }
-      else{
-	printf("0x%04X(%s), 0x%04X(%s)\n", source_reg_offset, source_reg_reg,
-	       dst_offset, dst_reg);
+      else if (bw_flag == BYTE) {
+	*d_reg = *s_reg;
+	*d_reg &= 0x00FF;
       }
+
       break;
     }
-    //# SRC = absolute addr; DST = register contents
-    else if (as_flag == 1 && ad_flag == 0) {
-      uint16_t source_reg_offset, source_reg_contents;
-      uint16_t* source_reg_ptr;
-      int16_t* dst_ptr;
-      reg_num_to_name(source_reg, source_reg_reg);
-      reg_num_to_name(destination, dst_reg);
-      //# Here, source_reg reg is acting as a constant generator
-      source_reg_offset = fetch();
-      if(source_reg == 0x2)
-	printf("&0x%04X, %s\n", source_reg_offset, dst_reg);
-      else
-	printf("0x%04X(%s), %s\n", source_reg_offset, source_reg_reg, dst_reg);
-      source_reg_ptr = get_reg_ptr(source_reg);
-      dst_ptr = get_reg_ptr(destination);
-      source_reg_contents = *source_reg_ptr;
-      void* addr = (void*)MEMSPACE;
-      addr += (source_reg_contents + source_reg_offset);
-      *dst_ptr = *( (int16_t*)addr );
-      break;
-    }
-    //# SRC = reg contents, DST = absolute address
-    //# Check for constant generator
-    else if (as_flag == 0 && ad_flag == 1) {
+
+    else if (as_flag == 0 && ad_flag == 1) {   /* MOV Rs, 0x0(Rd) */
       int16_t dst_offset;
-      reg_num_to_name(source_reg, source_reg_reg);
-      reg_num_to_name(destination, dst_reg);
+      reg_num_to_name(source, s_reg_name);
+      reg_num_to_name(destination, d_reg_name);
       dst_offset = fetch();
+
       if (destination == 0x2) {
-	printf("%s, &0x%04X\n", source_reg_reg, dst_offset);
+	printf("%s, &0x%04X\n", s_reg_name, dst_offset);
       }
+
       break;
     }
-    //# SRC = Constant; DST = register contents
-    else if (as_flag == 3 && ad_flag == 0) {
-      int16_t source_reg_const;
-      reg_num_to_name(destination, dst_reg);
-      source_reg_const = fetch();
-      printf("#0x%04X, %s\n", source_reg_const, dst_reg);
+
+    else if (as_flag == 1 && ad_flag == 0) {   /* MOV 0x0(Rs), Rd */
+      uint16_t source_offset;
+      uint16_t *s_reg_name_ptr;
+      int16_t *dst_ptr;
+
+      source_offset = fetch();
+      reg_num_to_name(source, s_reg_name);
+      reg_num_to_name(destination, d_reg_name);
+      
+      printf("0x%04X(%s), %s\n", source_offset, s_reg_name, d_reg_name);
+      
+      uint16_t *s_reg = get_reg_ptr(source);
+      uint16_t *d_reg = get_reg_ptr(destination);
+      uint16_t *source_addr = get_addr_ptr(*s_reg + source_offset);
+      
+      if (bw_flag == WORD) {
+	*d_reg = *source_addr;
+      }
+      else if (bw_flag == BYTE) {
+	*((uint8_t *)d_reg) = *((uint8_t *)source_addr);	
+	*d_reg &= 0x00FF;
+      }
+
       break;
     }
-    //# SRC = Constant, DST = Absolute Addressing mode
-    else if (as_flag == 3 && ad_flag == 1) {
-      int16_t source_reg_const;
+
+    else if (as_flag == 1 && ad_flag == 1) {   /* MOV 0x0(Rs), 0x0(Rd) */
+      reg_num_to_name(source, s_reg_name);
+      reg_num_to_name(destination, d_reg_name);
+      
+      int16_t source_offset = fetch();
+      int16_t destination_offset = fetch();
+      int16_t *s_reg = get_reg_ptr(source);
+      int16_t *d_reg = get_reg_ptr(destination);
+
+      uint16_t source_val = (uint16_t) *s_reg;
+      uint16_t destination_val = (uint16_t) *d_reg;
+
+      printf("0x%04X(%s), 0x%04X(%s)\n", (uint16_t)source_offset, s_reg_name,
+	     (uint16_t)destination_offset, d_reg_name);
+
+      uint16_t *source_addr = get_addr_ptr(source_val + source_offset);
+      uint16_t *destination_addr = 
+	get_addr_ptr(destination_val + destination_offset);
+      
+      if (bw_flag == WORD) {
+	*destination_addr = *source_addr;
+      }
+      else if (bw_flag == BYTE) {
+	*((uint8_t *)destination_addr) = *((uint8_t *)source_addr);
+      }
+
+      break;
+    }
+
+    else if (as_flag == 2 && ad_flag == 0) {   /* MOV @Rs, Rd */
+      reg_num_to_name(destination, d_reg_name);
+      reg_num_to_name(source, s_reg_name);
+
+      printf("@%s, %s\n", s_reg_name, d_reg_name);
+
+      break;
+    }
+
+    else if (as_flag == 2 && ad_flag == 1) {   /* MOV @Rs, 0x0(Rd) */
+      reg_num_to_name(destination, d_reg_name);
+      reg_num_to_name(source, s_reg_name);
+
+      int16_t destination_offset = 0;
+
+      printf("@%s, 0x%04X(%s)\n", s_reg_name, destination_offset, d_reg_name);
+      
+      break;
+    }
+
+    else if (as_flag == 3 && ad_flag == 0) {   /* MOV #S, Rd */
+      reg_num_to_name(destination, d_reg_name);
+      int16_t *d_reg = get_reg_ptr(destination);
+      int16_t source_value = fetch();
+
+      printf("#0x%04X, %s\n", source_value, d_reg_name);
+
+      break;
+    }
+
+    else if (as_flag == 3 && ad_flag == 1) {   /* MOV #S, 0x0(Rd) */
+      int16_t s_reg_name_const;
       uint16_t dst_addr;
-      source_reg_const = fetch();
+      s_reg_name_const = fetch();
       dst_addr = fetch();
-      printf("#0x%04X, &0x%04X\n", source_reg_const, dst_addr);
+      printf("#0x%04X, &0x%04X\n", s_reg_name_const, dst_addr);
     }
-    //# SRC = Indirect Register; DST = Register Contents
-    else if (as_flag == 2 && ad_flag == 0) {
-      int16_t source_reg_const;
-      reg_num_to_name(destination, dst_reg);
-      reg_num_to_name(source_reg, source_reg_reg);
-      printf("@%s, %s\n", source_reg_reg, dst_reg);
-      break;
-    }
+
     break;
   }
-    //# ADD source_reg to destination
+    //# ADD source to destination
   case 0x5:{
     printf("ADD\n");
     break;

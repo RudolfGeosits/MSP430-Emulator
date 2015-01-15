@@ -5,8 +5,23 @@ unsigned int i = 0;
 void main(void){
 
   asm(
-      //      "CALL R5\n"
-      "CALL 0x2(R5)\n"
+      "MOV R5, R4\n"
+      "MOV.B R5, R4\n"
+
+      "MOV 0x2(R5), 0x4(R4)\n"
+      "MOV.B 0x2(R5), 0x4(R4)\n"
+
+      "MOV 0x2(R5), R4\n"
+      "MOV.B 0x2(R5), R4\n"      
+
+      "MOV @R5, R4\n"
+      "MOV.B @R5, R4\n"
+
+      "MOV @R5+, R4\n"
+      "MOV.B @R5+, R4\n"
+      
+      //"CALL R5\n"
+      //"CALL 0x2(R5)\n"
       //"CALL @R5\n"
       //"CALL @R5+\n"
 

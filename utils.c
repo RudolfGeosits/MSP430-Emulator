@@ -39,7 +39,12 @@ void load_program(char *program_name, uint8_t *MEM)
 }
 
 uint16_t *get_stack_ptr() {
-  return (uint16_t *) ((void *) MEMSPACE + SP);
+  return (uint16_t *) ( ((void *)MEMSPACE + SP) );
+}
+
+uint16_t *get_addr_ptr(uint16_t addr) {
+  printf("Got address %04X\n", addr);
+  return (uint16_t *) ( (void *)MEMSPACE + addr );
 }
 
 //###########+++ Register number to name +++#########

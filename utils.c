@@ -43,7 +43,6 @@ uint16_t *get_stack_ptr() {
 }
 
 uint16_t *get_addr_ptr(uint16_t addr) {
-  printf("Got address %04X\n", addr);
   return (uint16_t *) ( (void *)MEMSPACE + addr );
 }
 

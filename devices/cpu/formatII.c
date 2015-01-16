@@ -25,8 +25,8 @@
 //########################################################
 void decode_formatII( uint16_t instruction )
 {
-  uint8_t condition = ( instruction & 0x1C00 ) >> 10;
-  int16_t signed_offset = ( instruction & 0x03FF );
+  uint8_t condition = (instruction & 0x1C00) >> 10;
+  int16_t signed_offset = (instruction & 0x03FF);
 
   switch(condition){
   
@@ -80,6 +80,7 @@ void decode_formatII( uint16_t instruction )
 
   default:{
     printf("Undefined Jump operation\n");
+    return;
   }
   
   } //# End of Switch

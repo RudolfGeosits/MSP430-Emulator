@@ -30,16 +30,20 @@ void decode_formatI( uint16_t instruction )
   uint8_t opcode = (instruction & 0x0380) >> 7;
   uint8_t bw_flag = (instruction & 0x0040) >> 6;
   uint8_t as_flag = (instruction & 0x0030) >> 4;
-  uint8_t source_reg = (instruction & 0x000F);
+  uint8_t source = (instruction & 0x000F);
   
-  reg_num_to_name(source_reg, reg_name);
-  uint16_t *reg = get_reg_ptr(source_reg);
+  reg_num_to_name(source, reg_name);
+  uint16_t *reg = get_reg_ptr(source);
+
+  printf("Opcode: 0x%01X  Source bits: 0x%01X\nAS_Flag: 0x%01X  "\
+	 "BW_Flag: 0x%01X\n",
+         opcode, source, as_flag, bw_flag);
   
   /* Spot CG1 and CG2 Constant generator instructions */
-  if (source_reg == 2 && as_flag > 0) {
+  if (source == 2 && as_flag > 0) {
     printf("CG1 using %%r2\n");
   }
-  else if (source_reg == 3) {
+  else if (source == 3) {
     printf("CG2 using %%r3\n");
   }
 

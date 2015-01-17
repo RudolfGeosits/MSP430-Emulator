@@ -40,18 +40,24 @@ void decode_formatIII( uint16_t instruction )
   reg_num_to_name(source, s_reg_name);      /* Get source register name */
   reg_num_to_name(destination, d_reg_name); /* Get destination register name */
 
+  uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
+  int16_t immediate_constant = 0;           /* Generated Constant */
+
   printf("Opcode: 0x%01X  Source bits: 0x%01X  Destination bits: 0x%01X\n" \
 	 "AS_Flag: 0x%01X  AD_Flag: 0x%01X  BW_Flag: 0x%01X\n",
 	 opcode, source, destination, as_flag, ad_flag, bw_flag);
 
   /* Spot CG1 and CG2 Constant generator instructions */
-  if (source == 2 && as_flag > 0) {
-    printf("CG1 using %%r2 - Skipping for now\n");
-    return;
+  if ( (source == 2 && as_flag > 1) || source == 3 ) {
+    constant_generator_active = 1;
+    immediate_constant = run_constant_generator(source, as_flag);
   }
-  else if (source == 3) {
-    printf("CG2 using %%r3 - Skipping for now\n");
-    return;
+  else {
+    constant_generator_active = 0;
+  }
+
+  if (constant_generator_active) {
+    printf("Got constant: %d, using it.\n", immediate_constant);
   }
 
   switch (opcode) {
@@ -60,14 +66,24 @@ void decode_formatIII( uint16_t instruction )
     bw_flag == 0 ? printf("MOV ") : printf("MOV.B ");
 
     if (as_flag == 0 && ad_flag == 0) {   /* MOV Rs, Rd */
-	      
-      printf("%s, %s\n", s_reg_name, d_reg_name);
+      int16_t source_value;
+
+      if (constant_generator_active) {       /* Check if CG1/CG2 available */
+	source_value = immediate_constant;
+	printf("#0x%04X, ", source_value);
+      }
+      else {                                 /* Value from register */
+	source_value = *s_reg;
+	printf("%s, ", s_reg_name);
+      }
+
+      printf("%s\n", d_reg_name);
       
       if (bw_flag == WORD) {		
-	*d_reg = *s_reg;
+	*d_reg = source_value;
       }
       else if (bw_flag == BYTE) {
-	*d_reg = *s_reg;
+	*d_reg = source_value;
 	*d_reg &= 0x00FF;
       }
 
@@ -76,17 +92,25 @@ void decode_formatIII( uint16_t instruction )
 
     else if (as_flag == 0 && ad_flag == 1) {   /* MOV Rs, 0x0(Rd) */
       int16_t destination_offset = fetch();
-
-      printf("%s, 0x%04X(%s)\n", s_reg_name, (uint16_t)destination_offset, 
-	     d_reg_name);
-
       uint16_t *destination_addr = get_addr_ptr(*d_reg + destination_offset);
+      int16_t source_value; 
+
+      if (constant_generator_active) {       /* Check if CG1/CG2 available */
+	source_value = immediate_constant;
+	printf("#0x%04X, ", source_value);
+      }
+      else {                                 /* Value from register */
+	source_value = *s_reg;
+	printf("%s, ", s_reg_name);
+      }
+
+      printf("0x%04X(%s)\n", (uint16_t)destination_offset, d_reg_name);
 
       if (bw_flag == WORD) {
-	*destination_addr = *s_reg;
+	*destination_addr = source_value;
       }
       else if (bw_flag == BYTE) {
-	*( (uint8_t *)destination_addr ) = *( (uint8_t *)s_reg );
+	*( (uint8_t *)destination_addr ) = (uint8_t) source_value;
       }
 	
       break;
@@ -156,7 +180,8 @@ void decode_formatIII( uint16_t instruction )
       uint16_t *source_addr = get_addr_ptr(*s_reg);
       uint16_t *destination_addr = get_addr_ptr(*d_reg + destination_offset);
 
-      printf("@%s, 0x%04X(%s)\n", s_reg_name, destination_offset, d_reg_name);
+      printf("@%s, 0x%04X(%s)\n", s_reg_name, (uint16_t)destination_offset, 
+	     d_reg_name);
 
       if (bw_flag == WORD) {
 	*destination_addr = *source_addr;
@@ -171,9 +196,17 @@ void decode_formatIII( uint16_t instruction )
     else if (as_flag == 3 && ad_flag == 0) {   /* MOV @Rs+, Rd */
                                                /* MOV #S, Rd   */
 
-      if (source == 0) {   /* If the source Reg is PC/R1 */
-	int16_t source_value = fetch();   /* Constant at PC */
-	printf("#0x%04X, %s\n", source_value, d_reg_name);
+      if (source == 0) {   /* If the source Reg is PC/R1 (Immediate Mode) */
+	int16_t source_value;
+
+	if (constant_generator_active) {   /* Check if CG1 or CG2 available */
+	  source_value = immediate_constant;
+	}
+	else {                             /* Constant at PC */
+	  source_value = fetch();            
+	}
+	
+	printf("#0x%04X, %s\n", (uint16_t)source_value, d_reg_name);
 	
 	bw_flag == WORD ? 
 	  *d_reg = source_value 
@@ -198,9 +231,16 @@ void decode_formatIII( uint16_t instruction )
       int16_t destination_offset = fetch();
       uint16_t *destination_addr = get_addr_ptr(*d_reg + destination_offset);
 
-      if (source == 0) {   /* If the source Reg is PC/R1 */
-	int16_t source_value = fetch();
-	
+      if (source == 0) {                       /* If the source Reg is PC/R1 */
+	int16_t source_value;
+
+	if (constant_generator_active) {       /* Check if CG1/CG2 available */
+	  source_value = immediate_constant;
+	}
+	else {                                 /* fetch from PC, (next word) */
+	  source_value = fetch();
+	}
+
 	printf("#0x%04X, 0x%04X(%s)\n", (uint16_t)source_value, (uint16_t)
 	       destination_offset, d_reg_name);
 
@@ -216,10 +256,9 @@ void decode_formatIII( uint16_t instruction )
 	       d_reg_name);
 
 	bw_flag == WORD ? 
-	  *destination_addr = *s_reg, *s_reg += 2
-	  : (*d_reg = *source_addr, *d_reg &= 0x00FF, *s_reg += 1);	
-
-	bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
+	  *destination_addr = *source_addr, *s_reg += 2
+	  : (*destination_addr = *source_addr, *destination_addr &= 0x00FF, 
+	     *s_reg += 1);	
       }
     }
 

@@ -4,8 +4,8 @@ unsigned int i = 0;
 
 void main(void){
 
-  /*
   asm(
+      /*
       "MOV R5, R4\n"
       "MOV.B R5, R4\n"
 
@@ -34,11 +34,42 @@ void main(void){
 
       "MOV @R5+, 0x0(R4)\n"
       "MOV.B @R5+, 0x0(R4)\n"
+      */
 
-      //"CALL R5\n"
-      //"CALL 0x2(R5)\n"
-      //"CALL @R5\n"
-      //"CALL @R5+\n"
+      //"CALL #0x1\n"
+      //"CALL #0x8\n"
+      //"CALL #0x72A\n"
+      "CALL 0x4\n"
+      "CALL &0x4\n"
+
+      "CALL R5\n"
+      "CALL 0x2(R5)\n"
+      "CALL @R5\n"
+      "CALL @R5+\n"
+
+      "PUSH -0x2\n"
+      "PUSH 0x2\n"
+      "PUSH.B 0x4\n"
+
+      "PUSH &0xC000\n"
+      "PUSH.B &0xC010\n"
+
+      "PUSH #4\n"
+      "PUSH #8\n"
+      "PUSH #0\n"
+      "PUSH #1\n"
+      "PUSH #2\n"
+      "PUSH #-1\n"
+
+      "PUSH.B #4\n"
+      "PUSH.B #8\n"
+      "PUSH.B #0\n"
+      "PUSH.B #1\n"
+      "PUSH.B #2\n"
+      "PUSH.B #-1\n"
+
+      "PUSH #0x1234\n"
+      "PUSH.B #0x78AB\n"
 
       "PUSH R5\n"
       "PUSH.B R5\n"
@@ -76,8 +107,7 @@ void main(void){
       "RRC.B @R5+\n"
       "RRC.B 0xF(R5)\n"
       "RRC -0x4(R5)\n"
-  );
-  */
+      );
   
   // Stop the watchdog timer
   WDTCTL = WDTPW + WDTHOLD;

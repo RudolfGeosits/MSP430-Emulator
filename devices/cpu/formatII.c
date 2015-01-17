@@ -35,16 +35,21 @@ void decode_formatII( uint16_t instruction )
   reg_num_to_name(source, reg_name);
   uint16_t *reg = get_reg_ptr(source);
 
+  uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
+  int16_t immediate_constant = 0;           /* Generated Constant */
+
   printf("Opcode: 0x%01X  Source bits: 0x%01X\nAS_Flag: 0x%01X  "\
 	 "BW_Flag: 0x%01X\n",
          opcode, source, as_flag, bw_flag);
   
   /* Spot CG1 and CG2 Constant generator instructions */
-  if (source == 2 && as_flag > 0) {
-    printf("CG1 using %%r2\n");
+  if ( (source == 2 && as_flag > 1) || source == 3 ) {
+    constant_generator_active = 1;
+    immediate_constant = run_constant_generator(source, as_flag);
+    printf("Got constant: %d, using it.\n", immediate_constant);
   }
-  else if (source == 3) {
-    printf("CG2 using %%r3\n");
+  else {
+    constant_generator_active = 0;
   }
 
   switch (opcode) {
@@ -469,67 +474,132 @@ void decode_formatII( uint16_t instruction )
     uint16_t *stack_addr = (uint16_t *) ( (void *) MEMSPACE + SP );
       
     if(as_flag == 0x0){   /* PUSH Rn */
-      printf("%s\n", reg_name);
+                          /* PUSH #N */
+      int16_t source_value;
 
+      if (constant_generator_active) {
+	source_value = immediate_constant;
+	printf("0x%04X\n", (uint16_t) source_value);
+      }
+      else {
+	printf("%s\n", reg_name);
+	source_value = *reg;
+      }
+      
       if (bw_flag == WORD) {
-        *stack_addr = *reg;
+        *stack_addr = source_value;
       }
       else if (bw_flag == BYTE) {
         *stack_addr &= 0xFF00;   /* Zero out bottom half for pushed byte */
-        *stack_addr |= (uint8_t) *reg;
+        *stack_addr |= (uint8_t) source_value;
       }      
     }
 
     else if(as_flag == 0x1){   /* PUSH 0x0(Rn) */
-      int16_t source_offset = fetch();
-      printf("0x%04X(%s)\n", (uint16_t)source_offset, reg_name);
+                               /* PUSH #S      */
+                               /* PUSH 0xN     */
+                               /* PUSH &0xN    */
+      int16_t source_value;
 
-      uint16_t *address = (uint16_t *) 
-        ((void *) MEMSPACE + *reg + source_offset);
+      if (constant_generator_active) {   /* Check if CG1 or CG2 available */
+	source_value = immediate_constant;
+	printf("#0x%04X\n", (uint16_t) source_value);
+      }
+      else if (source == 0) {   /* Symbolic Mode */
+	int16_t pc_offset = fetch();
+	uint16_t *address = get_addr_ptr(PC + pc_offset);
+	source_value = (int16_t) *address;
+
+	printf("0x%04X\n", (uint16_t) pc_offset);
+      }
+      else if (source == 2) {   /* Absolute Mode */
+	uint16_t absolute_addr = fetch();
+	uint16_t *address = get_addr_ptr(absolute_addr);
+	source_value = (int16_t) *address;
+
+	printf("&0x%04X\n", (uint16_t) absolute_addr);
+      }
+      else {                    /* Offset at PC */
+	int16_t source_offset = fetch();
+	uint16_t *address = get_addr_ptr(*reg + source_offset);
+	source_value = *address;
+
+	printf("0x%04X(%s)\n", (uint16_t)source_offset, reg_name);
+      }
 
       if (bw_flag == WORD) {
-        *stack_addr = *address;
+        *stack_addr = source_value;
       }
       else if (bw_flag == BYTE) {
         *stack_addr &= 0xFF00;
-        *stack_addr |= (uint8_t) *address;
+        *stack_addr |= (uint8_t) source_value;
       }
     }
 
     else if(as_flag == 0x2){   /* PUSH @Rn */
-      printf("@%s\n", reg_name);
+                               /* PUSH #S  */
+      int16_t source_value;
 
-      uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
+      if (constant_generator_active) {
+	source_value = immediate_constant;
+	printf("0x%04X\n", (uint16_t) source_value);
+      }
+      else {
+	printf("@%s\n", reg_name);
+	source_value = (int16_t) *get_addr_ptr(*reg);
+      }
 
       if (bw_flag == WORD) {
-        *stack_addr = *address;
+        *stack_addr = source_value;
       }
       else if (bw_flag == BYTE) {
         *stack_addr &= 0xFF00;
-        *stack_addr |= (uint8_t) *address;
+        *stack_addr |= (uint8_t) source_value;
       }
     }
 
     else if(as_flag == 0x3){   /* PUSH @Rn+ */
-      printf("@%s+\n", reg_name);
+                               /* PUSH #S   */
+      int16_t source_value;
+      
+      if (constant_generator_active) {   /* Check if CG1 or CG2 available */
+	source_value = immediate_constant;
+	printf("#0x%04X\n", (uint16_t) source_value);
+      }
+      else if (source == 0) {   /* Immediate mode PC Fetch*/
+	source_value = fetch();
+	printf("#0x%04X\n", (uint16_t) source_value);
+      }
+      else {   /* Regular Indirect Register Auto-Increment mode */
+	uint16_t *address = get_addr_ptr(*reg);
+	source_value = (uint16_t) *address;
 
-      uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
-
+	printf("@%s+\n", reg_name);
+      }
+      
+      
       if (bw_flag == WORD) {
-        *stack_addr = *address;
-	*reg += 2;
+	*stack_addr = source_value;
+
+	source > 3 ? *reg += 2 : 0;
       }
       else if (bw_flag == BYTE) {
-        *stack_addr &= 0xFF00;
-        *stack_addr |= (uint8_t) *address;
-	*reg += 1;
+	*stack_addr &= 0xFF00;
+	*stack_addr |= (uint8_t) source_value;
+	
+	source > 3 ? *reg += 1 : 0;
       }
     }
 
     break;
   }
 
-  //# Call subroutine; push PC and move source to PC: Always word inst
+  /* CALL SUBROUTINE: 
+   *     PUSH PC and PC = SRC
+   *     
+   *     This is always a word instruction. Supporting all addressing modes
+   */
+    
   case 0x5:{
     printf("CALL ");
 
@@ -538,34 +608,82 @@ void decode_formatII( uint16_t instruction )
     *stack_addr = PC;     /* Place old PC onto stack */
 
     if(as_flag == 0x0){   /* CALL Rn */
-      printf("%s\n", reg_name);
-
-      PC = *reg;          /* PC updated to new address */
+                          /* CALL #N */
+      
+      if (constant_generator_active) {   /* Immediate Mode */
+	printf("#0x%04X\n", (uint16_t) immediate_constant);
+	PC = (uint16_t) immediate_constant;
+      }
+      else {   /* Register Mode */
+	printf("%s\n", reg_name);
+	PC = *reg;
+      }
     }
+
     else if(as_flag == 0x1){   /* CALL 0x0(Rn) */
-      int16_t source_offset = fetch();
-      printf("0x%04X(%s)\n", (uint16_t)source_offset, reg_name);
-    
-      uint16_t *address = (uint16_t *)
-	((void *) MEMSPACE + *reg + source_offset);
-      
-      PC = *address;
+                               /* CALL #N      */
+                               /* CALL 0xN     */
+                               /* CALL &0xN    */
+
+      if (constant_generator_active) {
+	printf("#0x%04X\n", (uint16_t) immediate_constant);
+	PC = (uint16_t) immediate_constant;
+      }
+      else if (source == 0) {   /* Symbolic Mode */
+	int16_t pc_offset = fetch();	
+	PC += pc_offset;
+
+	printf("0x%04X\n", (uint16_t) pc_offset);
+      }
+      else if (source == 2) {   /* Absolute Mode */
+	uint16_t absolute_addr = fetch();
+	PC = absolute_addr;
+
+	printf("&0x%04X\n", absolute_addr);
+      }
+      else {                    /* Indexed mode */
+	int16_t source_offset = fetch();
+	PC = *get_addr_ptr(*reg + source_offset);
+	
+	printf("0x%04X(%s)\n", (uint16_t)source_offset, reg_name);    	
+      }
     }
+
     else if(as_flag == 0x2){   /* CALL @Rn */
-      printf("@%s\n", reg_name);
+                               /* CALL #N  */
 
-      uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
-      PC = *address;
+      if (constant_generator_active) {   /* Immediate mode (CG1/CG2) */
+	PC = immediate_constant;
+	printf("#0x%04X\n", (uint16_t) immediate_constant);
+      }
+      else {   /* Indirect register mode */
+	printf("@%s\n", reg_name);	
+	PC = *get_addr_ptr(*reg);
+      }
     }
+    
     else if(as_flag == 0x3){   /* CALL @Rn+ */
-      printf("@%s+\n", reg_name);
+                               /* CALL #N   */
 
-      uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
-      PC = *address;
-      
-      *reg += 2;
+      if (constant_generator_active) {   /* Immediate Mode (CG1/CG2) */
+	printf("#0x%04X\n", (uint16_t) immediate_constant);
+	PC = (uint16_t) immediate_constant;
+      }
+      else if (source == 0) {   /* Immediate Mode (PC) */
+	uint16_t source_value = fetch();
+	PC = source_value;
+	
+	printf("#0x%04X\n", (uint16_t) source_value);
+      }
+      else {   /* Indirect register auto increment mode */
+	printf("@%s+\n", reg_name);
+	
+	uint16_t *address = get_addr_ptr(*reg);
+	PC = *address;
+	*reg += 2;
+      }
     }
-
+      
     break;
   }
   

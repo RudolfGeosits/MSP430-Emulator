@@ -17,7 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses
 
 void load_program(char *program_name, uint8_t *MEM)
 {
-  int size, result;
+  uint32_t size, result;
   printf("Loading Program: ( %s )\n", program_name);
 
   FILE *fd = fopen(program_name, "rb+");
@@ -27,7 +27,7 @@ void load_program(char *program_name, uint8_t *MEM)
     exit(1);
   }
 
-  // obtain file size
+  /* obtain file size */
   fseek(fd, 0, SEEK_END);
   size = ftell(fd);
   rewind(fd);

@@ -17,21 +17,21 @@
 */
 
 //# r2 or SR, the status register
-typedef struct{
+typedef struct {
   uint8_t reserved : 7;   //# Reserved bits
   uint8_t overflow : 1;   //# Overflow flag
   uint8_t SCG1 : 1;       //# System Clock Generator SMCLK; ON = 0; OFF = 1;
-  uint8_t SCG0 : 1;       //# System Clock Generator DCOCLK DCO ON = 0; DCO OFF = 1;
+  uint8_t SCG0 : 1;  //# System Clock Generator DCOCLK DCO ON = 0; DCO OFF = 1;
 
-  uint8_t OSCOFF : 1;     //# Oscillator Off. LFXT1CLK ON = 0; LFXT1CLK OFF = 1;
+  uint8_t OSCOFF : 1;    //# Oscillator Off. LFXT1CLK ON = 0; LFXT1CLK OFF = 1;
 
   uint8_t CPUOFF : 1;     //# CPU off; CPU OFF = 1; CPU ON = 0;
-  uint8_t GIE : 1;        //# General Interupt enable; Enable maskable ints = 1; 0 = dont 
+  uint8_t GIE : 1;   //# General Interupt enable; Enable maskable ints = 1; 0 = dont 
 
   uint8_t negative : 1;   //# Negative flag
   uint8_t zero : 1;       //# Zero flag
   uint8_t carry : 1;      //# Carry flag; Set when result produces a carry
-}status_reg;
+} status_reg;
 
 status_reg SR;
 

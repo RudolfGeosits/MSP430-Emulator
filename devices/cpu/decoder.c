@@ -35,13 +35,13 @@ void decode(uint16_t instruction)
   format_id = (uint8_t)(instruction >> 12);
 
   if (format_id == 0x1) {
-    decode_formatI(instruction);  /* format I (single operand) instruction */
+    decode_formatII(instruction);  /* format II (single operand) instruction */
   }    
   else if (format_id >= 0x2 && format_id <= 3) {
-    decode_formatII(instruction);  /* format II (jump) instruction */
+    decode_formatIII(instruction);  /* format III (jump) instruction */
   }
   else if (format_id >= 0x4) {
-    decode_formatIII(instruction); /* format III (two operand) instruction */
+    decode_formatI(instruction); /* format I (two operand) instruction */
   }
 }
 

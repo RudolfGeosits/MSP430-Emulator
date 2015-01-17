@@ -4,8 +4,8 @@ unsigned int i = 0;
 
 void main(void){
 
+  /*
   asm(
-      /*
       "MOV R5, R4\n"
       "MOV.B R5, R4\n"
 
@@ -23,7 +23,6 @@ void main(void){
 
       "MOV @R5, 0x2(R4)\n"
       "MOV.B @R5, 0x4(R4)\n"
-      */
       "MOV #5, R5\n"
       "MOV.B #0x4560, R5\n"
 
@@ -78,10 +77,13 @@ void main(void){
       "RRC.B 0xF(R5)\n"
       "RRC -0x4(R5)\n"
   );
+  */
   
   // Stop the watchdog timer
   WDTCTL = WDTPW + WDTHOLD;
 
+  i = 182;
+    
   // A register that configures the direction of a port pin as an
   // input or output 
   P1DIR |= 0x10;

@@ -37,9 +37,9 @@ int main(int argc, char **argv)
   initialize_msp_registers();
   load_program(argv[1], LOAD_POS);
 
-  while (1) { /* CPU Fetch-Decode-Execute */
-    decode( fetch() );
-    command_loop();
+  while (1) {            /* Fetch-Decode-Execute Cycle */
+    decode( fetch() );   /* Instruction Decoder */
+    command_loop();      /* Debugger */
   }
 
   uninitialize_msp_memspace();

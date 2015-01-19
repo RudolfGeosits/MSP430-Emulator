@@ -51,61 +51,33 @@ int16_t *get_reg_ptr(uint8_t reg)
 {  
   static int16_t r2 = 0;
 
-  switch( reg ){
-  case 0x0:{
-    return &PC;
-  }
-  case 0x1:{
-    return &SP;
-  }
-  case 0x2:{
-    r2 = sr_to_value();
-    return &r2;
-  }
-  case 0x3:{
-    return 0;
-  }
-  case 0x4:{
-    return &r4;
-  }
-  case 0x5:{
-    return &r5;
-  }
-  case 0x6:{
-    return &r6;
-  }
-  case 0x7:{
-    return &r7;
-  }
-  case 0x8:{
-    return &r8;
-  }
-  case 0x9:{
-    return &r9;
-  }
-  case 0xA:{
-    return &r10;
-  }
-  case 0xB:{
-    return &r11;
-  }
-  case 0xC:{
-    return &r12;
-  }
-  case 0xD:{
-    return &r13;
-  }
-  case 0xE:{
-    return &r14;
-  }
-  case 0xF:{
-    return &r15;
-  }
-  
-  default:{
-    return 0;
-  }
+  switch (reg) {  
+    case 0x0: return &PC;
+    case 0x1: return &SP;
 
+    case 0x2:{
+      r2 = sr_to_value();
+      return &r2;
+    }
+
+    case 0x3: return &CG2;
+    case 0x4: return &r4;
+    case 0x5: return &r5;
+    case 0x6: return &r6;
+    case 0x7: return &r7;
+    case 0x8: return &r8;
+    case 0x9: return &r9;
+    case 0xA: return &r10;
+    case 0xB: return &r11;
+    case 0xC: return &r12;
+    case 0xD: return &r13;
+    case 0xE: return &r14;
+    case 0xF: return &r15;
+      
+    default:{
+      printf("Invalid Register Number");
+      return 0;
+    }
   }
 }
 
@@ -245,76 +217,75 @@ uint8_t reg_name_to_num(char *name)
 void reg_num_to_name(uint8_t number, char *name)
 {  
   switch (number) { 
-  case 0x0:{
-    strncpy(name, "PC\0", 3);
-    return;
+    case 0x0:{
+      strncpy(name, "PC\0", 3);
+      return;
+    }
+    case 0x1:{
+      strncpy(name, "SP\0", 3);
+      return;
+    }
+    case 0x2:{
+      strncpy(name, "SR\0", 3);
+      return;
+    }
+    case 0x3:{
+      strncpy(name, "R3\0", 3);
+      return;
+    }
+    case 0x4:{
+      strncpy(name, "R4\0", 3);
+      return;
+    }
+    case 0x5:{
+      strncpy(name, "R5\0", 3);
+      return;
+    }
+    case 0x6:{
+      strncpy(name, "R6\0", 3);
+      return;
+    }
+    case 0x7:{
+      strncpy(name, "R7\0", 3);
+      return;
+    }
+    case 0x8:{
+      strncpy(name, "R8\0", 3);
+      return;
+    }
+    case 0x9:{
+      strncpy(name, "R9\0", 3);
+      return;
+    }
+    case 0xA:{
+      strncpy(name, "R10\0", 4);
+      return;
+    }
+    case 0xB:{
+      strncpy(name, "R11\0", 4);
+      return;
+    }
+    case 0xC:{
+      strncpy(name, "R12\0", 4);
+      return;
+    }
+    case 0xD:{
+      strncpy(name, "R13\0", 4);
+      return;
+    }
+    case 0xE:{
+      strncpy(name, "R14\0", 4);
+      return;
+    }
+    case 0xF:{
+      strncpy(name, "R15\0", 4);
+      return;
+    }
+    default:{
+      strncpy(name, "???\0", 4);
+      return;
+    }
   }
-  case 0x1:{
-    strncpy(name, "SP\0", 3);
-    return;
-  }
-  case 0x2:{
-    strncpy(name, "SR\0", 3);
-    return;
-  }
-  case 0x3:{
-    strncpy(name, "R3\0", 3);
-    return;
-  }
-  case 0x4:{
-    strncpy(name, "R4\0", 3);
-    return;
-  }
-  case 0x5:{
-    strncpy(name, "R5\0", 3);
-    return;
-  }
-  case 0x6:{
-    strncpy(name, "R6\0", 3);
-    return;
-  }
-  case 0x7:{
-    strncpy(name, "R7\0", 3);
-    return;
-  }
-  case 0x8:{
-    strncpy(name, "R8\0", 3);
-    return;
-  }
-  case 0x9:{
-    strncpy(name, "R9\0", 3);
-    return;
-  }
-  case 0xA:{
-    strncpy(name, "R10\0", 4);
-    return;
-  }
-  case 0xB:{
-    strncpy(name, "R11\0", 4);
-    return;
-  }
-  case 0xC:{
-    strncpy(name, "R12\0", 4);
-    return;
-  }
-  case 0xD:{
-    strncpy(name, "R13\0", 4);
-    return;
-  }
-  case 0xE:{
-    strncpy(name, "R14\0", 4);
-    return;
-  }
-  case 0xF:{
-    strncpy(name, "R15\0", 4);
-    return;
-  }
-  default:{
-    strncpy(name, "???\0", 4);
-    return;
-  }
-
-  } //# End of switch
 }
 
 //##########+++ Display the menu for this program +++##########

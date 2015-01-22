@@ -16,7 +16,7 @@
   along with this program. If not, see <http://www.gnu.org/licenses      
 */
 
-//##########+++ CPU Fetch Cycle +++##########
+/*##########+++ CPU Fetch Cycle  +++##########*/
 uint16_t fetch()
 {
   uint16_t word;
@@ -26,7 +26,7 @@ uint16_t fetch()
   return word;
 }
 
-//##########+++ CPU Decode Cycle +++##########
+/*##########+++ CPU Decode Cycle +++##########*/
 void decode(uint16_t instruction)
 {  
   int done = 0;

@@ -23,10 +23,10 @@
 */
 void initialize_msp_memspace()
 {
-  /* 64 KB Address Space */
-  MEMSPACE = (uint8_t *) malloc(0xFFFF);
+  /* 128 KB Address Space */
+  MEMSPACE = (uint8_t *) malloc(0x1FFFF);
   
-  IVT = MEMSPACE +   0xFFE0;   /* 0xFFE0 - 0xFFFF */
+  IVT = MEMSPACE +   0xFFE0;   /* 0xFFE0 - 0x1FFFF */
   ROM = MEMSPACE +   0x0400;   /* 0x400 - 0xFFDF {Varies with device} */
   RAM = MEMSPACE +   0x0200;   /* 0x200 - 0x3FF {Varies with device} */
   PER16 = MEMSPACE + 0x0100;   /* 0x0100 - 0x01FF */

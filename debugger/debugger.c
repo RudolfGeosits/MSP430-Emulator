@@ -74,10 +74,10 @@ void command_loop()
 
     /* setm MEMLOC VAL, set a memory location to some value */
     else if ( strncmp("setm", command, sizeof("setm")) == 0 ) {
-      int value = 0;
-      int address;
+      uint16_t value = 0;
+      uint16_t address;
       
-      scanf("%X %X", &address, &value);
+      scanf("%X %X", (unsigned int *) &address, (unsigned int *) &value);
       printf("TODO: Change loc %04X to %04X\n", address, (uint16_t) value);
       continue;
     }

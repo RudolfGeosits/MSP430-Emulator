@@ -643,7 +643,7 @@ void decode_formatII( uint16_t instruction )
       }
       else {                    /* Indexed mode */
 	int16_t source_offset = fetch();
-	PC = *get_addr_ptr(*reg + source_offset);
+	PC = *reg + source_offset;
 	
 	printf("0x%04X(%s)\n", (uint16_t)source_offset, reg_name);    	
       }

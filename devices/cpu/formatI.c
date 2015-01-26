@@ -1,16 +1,16 @@
 /*
-MSP430 Emulator
-Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses
+  MSP430 Emulator
+  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses
 */
 
 //##########+++ Decode Format I Instructions +++##########
@@ -23,7 +23,7 @@ along with this program. If not, see <http://www.gnu.org/licenses
 //# S = S_Reg_Name, D = Destination
 //########################################################
 
-void decode_formatI( uint16_t instruction )
+void decode_formatI(uint16_t instruction)
 {
   uint8_t opcode = (instruction & 0xF000) >> 12;
   uint8_t source = (instruction & 0x0F00) >> 8;
@@ -34,8 +34,8 @@ void decode_formatI( uint16_t instruction )
 
   char s_reg_name[10], d_reg_name[10];
 
-  int16_t *s_reg = get_reg_ptr(source);      /* Source Register pointer */
-  int16_t *d_reg = get_reg_ptr(destination); /* Destination Register pointer */
+  int16_t *s_reg = get_reg_ptr(source);     /* Source Register pointer */
+  int16_t *d_reg = get_reg_ptr(destination);/* Destination Register pointer */
 
   reg_num_to_name(source, s_reg_name);      /* Get source register name */
   reg_num_to_name(destination, d_reg_name); /* Get destination register name */
@@ -61,18 +61,29 @@ void decode_formatI( uint16_t instruction )
   }
 
   switch (opcode) {
-
-  case 0x4:{   /* MOV SOURCE, DEST */
+    
+  /* MOV SOURCE, DESTINATION
+   *   Ex: MOV #4, R6
+   *
+   * SOURCE = DESTINATION
+   *
+   * The source operand is moved to the destination. The source operand is 
+   * not affected. The previous contents of the destination are lost.
+   * 
+  */
+  case 0x4: {
     bw_flag == 0 ? printf("MOV ") : printf("MOV.B ");
 
-    if (as_flag == 0 && ad_flag == 0) {   /* MOV Rs, Rd */
+    /* Register - Register;     Ex: MOV Rs, Rd */
+    /* Constant Gen - Register; Ex: MOV #C, Rd */    
+    if (as_flag == 0 && ad_flag == 0) {
       int16_t source_value;
 
-      if (constant_generator_active) {       /* Check if CG1/CG2 available */
+      if (constant_generator_active) {   /* Source Constant */
 	source_value = immediate_constant;
 	printf("#0x%04X, ", source_value);
       }
-      else {                                 /* Value from register */
+      else {                             /* Source from register */
 	source_value = *s_reg;
 	printf("%s, ", s_reg_name);
       }
@@ -90,21 +101,37 @@ void decode_formatI( uint16_t instruction )
       break;
     }
 
-    else if (as_flag == 0 && ad_flag == 1) {   /* MOV Rs, 0x0(Rd) */
+    /* Register - Indexed;      Ex: MOV Rs, 0x0(Rd) */
+    /* Register - Symbolic;     Ex: MOV Rs, 0xD     */
+    /* Register - Absolute;     Ex: MOV Rs, &0xD    */
+    /* Constant Gen - Indexed;  Ex: MOV #C, 0x0(Rd) */
+    /* Constant Gen - Symbolic; Ex: MOV #C, 0xD     */
+    /* Constant Gen - Absolute; Ex: MOV #C, &0xD    */
+    else if (as_flag == 0 && ad_flag == 1) {
       int16_t destination_offset = fetch();
       uint16_t *destination_addr = get_addr_ptr(*d_reg + destination_offset);
       int16_t source_value; 
 
-      if (constant_generator_active) {       /* Check if CG1/CG2 available */
+      if (constant_generator_active) {   /* Source Constant */
 	source_value = immediate_constant;
 	printf("#0x%04X, ", source_value);
       }
-      else {                                 /* Value from register */
+      else {                             /* Source from register */
 	source_value = *s_reg;
 	printf("%s, ", s_reg_name);
       }
 
-      printf("0x%04X(%s)\n", (uint16_t)destination_offset, d_reg_name);
+      if (destination == 0) {            /* Destination Symbolic */
+	destination_offset -= 2;
+	printf("0x%04X\n", (uint16_t) (*d_reg + destination_offset));
+      }
+      else if (destination == 2) {       /* Destination Absolute */
+	destination_addr = get_addr_ptr(destination_offset);
+	printf("&0x%04X\n", (uint16_t) destination_offset);
+      }
+      else {                             /* Destination Indexed */
+	printf("0x%04X(%s)\n", (uint16_t) destination_offset, d_reg_name);
+      }
 
       if (bw_flag == WORD) {
 	*destination_addr = source_value;
@@ -116,8 +143,10 @@ void decode_formatI( uint16_t instruction )
       break;
     }
 
-    else if (as_flag == 1 && ad_flag == 0) {   /* MOV 0x0(Rs), Rd */
-                                               /*  */
+    /* Indexed - Register;  Ex: MOV 0x0(Rs), Rd */
+    /* Symbolic - Register; Ex: MOV 0xS, Rd     */
+    /* Absolute - Register; Ex: MOV &0xS, Rd    */ //CONTINUE HERE
+    else if (as_flag == 1 && ad_flag == 0) {
       int16_t source_offset = fetch();
 
       printf("0x%04X(%s), %s\n", (uint16_t)source_offset, s_reg_name, 
@@ -136,11 +165,14 @@ void decode_formatI( uint16_t instruction )
       break;
     }
 
-    else if (as_flag == 1 && ad_flag == 1) {   /* MOV 0x0(Rs), 0x0(Rd) */
-                                               /* MOV S_ADDR, D_ADDR   */
-                                               /* MOV S_ADDR, 0x0(Rd)  */
-                                               /* MOV 0x0(Rs), D_ADDR  */
-
+    /* Indexed - Indexed;   Ex: MOV 0x0(Rs), 0x0(Rd) */
+    /* Symbolic - Indexed;  Ex: MOV 0xS, 0x0(Rd)     */
+    /* Indexed - Symbolic;  Ex: MOV 0x0(Rd), 0xD     */
+    /* Symbolic - Symbolic; Ex: MOV 0xS, 0xD         */
+    /* Absolute - Indexed;  Ex: &0xS, 0x0(Rd)        */
+    /* Indexed - Absolute;  Ex: 0x0(Rs), &0xD        */
+    /* Absolute - Absolute; Ex: &0xS, &0xD           */
+    else if (as_flag == 1 && ad_flag == 1) {
       int16_t source_offset = fetch();
       int16_t destination_offset = fetch();
       uint16_t source_val = (uint16_t) *s_reg;
@@ -152,11 +184,11 @@ void decode_formatI( uint16_t instruction )
 		 (uint16_t) destination_offset);
 	}
 	else if (source == 0) {
-	  printf("0x%04X, 0x%04X(PC)\n", (uint16_t) source_offset, 
-		 (uint16_t) destination_offset);
+	  printf("0x%04X, 0x%04X(%s)\n", (uint16_t) source_offset, 
+		 (uint16_t) destination_offset, d_reg_name);
 	}
 	else if (destination == 0) {
-	  printf("0x%04X(PC), 0x%04X\n", (uint16_t)source_offset, 
+	  printf("0x%04X(%s), 0x%04X\n", (uint16_t)source_offset, s_reg_name, 
 		 (uint16_t) destination_offset);
 	}
       }
@@ -179,7 +211,8 @@ void decode_formatI( uint16_t instruction )
       break;
     }
 
-    else if (as_flag == 2 && ad_flag == 0) {   /* MOV @Rs, Rd */
+    /* Indirect - Register; Ex: MOV @Rs, Rd */
+    else if (as_flag == 2 && ad_flag == 0) {
       printf("@%s, %s\n", s_reg_name, d_reg_name);
 
       uint16_t *source_addr = get_addr_ptr(*s_reg); 
@@ -195,7 +228,10 @@ void decode_formatI( uint16_t instruction )
       break;
     }
 
-    else if (as_flag == 2 && ad_flag == 1) {   /* MOV @Rs, 0x0(Rd) */
+    /* Indirect - Indexed;  Ex: MOV @Rs, 0x0(Rd) */
+    /* Indirect - Symbolic; Ex: MOV @Rs, 0xD     */
+    /* Indirect - Absolute; Ex: MOV @Rs, &0xD    */
+    else if (as_flag == 2 && ad_flag == 1) {
       int16_t destination_offset = fetch();
       uint16_t *source_addr = get_addr_ptr(*s_reg);
       uint16_t *destination_addr = get_addr_ptr(*d_reg + destination_offset);
@@ -213,9 +249,10 @@ void decode_formatI( uint16_t instruction )
       break;
     }
 
-    else if (as_flag == 3 && ad_flag == 0) {   /* MOV @Rs+, Rd */
-                                               /* MOV #S, Rd   */
-
+    /* Indirect Inc - Register; Ex: MOV @Rs+, Rd */
+    /* Immediate - Register;    Ex: MOV #S, Rd   */
+    /* Constant Gen - Register; Ex: MOV #C, Rd   */
+    else if (as_flag == 3 && ad_flag == 0) {
       if (source == 0) {   /* If the source Reg is PC/R1 (Immediate Mode) */
 	int16_t source_value;
 
@@ -246,8 +283,16 @@ void decode_formatI( uint16_t instruction )
       break;
     }
 
-    else if (as_flag == 3 && ad_flag == 1) {   /* MOV @S+, 0x0(Rd) */
-                                               /* MOV #S, 0x0(Rd)  */
+    /* Indirect Inc - Indexed;  Ex: MOV @Rs+, 0x0(Rd) */
+    /* Indirect Inc - Symbolic; Ex: MOV @Rs+, 0xD     */
+    /* Indirect Inc - Absolute; Ex: MOV @Rs+, &0xD    */
+    /* Immediate - Indexed;     Ex: MOV #S, 0x0(Rd)   */
+    /* Immediate - Symbolic;    Ex: MOV #S, 0xD       */
+    /* Immediate - Absolute;    Ex: MOV #S, &0xD      */
+    /* Constant Gen - Indexed;  Ex: MOV #C, 0x0(Rd)   */
+    /* Constant Gen - Symbolic; Ex: MOV #C, 0xD       */
+    /* Constant Gen - Absolute; Ex: MOV #C, &0xD      */
+    else if (as_flag == 3 && ad_flag == 1) {
       int16_t destination_offset = fetch();
       uint16_t *destination_addr = get_addr_ptr(*d_reg + destination_offset);
 
@@ -284,19 +329,244 @@ void decode_formatI( uint16_t instruction )
 
     break;
   }
-    //# ADD source to destination
+ 
+  /* ADD SOURCE, DESTINATION 
+   *   Ex: ADD R5, R4
+   * 
+   * The source operand is added to the destination operand. The source operand
+   * is not affected. The previous contents of the destination are lost.
+   *
+   * DESTINATION = SOURCE + DESTINATION
+   *   
+   * N: Set if result is negative, reset if positive
+   * Z: Set if result is zero, reset otherwise
+   * C: Set if there is a carry from the result, cleared if not
+   * V: Set if an arithmetic overflow occurs, otherwise reset  
+   *
+  */
   case 0x5:{
-    printf("ADD\n");
+    bw_flag == 0 ? printf("ADD ") : printf("ADD.B ");
+
+    /* Register - Register;     Ex: ADD Rs, Rd */
+    /* Constant Gen - Register; Ex: ADD #C, Rd */    
+    if (as_flag == 0 && ad_flag == 0) {   
+      
+    }
+
+    /* Register - Indexed;      Ex: ADD Rs, 0x0(Rd) */
+    /* Register - Symbolic;     Ex: ADD Rs, 0xD     */
+    /* Register - Absolute;     Ex: ADD Rs, &0xD    */
+    /* Constant Gen - Indexed;  Ex: ADD #C, 0x0(Rd) */
+    /* Constant Gen - Symbolic; Ex: ADD #C, 0xD     */
+    /* Constant Gen - Absolute; Ex: ADD #C, &0xD    */
+    else if (as_flag == 0 && ad_flag == 1) {   
+    
+    }
+
+    /* Indexed - Register;  Ex: ADD 0x0(Rs), Rd */
+    /* Symbolic - Register; Ex: ADD 0xS, Rd     */
+    /* Absolute - Register; Ex: ADD &0xS, Rd    */
+    else if (as_flag == 1 && ad_flag == 0) {  
+
+    }
+
+    /* Indexed - Indexed;   Ex: ADD 0x0(Rs), 0x0(Rd) */
+    /* Symbolic - Indexed;  Ex: ADD 0xS, 0x0(Rd)     */
+    /* Indexed - Symbolic;  Ex: ADD 0x0(Rd), 0xD     */
+    /* Symbolic - Symbolic; Ex: ADD 0xS, 0xD         */
+    /* Absolute - Indexed;  Ex: &0xS, 0x0(Rd)        */
+    /* Indexed - Absolute;  Ex: 0x0(Rs), &0xD        */
+    /* Absolute - Absolute; Ex: &0xS, &0xD           */
+    else if (as_flag == 1 && ad_flag == 1) {  
+      
+    }
+    
+    /* Indirect - Register; Ex: ADD @Rs, Rd */
+    else if (as_flag == 2 && ad_flag == 0) {   
+    
+    }
+
+    /* Indirect - Indexed;  Ex: ADD @Rs, 0x0(Rd) */
+    /* Indirect - Symbolic; Ex: ADD @Rs, 0xD     */
+    /* Indirect - Absolute; Ex: ADD @Rs, &0xD    */
+    else if (as_flag == 2 && ad_flag == 1) {   
+      
+    }
+    
+    /* Indirect Inc - Register; Ex: ADD @Rs+, Rd */
+    /* Immediate - Register;    Ex: ADD #S, Rd   */
+    /* Constant Gen - Register; Ex: ADD #C, Rd   */
+    else if (as_flag == 3 && ad_flag == 0) {   
+      
+    }
+    
+    /* Indirect Inc - Indexed;  Ex: ADD @Rs+, 0x0(Rd) */
+    /* Indirect Inc - Symbolic; Ex: ADD @Rs+, 0xD     */
+    /* Indirect Inc - Absolute; Ex: ADD @Rs+, &0xD    */
+    /* Immediate - Indexed;     Ex: ADD #S, 0x0(Rd)   */
+    /* Immediate - Symbolic;    Ex: ADD #S, 0xD       */
+    /* Immediate - Absolute;    Ex: ADD #S, &0xD      */
+    /* Constant Gen - Indexed;  Ex: ADD #C, 0x0(Rd)   */
+    /* Constant Gen - Symbolic; Ex: ADD #C, 0xD       */
+    /* Constant Gen - Absolute; Ex: ADD #C, &0xD      */
+    else if (as_flag == 3 && ad_flag == 1) {
+      
+    }
+
     break;
   }
-    //# ADDC Add w/ carry dst += (src+C)
+
+  /* ADDC SOURCE, DESTINATION 
+   *   Ex: ADDC R5, R4
+   *    
+   *
+   * DESTINATION += (SOURCE + C)
+   *   
+   
+   
+   *
+  */
   case 0x6:{
-    printf("ADDC\n");
+    bw_flag == 0 ? printf("ADDC ") : printf("ADDC.B ");
+
+    /* Register - Register;     Ex: ADDC Rs, Rd */
+    /* Constant Gen - Register; Ex: ADDC #C, Rd */    
+    if (as_flag == 0 && ad_flag == 0) {   
+      
+    }
+
+    /* Register - Indexed;      Ex: ADDC Rs, 0x0(Rd) */
+    /* Register - Symbolic;     Ex: ADDC Rs, 0xD     */
+    /* Register - Absolute;     Ex: ADDC Rs, &0xD    */
+    /* Constant Gen - Indexed;  Ex: ADDC #C, 0x0(Rd) */
+    /* Constant Gen - Symbolic; Ex: ADDC #C, 0xD     */
+    /* Constant Gen - Absolute; Ex: ADDC #C, &0xD    */
+    else if (as_flag == 0 && ad_flag == 1) {   
+    
+    }
+
+    /* Indexed - Register;  Ex: ADDC 0x0(Rs), Rd */
+    /* Symbolic - Register; Ex: ADDC 0xS, Rd     */
+    /* Absolute - Register; Ex: ADDC &0xS, Rd    */
+    else if (as_flag == 1 && ad_flag == 0) {  
+
+    }
+
+    /* Indexed - Indexed;   Ex: ADDC 0x0(Rs), 0x0(Rd) */
+    /* Symbolic - Indexed;  Ex: ADDC 0xS, 0x0(Rd)     */
+    /* Indexed - Symbolic;  Ex: ADDC 0x0(Rd), 0xD     */
+    /* Symbolic - Symbolic; Ex: ADDC 0xS, 0xD         */
+    /* Absolute - Indexed;  Ex: &0xS, 0x0(Rd)        */
+    /* Indexed - Absolute;  Ex: 0x0(Rs), &0xD        */
+    /* Absolute - Absolute; Ex: &0xS, &0xD           */
+    else if (as_flag == 1 && ad_flag == 1) {  
+      
+    }
+    
+    /* Indirect - Register; Ex: ADDC @Rs, Rd */
+    else if (as_flag == 2 && ad_flag == 0) {   
+    
+    }
+
+    /* Indirect - Indexed;  Ex: ADDC @Rs, 0x0(Rd) */
+    /* Indirect - Symbolic; Ex: ADDC @Rs, 0xD     */
+    /* Indirect - Absolute; Ex: ADDC @Rs, &0xD    */
+    else if (as_flag == 2 && ad_flag == 1) {   
+      
+    }
+    
+    /* Indirect Inc - Register; Ex: ADDC @Rs+, Rd */
+    /* Immediate - Register;    Ex: ADDC #S, Rd   */
+    /* Constant Gen - Register; Ex: ADDC #C, Rd   */
+    else if (as_flag == 3 && ad_flag == 0) {   
+      
+    }
+    
+    /* Indirect Inc - Indexed;  Ex: ADDC @Rs+, 0x0(Rd) */
+    /* Indirect Inc - Symbolic; Ex: ADDC @Rs+, 0xD     */
+    /* Indirect Inc - Absolute; Ex: ADDC @Rs+, &0xD    */
+    /* Immediate - Indexed;     Ex: ADDC #S, 0x0(Rd)   */
+    /* Immediate - Symbolic;    Ex: ADDC #S, 0xD       */
+    /* Immediate - Absolute;    Ex: ADDC #S, &0xD      */
+    /* Constant Gen - Indexed;  Ex: ADDC #C, 0x0(Rd)   */
+    /* Constant Gen - Symbolic; Ex: ADDC #C, 0xD       */
+    /* Constant Gen - Absolute; Ex: ADDC #C, &0xD      */
+    else if (as_flag == 3 && ad_flag == 1) {
+      
+    }    
+
     break;
   }
     //# SUBC Sub w/carry dst -= (src+C)
   case 0x7:{
-    printf("SUBC\n");
+    bw_flag == 0 ? printf("SUBC ") : printf("SUBC.B ");
+
+    /* Register - Register;     Ex: SUBC Rs, Rd */
+    /* Constant Gen - Register; Ex: SUBC #C, Rd */    
+    if (as_flag == 0 && ad_flag == 0) {   
+      
+    }
+
+    /* Register - Indexed;      Ex: SUBC Rs, 0x0(Rd) */
+    /* Register - Symbolic;     Ex: SUBC Rs, 0xD     */
+    /* Register - Absolute;     Ex: SUBC Rs, &0xD    */
+    /* Constant Gen - Indexed;  Ex: SUBC #C, 0x0(Rd) */
+    /* Constant Gen - Symbolic; Ex: SUBC #C, 0xD     */
+    /* Constant Gen - Absolute; Ex: SUBC #C, &0xD    */
+    else if (as_flag == 0 && ad_flag == 1) {   
+    
+    }
+
+    /* Indexed - Register;  Ex: SUBC 0x0(Rs), Rd */
+    /* Symbolic - Register; Ex: SUBC 0xS, Rd     */
+    /* Absolute - Register; Ex: SUBC &0xS, Rd    */
+    else if (as_flag == 1 && ad_flag == 0) {  
+
+    }
+
+    /* Indexed - Indexed;   Ex: SUBC 0x0(Rs), 0x0(Rd) */
+    /* Symbolic - Indexed;  Ex: SUBC 0xS, 0x0(Rd)     */
+    /* Indexed - Symbolic;  Ex: SUBC 0x0(Rd), 0xD     */
+    /* Symbolic - Symbolic; Ex: SUBC 0xS, 0xD         */
+    /* Absolute - Indexed;  Ex: &0xS, 0x0(Rd)        */
+    /* Indexed - Absolute;  Ex: 0x0(Rs), &0xD        */
+    /* Absolute - Absolute; Ex: &0xS, &0xD           */
+    else if (as_flag == 1 && ad_flag == 1) {  
+      
+    }
+    
+    /* Indirect - Register; Ex: SUBC @Rs, Rd */
+    else if (as_flag == 2 && ad_flag == 0) {   
+    
+    }
+
+    /* Indirect - Indexed;  Ex: SUBC @Rs, 0x0(Rd) */
+    /* Indirect - Symbolic; Ex: SUBC @Rs, 0xD     */
+    /* Indirect - Absolute; Ex: SUBC @Rs, &0xD    */
+    else if (as_flag == 2 && ad_flag == 1) {   
+      
+    }
+    
+    /* Indirect Inc - Register; Ex: SUBC @Rs+, Rd */
+    /* Immediate - Register;    Ex: SUBC #S, Rd   */
+    /* Constant Gen - Register; Ex: SUBC #C, Rd   */
+    else if (as_flag == 3 && ad_flag == 0) {   
+      
+    }
+    
+    /* Indirect Inc - Indexed;  Ex: SUBC @Rs+, 0x0(Rd) */
+    /* Indirect Inc - Symbolic; Ex: SUBC @Rs+, 0xD     */
+    /* Indirect Inc - Absolute; Ex: SUBC @Rs+, &0xD    */
+    /* Immediate - Indexed;     Ex: SUBC #S, 0x0(Rd)   */
+    /* Immediate - Symbolic;    Ex: SUBC #S, 0xD       */
+    /* Immediate - Absolute;    Ex: SUBC #S, &0xD      */
+    /* Constant Gen - Indexed;  Ex: SUBC #C, 0x0(Rd)   */
+    /* Constant Gen - Symbolic; Ex: SUBC #C, 0xD       */
+    /* Constant Gen - Absolute; Ex: SUBC #C, &0xD      */
+    else if (as_flag == 3 && ad_flag == 1) {
+      
+    }    
+
     break;
   }
     //# SUB dst -= src

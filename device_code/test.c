@@ -11,37 +11,8 @@ void subroutine()
 }
 
 void main(void){
-  /*
   asm(
-      /*
-      "MOV R5, R4\n"
-      "MOV.B R5, R4\n"
-
-      "MOV 0x2(R5), 0x4(R4)\n"
-      "MOV.B 0x2(R5), 0x4(R4)\n"
-
-      "MOV 0x2(R5), R4\n"
-      "MOV.B 0x2(R5), R4\n"      
-
-      "MOV R5, 0x2(R4)\n"
-      "MOV.B R5, -0x2(R4)\n"      
-
-      "MOV @R5, R4\n"
-      "MOV.B @R5, R4\n"
-
-      "MOV @R5, 0x2(R4)\n"
-      "MOV.B @R5, 0x4(R4)\n"
-      "MOV #5, R5\n"
-      "MOV.B #0x4560, R5\n"
-
-      "MOV #5, 0x0(R5)\n"
-      "MOV.B #0x1234, 0x2(R5)\n"
-
-      "MOV @R5+, R4\n"
-      "MOV.B @R5+, R4\n"
-
-      "MOV @R5+, 0x0(R4)\n"
-      "MOV.B @R5+, 0x0(R4)\n"
+      
 
       "CALL #0x1\n" 
       "CALL #0x8\n" 
@@ -116,11 +87,8 @@ void main(void){
       "RRC.B @R5+\n"
       "RRC.B 0xF(R5)\n"
       "RRC -0x4(R5)\n"
-      */
-  //      );
-
-  subroutine();
-
+      );
+  
   // Stop the watchdog timer
   WDTCTL = WDTPW + WDTHOLD;
 

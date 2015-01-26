@@ -19,7 +19,7 @@
 /* Dump Bytes, Dump Words, Dump Double Words */
 typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
 
-//##########+++ Main Command Loop +++##########
+/* Main command loop */
 void command_loop()
 {
   char command[32];
@@ -29,12 +29,12 @@ void command_loop()
     scanf("%s", command);
 
     /* st X, step X instructions forward, defaults to 1 */
-    if ( strncmp("st", command, sizeof("st")) == 0 ) {
+    if ( strncmp("st", command, sizeof "st") == 0 ) {
       break;
     }                                 
 
     /* Display all 16 registers */
-    else if ( strncmp("r", command, sizeof("r")) == 0 ) {
+    else if ( strncmp("r", command, sizeof "r") == 0 ) {
       display_registers();
       continue;
     }
@@ -59,8 +59,13 @@ void command_loop()
       dump_memory(MEMSPACE, 0x0, start_addr, stride);	
     }
 
+    /* dis ADDRESS, Dump a disassembly from ADDRESS */
+    else if ( strncmp("dis", command, sizeof "dis") == 0 ) {
+      printf("DISASSEMBLY\n");
+    }
+
     /* setr REG_VAL, set a register to some value */
-    else if ( strncmp("setr", command, sizeof("setr")) == 0 ) {
+    else if ( strncmp("setr", command, sizeof "setr") == 0 ) {
       int value = 0;
       char reg_name[10];
       
@@ -73,7 +78,7 @@ void command_loop()
     }
 
     /* setm MEMLOC VAL, set a memory location to some value */
-    else if ( strncmp("setm", command, sizeof("setm")) == 0 ) {
+    else if ( strncmp("setm", command, sizeof "setm") == 0 ) {
       uint16_t value = 0;
       uint16_t address;
       

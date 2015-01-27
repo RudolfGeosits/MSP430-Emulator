@@ -4,17 +4,15 @@ unsigned int i = 0;
 
 void main(void){
   asm(
-      "ADD R5, R4\n"
-      "ADD.B R5, R4\n"
 
       /*
       "MOV 0x2(R5), 0x2(R4)\n"
       "MOV -0x2, -0x4(R4)\n"
       "MOV 0x2(R5), 0x4\n"
-      "MOV 0x4, 0x2\n"
+      "MOV 0x8, 0x2\n"
       "MOV &0xC000, 0x2(R4)\n"
-      "MOV 0x2(R5), &0xC000\n"
-      "MOV &0xC004, &0xC008\n"
+      "MOV 0x2(R5), &0xC000\n" 
+      "MOV &0xC004, &0xC008\n" 
       "MOV 0x2, &0x3F0\n"
       "MOV &0xC000, 0x2\n"
       
@@ -27,14 +25,39 @@ void main(void){
       "MOV @R5+, R7\n"
       "MOV #0x1234, R7\n"
 
+      "MOV @R5+, 0x2(R4)\n"
+      "MOV @R5+, 0x2\n"
+      "MOV @R5+, &0x300\n"
+      "MOV #0x1234, 0x2(R4)\n"
+      "MOV #0x1234, 0x2\n"
+      "MOV #0x7829, &0x304\n"
+
       "MOV.B @R5+, 0x2(R4)\n"
       "MOV.B @R5+, 0x2\n"
       "MOV.B @R5+, &0x300\n"
       "MOV.B #0x1234, 0x2(R4)\n"
       "MOV.B #0x1234, 0x2\n"
       "MOV.B #0x7829, &0x304\n"
-      */
 
+      "MOV.B 0x2(R5), 0x2(R4)\n"
+      "MOV.B -0x2, -0x4(R4)\n"
+      "MOV.B 0x2(R5), 0x4\n" 
+      "MOV.B 0x4, 0x2\n"
+      "MOV.B &0xC000, 0x2(R4)\n" 
+      "MOV.B 0x2(R5), &0xC000\n"
+      "MOV.B &0xC004, &0xC008\n" 
+      "MOV.B 0x2, &0x3F0\n"
+      "MOV.B &0xC000, 0x2\n"
+      
+      "MOV.B @R5, R7\n"
+
+      "MOV.B @R5, 0x2(R4)\n" 
+      "MOV.B @R5, 0x2\n"
+      "MOV.B @R5, &0x300\n"
+
+      "MOV.B @R5+, R7\n"
+      "MOV.B #0x1234, R7\n"
+*/
       "CALL #0x1\n" 
       "CALL #0x8\n" 
       "CALL #-0x1\n" 

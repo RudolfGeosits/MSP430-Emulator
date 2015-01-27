@@ -429,7 +429,23 @@ void decode_formatI(uint16_t instruction)
     /* Register - Register;     Ex: ADD Rs, Rd */
     /* Constant Gen - Register; Ex: ADD #C, Rd */    
     if (as_flag == 0 && ad_flag == 0) {   
-      
+      uint16_t source_value;
+
+      if (constant_generator_active) { /* Source Constant */
+	source_value = immediate_constant;
+	printf("#0x%04X, %s\n", source_value, d_reg_name);
+      }
+      else {                           /* Source Register */
+	source_value = *s_reg;
+	printf("%s, %s\n", s_reg_name, d_reg_name);
+      }
+
+      if (bw_flag == WORD) {
+	*d_reg = source_value + *d_reg;
+      }
+      else if (bw_flag == BYTE) {
+	*d_reg = ((uint8_t) source_value) + ((uint8_t) *d_reg);
+      }
     }
 
     /* Register - Indexed;      Ex: ADD Rs, 0x0(Rd) */
@@ -439,7 +455,42 @@ void decode_formatI(uint16_t instruction)
     /* Constant Gen - Symbolic; Ex: ADD #C, 0xD     */
     /* Constant Gen - Absolute; Ex: ADD #C, &0xD    */
     else if (as_flag == 0 && ad_flag == 1) {   
-    
+      int16_t source_value;
+
+      if (constant_generator_active) {   /* Source Constant */
+	source_value = immediate_constant; 
+	printf("#0x%04X, ", source_value);
+      }
+      else {                             /* Source Register */
+	source_value = *s_reg;
+	printf("%s, ", s_reg_name);
+      }
+     
+      uint16_t *destination_addr;
+      int16_t destination_offset = fetch();
+
+      if (destination == 0) {        /* Destination Symbolic */
+	uint16_t virtual_addr = PC + destination_offset - 2;
+
+	destination_addr = get_addr_ptr(virtual_addr);
+	printf("0x%04X\n", virtual_addr);
+      }
+      else if (destination == 2) {   /* Destination Absolute */
+	destination_addr = get_addr_ptr(destination_offset);
+	printf("&0x%04X\n", destination_offset);	
+      }
+      else {                         /* Destination Indexed */
+	destination_addr = get_addr_ptr(*d_reg + destination_offset);
+	printf("0x%04X(%s)\n", (uint16_t) destination_offset, d_reg_name);
+      }
+
+      if (bw_flag == WORD) {
+	
+      }
+      else if (bw_flag == BYTE) {
+	
+      }
+
     }
 
     /* Indexed - Register;      Ex: ADD 0x0(Rs), Rd */
@@ -447,7 +498,40 @@ void decode_formatI(uint16_t instruction)
     /* Absolute - Register;     Ex: ADD &0xS, Rd    */
     /* Constant Gen - Register; Ex: ADD #C, Rd      */
     else if (as_flag == 1 && ad_flag == 0) {  
+      int16_t source_value, source_offset;
+      
+      if (constant_generator_active) {   /* Source Constant */
+	source_value = immediate_constant;
+	printf("#0x%04X, ", source_value);
+      }
+      else if (source == 0) {            /* Source Symbolic */
+	source_offset = fetch();
+	uint16_t virtual_addr = PC + source_offset - 2;
 
+	source_value = *get_addr_ptr(virtual_addr);
+	printf("0x%04X, ", virtual_addr);
+      }
+      else if (source == 2) {            /* Source Absolute */
+	source_offset = fetch();
+	source_value = *get_addr_ptr(source_offset);
+
+	printf("&0x%04X, ", source_offset);
+      }
+      else {                             /* Source Indexed */
+	source_offset = fetch();
+	source_value = *get_addr_ptr(*s_reg + source_offset);
+
+	printf("0x%04X(%s), ", (uint16_t) source_offset, s_reg_name);
+      }
+
+      printf("%s\n", d_reg_name);
+
+      if (bw_flag == WORD) {
+
+      }
+      else if (bw_flag == BYTE) {
+	
+      }
     }
 
     /* Indexed - Indexed;       Ex: ADD 0x0(Rs), 0x0(Rd) */
@@ -463,7 +547,54 @@ void decode_formatI(uint16_t instruction)
     /* Constant Gen - Symbolic; Ex: ADD #C, 0xD          */
     /* Constant Gen - Absolute; Ex: ADD #C, &0xD         */
     else if (as_flag == 1 && ad_flag == 1) {  
+      int16_t source_value, source_offset;
+      uint8_t back = 2;
+
+      if (constant_generator_active) {   /* Source Constant */
+	source_value = immediate_constant;
+	printf("#%04X, ", source_value);
+      }
+      else if (source == 0) {            /* Source Symbolic */
+	source_offset = fetch();
+	uint16_t virtual_addr = PC + source_offset - back;
+	source_value = *get_addr_ptr(virtual_addr);
+	back += 2;
+
+	printf("0x%04X, ", virtual_addr);
+      }
+      else if (source == 2) {            /* Source Absolute */
+	source_offset = fetch();
+	source_value = *get_addr_ptr(source_offset);
+	
+	printf("&0x%04X, ", source_offset);
+      }
+      else {                             /* Source Indexed */
+	source_offset = fetch();
+	source_value = *get_addr_ptr(*s_reg + source_offset);
+      }
       
+      int16_t destination_offset;
+      uint16_t *destination_addr;
+
+      if (destination == 0) {        /* Destination Symbolic */
+	destination_offset = fetch();
+	uint16_t virtual_addr = PC + destination_offset - back;
+
+	destination_addr = get_addr_ptr(virtual_addr);
+	printf("0x%04X\n", virtual_addr);
+      }
+      else if (destination == 2) {   /* Destination Absolute */
+	destination_offset = fetch();
+	destination_addr = get_addr_ptr(destination_offset);
+
+	printf("&0x%04X\n", (uint16_t) destination_offset);
+      }
+      else {                         /* Destination Indexed */
+	destination_offset = fetch();
+	destination_addr = get_addr_ptr(*d_reg + destination_offset);
+	
+	printf("0x%04X(%s)\n", (uint16_t) destination_offset, d_reg_name);
+      }
     }
     
     /* Indirect - Register; Ex: ADD @Rs, Rd     */

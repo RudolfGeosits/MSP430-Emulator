@@ -46,7 +46,11 @@ uint16_t *get_addr_ptr(uint16_t addr) {
   return (uint16_t *) ( (void *)MEMSPACE + addr );
 }
 
-//###########+++ Register number to name +++#########
+/* Get a pointer to the register specified by name REG
+** Ex:
+**    int16_t *r4_ptr = reg_name_to_num(4);
+** Returns a signed 16 bit pointer
+*/
 int16_t *get_reg_ptr(uint8_t reg)
 {  
   static int16_t r2 = 0;
@@ -81,6 +85,16 @@ int16_t *get_reg_ptr(uint8_t reg)
   }
 }
 
+/* Convert upper case letters in string to lower case
+**    Ex:   filter_uppercase(buffer);
+*/
+void filter_uppercase(char *buffer)
+{
+  for (buffer; *buffer; ++buffer) {
+    *buffer = *buffer > 0x40 && *buffer < 0x5b ? *buffer | 0x60 : *buffer;
+  }
+}
+
 /* Convert register name to respective opcode number
 ** Ex:
 **    uint8_t n = reg_name_to_num("%r1");
@@ -88,120 +102,91 @@ int16_t *get_reg_ptr(uint8_t reg)
 */
 uint8_t reg_name_to_num(char *name)
 {
-  if ( strncmp("%R0", name, sizeof "%R0") == 0 ||
+  if ( 
        strncmp("%r0", name, sizeof "%r0") == 0 ||
-       strncmp("R0", name, sizeof "R0") == 0   ||
        strncmp("r0", name, sizeof "r0") == 0   ||
-       strncmp("PC", name, sizeof "PC") == 0   || 
+       strncmp("%pc", name, sizeof "%pc") == 0 ||
        strncmp("pc", name, sizeof "pc") == 0 ) {
-  
+    
     return 0;
   }
-  else if ( strncmp("%R1", name, sizeof "%R1") == 0 ||
-	    strncmp("%r1", name, sizeof "%r1") == 0 ||
-	    strncmp("R1", name, sizeof "R1") == 0   ||
+  else if ( strncmp("%r1", name, sizeof "%r1") == 0 ||
 	    strncmp("r1", name, sizeof "r1") == 0   ||
-	    strncmp("SP", name, sizeof "SP") == 0   ||
+	    strncmp("%sp", name, sizeof "%sp") == 0   ||
 	    strncmp("sp", name, sizeof "sp") == 0 ) {
   
     return 1;
   }
-  else if ( strncmp("%R2", name, sizeof "%R2") == 0 ||
-	    strncmp("%r2", name, sizeof "%r2") == 0 ||
-	    strncmp("R2", name, sizeof "R2") == 0   ||
+  else if ( strncmp("%r2", name, sizeof "%r2") == 0 ||
 	    strncmp("r2", name, sizeof "r2") == 0   ||
-	    strncmp("SR", name, sizeof "SR") == 0   ||
+	    strncmp("%sr", name, sizeof "%sr") == 0   ||
 	    strncmp("sr", name, sizeof "sr") == 0 ) {
   
     return 2;
   }
-  else if ( strncmp("%R3", name, sizeof "%R3") == 0 ||
-	    strncmp("%r3", name, sizeof "%r3") == 0 ||
-	    strncmp("R3", name, sizeof "R3") == 0   ||
-	    strncmp("r3", name, sizeof "r3") == 0 ) {
-  
+  else if ( strncmp("%r3", name, sizeof "%r3") == 0 ||
+	    strncmp("r3", name, sizeof "r3") == 0   ||
+	    strncmp("%cg2", name, sizeof "%cg2") == 0 ||
+	    strncmp("cg2", name, sizeof "cg2") == 0 ) {            
+
     return 3;
   }
-  else if ( strncmp("%R4", name, sizeof "%R4") == 0 ||
-	    strncmp("%r4", name, sizeof "%r4") == 0 ||
-	    strncmp("R4", name, sizeof "R4") == 0   ||
+  else if ( strncmp("%r4", name, sizeof "%r4") == 0 ||
 	    strncmp("r4", name, sizeof "r4") == 0 ) {
   
     return 4;
   }
-  else if ( strncmp("%R5", name, sizeof "%R5") == 0 ||
-	    strncmp("%r5", name, sizeof "%r5") == 0 ||
-	    strncmp("R5", name, sizeof "R5") == 0   ||
+  else if ( strncmp("%r5", name, sizeof "%r5") == 0 ||
 	    strncmp("r5", name, sizeof "r5") == 0 ) {
   
     return 5;
   }
-  else if ( strncmp("%R6", name, sizeof "%R6") == 0 ||
-	    strncmp("%r6", name, sizeof "%r6") == 0 ||
-	    strncmp("R6", name, sizeof "R6") == 0   ||
+  else if ( strncmp("%r6", name, sizeof "%r6") == 0 ||
 	    strncmp("r6", name, sizeof "r6") == 0 ) {
   
     return 6;
   }
-  else if ( strncmp("%R7", name, sizeof "%R7") == 0 ||
-	    strncmp("%r7", name, sizeof "%r7") == 0 ||
-	    strncmp("R7", name, sizeof "R7") == 0   ||
+  else if ( strncmp("%r7", name, sizeof "%r7") == 0 ||
 	    strncmp("r7", name, sizeof "r7") == 0 ) {
   
     return 7;
   }
-  else if ( strncmp("%R8", name, sizeof "%R8") == 0 ||
-	    strncmp("%r8", name, sizeof "%r8") == 0 ||
-	    strncmp("R8", name, sizeof "R8") == 0   ||
+  else if ( strncmp("%r8", name, sizeof "%r8") == 0 ||
 	    strncmp("r8", name, sizeof "r8") == 0 ) {
   
     return 8;
   }
-  else if ( strncmp("%R9", name, sizeof "%R9") == 0 ||
-	    strncmp("%r9", name, sizeof "%r9") == 0 ||
-	    strncmp("R9", name, sizeof "R9") == 0   ||
+  else if ( strncmp("%r9", name, sizeof "%r9") == 0 ||
 	    strncmp("r9", name, sizeof "r9") == 0 ) {
   
     return 9;
   }
-  else if ( strncmp("%R10", name, sizeof "%R10") == 0 ||
-	    strncmp("%r10", name, sizeof "%r10") == 0 ||
-	    strncmp("R10", name, sizeof "R10") == 0   ||
+  else if ( strncmp("%r10", name, sizeof "%r10") == 0 ||
 	    strncmp("r10", name, sizeof "r10") == 0 ) {
   
     return 10;
   }
-  else if ( strncmp("%R11", name, sizeof "%R11") == 0 ||
-	    strncmp("%r11", name, sizeof "%r11") == 0 ||
-	    strncmp("R11", name, sizeof "R11") == 0   ||
+  else if ( strncmp("%r11", name, sizeof "%r11") == 0 ||
 	    strncmp("r11", name, sizeof "r11") == 0 ) {
   
     return 11;
   }
-  else if ( strncmp("%R12", name, sizeof "%R12") == 0 ||
-	    strncmp("%r12", name, sizeof "%r12") == 0 ||
-	    strncmp("R12", name, sizeof "R12") == 0   ||
+  else if ( strncmp("%r12", name, sizeof "%r12") == 0 ||
 	    strncmp("r12", name, sizeof "r12") == 0 ) {
   
     return 12;
   }
-  else if ( strncmp("%R13", name, sizeof "%R13") == 0 ||
-	    strncmp("%r13", name, sizeof "%r13") == 0 ||
-	    strncmp("R13", name, sizeof "R13") == 0   ||
+  else if ( strncmp("%r13", name, sizeof "%r13") == 0 ||
 	    strncmp("r13", name, sizeof "r13") == 0 ) {
   
     return 13;
   }
-  else if ( strncmp("%R14", name, sizeof "%R14") == 0 ||
-	    strncmp("%r14", name, sizeof "%r14") == 0 ||
-	    strncmp("R14", name, sizeof "R14") == 0   ||
+  else if ( strncmp("%r14", name, sizeof "%r14") == 0 ||
 	    strncmp("r14", name, sizeof "r14") == 0 ) {
   
     return 14;
   }
-  else if ( strncmp("%R15", name, sizeof "%R15") == 0 ||
-	    strncmp("%r15", name, sizeof "%r15") == 0 ||
-	    strncmp("R15", name, sizeof "R15") == 0   ||
+  else if ( strncmp("%r15", name, sizeof "%r15") == 0 ||
 	    strncmp("r15", name, sizeof "r15") == 0 ) {
   
     return 15;
@@ -213,7 +198,11 @@ uint8_t reg_name_to_num(char *name)
 
 }
 
-//###########+++ Register number to name +++#########
+/* Convert register number into its ASCII name
+** Ex:
+**    char reg_name[10];
+**    reg_num_to_name(0, reg_name);
+*/
 void reg_num_to_name(uint8_t number, char *name)
 {  
   switch (number) { 
@@ -288,7 +277,7 @@ void reg_num_to_name(uint8_t number, char *name)
   }
 }
 
-//##########+++ Display the menu for this program +++##########
+/* Display Menu for the program */
 void display_help()
 {
   printf("****************************************"\

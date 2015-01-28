@@ -27,6 +27,7 @@ void command_loop()
   while (1) {
     memset(command, 0, sizeof(command));
     scanf("%s", command);
+    filter_uppercase(command);
 
     /* st X, step X instructions forward, defaults to 1 */
     if ( strncmp("st", command, sizeof "st") == 0 ) {
@@ -40,12 +41,24 @@ void command_loop()
     }
 
     /* d(b/w/d) ADDRESS, dump bytes, words, or double words at ADDRESS */
+    /* d(b/w/d) REGISTER, dump from register value address */
     else if ( command[0] == 'd' && 
 	      (command[1] == 'b' || command[1] == 'w' || command[1] == 'd') ) {
 
+      char param1[20];
       uint32_t start_addr, stride;
-      scanf("%X", &start_addr);
+      
+      memset(param1, 0, sizeof param1);
+      scanf("%s", param1);
+      filter_uppercase(param1);
 
+      if (param1[0] >= 0x30 && param1[0] <= 0x39) {   /* Got hex ADDRESS */
+	sscanf(param1, "%X", &start_addr);
+      }
+      else if (param1[0] == '%' || param1[0] == 'r') {   /* Got Register */
+	start_addr = (uint16_t) *get_reg_ptr( reg_name_to_num(param1) );
+      }
+      
       if (command[1] == 'b') {
 	stride = BYTE_STRIDE;
       }
@@ -70,6 +83,7 @@ void command_loop()
       char reg_name[10];
       
       scanf("%s %X", reg_name, &value);
+      filter_uppercase(reg_name);
 
       uint16_t *reg = get_reg_ptr( reg_name_to_num(reg_name) );
       *reg = value;
@@ -80,16 +94,20 @@ void command_loop()
     /* setm MEMLOC VAL, set a memory location to some value */
     else if ( strncmp("setm", command, sizeof "setm") == 0 ) {
       uint16_t value = 0;
-      uint16_t address;
+      uint16_t virtual_addr;
+
+      scanf("%X %X", (unsigned int *) &virtual_addr, (unsigned int *) &value);
+      *get_addr_ptr(virtual_addr) = value;
       
-      scanf("%X %X", (unsigned int *) &address, (unsigned int *) &value);
-      printf("TODO: Change loc %04X to %04X\n", address, (uint16_t) value);
       continue;
     }
 
     /* help, display a list of debugger commands */
     else if ( strncmp("help", command, sizeof "help") == 0 ) {
-      printf("\tCommands:\n\ndb  dw  dd, setr, st\n\n");
+      printf("\td(b|w|d) HEX_ADDR|Rn : Dump Memory At HEX_ADDR or Rn\n\tsetr "\
+	     "Rn HEX_VALUE : Set Register Value\n\tst : Step Instruction\n\t"\
+	     "setm HEX_ADDR HEX_VALUE : Set Memory Location HEX_ADDR value " \
+	     "HEX_VALUE\n\n");
     }
 
     /* End the command loop, next instruction */

@@ -11,3 +11,32 @@ MSP430-Emulator
   electronics testing with the 430 using openGL to create a graphics 
   interface for virtual breadboarding.
 
+- TODO
+
+  - 8 bit per locations
+  - debugger breakpoints on addr
+  - OpenGL GUI of chip and pins
+
+  - Instructions
+    ADD
+    ADDC
+    SUBC
+    SUB 
+    CMP
+    DADD
+    BIT
+    BIC
+    BIS
+    XOR
+    AND
+    
+    RETI
+
+    JNE
+    JEQ
+    JNC
+    JC
+    JN
+    JGE
+    JL
+    JMP

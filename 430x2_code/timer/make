@@ -1,0 +1,1 @@
+msp430-gcc -mmcu=msp430g2553 main.c -o main

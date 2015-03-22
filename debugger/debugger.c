@@ -96,7 +96,7 @@ void command_loop()
       uint16_t value = 0;
       uint16_t virtual_addr;
 
-      scanf("%X %X", (unsigned int *) &virtual_addr, (unsigned int *) &value);
+      scanf("%X %X", (unsigned int *) &virtual_addr, (unsigned int *)&value);
       *get_addr_ptr(virtual_addr) = value;
       
       continue;
@@ -154,7 +154,7 @@ void display_registers()
   printf("\n%s%04X %s%04X %s%04X %s%04X %%R4:%04X\n" \
          "%%R5:%04X %%R6:%04X %%R7:%04X %%R8:%04X %%R9:%04X\n" \
          "%%R10:%04X   %%r11:%04X  %%r12:%04X   %%R13:%04X\n" \
-         "%%R14:%04X   %%R15:%04X  V:%d   N:%d   Z:%d   C:%d\n",
+         "%%R14:%04X   %%R15:%04X  V:%d   N:%d   Z:%d   C:%d\n\n",
 
          r0_name, (uint16_t)PC, r1_name, (uint16_t)SP, r2_name, (uint16_t)r2, 
 	 r3_name, (uint16_t)CG2, (uint16_t)r4, (uint16_t)r5, (uint16_t)r6, 

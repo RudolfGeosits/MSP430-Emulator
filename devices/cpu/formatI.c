@@ -23,6 +23,9 @@
 //# S = S_Reg_Name, D = Destination
 //########################################################
 
+uint8_t overflowed(int16_t source, int16_t original_destination, 
+		   int16_t *result_addr, uint8_t bw_flag);
+
 void decode_formatI(uint16_t instruction)
 {
   uint8_t opcode = (instruction & 0xF000) >> 12;
@@ -67,7 +70,7 @@ void decode_formatI(uint16_t instruction)
   memset(asm_op2, 0, sizeof asm_op2);
 
   /* Register - Register;     Ex: MOV Rs, Rd */
-  /* Constant Gen - Register; Ex: MOV #C, Rd */    
+  /* Constant Gen - Register; Ex: MOV #C, Rd */ /* 0 */
   if (as_flag == 0 && ad_flag == 0) {
     if (constant_generator_active) {   /* Source Constant */
       source_value = immediate_constant;
@@ -88,9 +91,9 @@ void decode_formatI(uint16_t instruction)
   /* Register - Indexed;      Ex: MOV Rs, 0x0(Rd) */
   /* Register - Symbolic;     Ex: MOV Rs, 0xD     */
   /* Register - Absolute;     Ex: MOV Rs, &0xD    */
-  /* Constant Gen - Indexed;  Ex: MOV #C, 0x0(Rd) */
-  /* Constant Gen - Symbolic; Ex: MOV #C, 0xD     */
-  /* Constant Gen - Absolute; Ex: MOV #C, &0xD    */
+  /* Constant Gen - Indexed;  Ex: MOV #C, 0x0(Rd) */ /* 0 */
+  /* Constant Gen - Symbolic; Ex: MOV #C, 0xD     */ /* 0 */
+  /* Constant Gen - Absolute; Ex: MOV #C, &0xD    */ /* 0 */
   else if (as_flag == 0 && ad_flag == 1) {
     destination_offset = fetch();
     destination_addr = get_addr_ptr(*d_reg + destination_offset);
@@ -125,7 +128,7 @@ void decode_formatI(uint16_t instruction)
   /* Indexed - Register;      Ex: MOV 0x0(Rs), Rd */
   /* Symbolic - Register;     Ex: MOV 0xS, Rd     */
   /* Absolute - Register;     Ex: MOV &0xS, Rd    */
-  /* Constant Gen - Register; Ex: MOV #C, Rd      */
+  /* Constant Gen - Register; Ex: MOV #C, Rd      */ /* 1 */
   else if (as_flag == 1 && ad_flag == 0) {
     if (constant_generator_active) {   /* Source Constant */
       source_value = immediate_constant;
@@ -166,9 +169,9 @@ void decode_formatI(uint16_t instruction)
   /* Absolute - Absolute;     Ex: MOV &0xS, &0xD       */
   /* Absolute - Symbolic;     Ex: MOV &0xS, 0xD        */
   /* Symbolic - Absolute;     Ex: MOV 0xS, &0xD        */
-  /* Constant Gen - Indexed;  Ex: MOV #C, 0x0(Rd)      */
-  /* Constant Gen - Symbolic; Ex: MOV #C, 0xD          */
-  /* Constant Gen - Absolute; Ex: MOV #C, &0xD         */
+  /* Constant Gen - Indexed;  Ex: MOV #C, 0x0(Rd)      */ /* 1 */
+  /* Constant Gen - Symbolic; Ex: MOV #C, 0xD          */ /* 1 */
+  /* Constant Gen - Absolute; Ex: MOV #C, &0xD         */ /* 1 */
   else if (as_flag == 1 && ad_flag == 1) {
     if (constant_generator_active) {   /* Source Constant */
       source_value = immediate_constant;
@@ -215,7 +218,7 @@ void decode_formatI(uint16_t instruction)
   }
 
   /* Indirect - Register;     Ex: MOV @Rs, Rd */
-  /* Constant Gen - Register; Ex: MOV #C, Rd  */
+  /* Constant Gen - Register; Ex: MOV #C, Rd  */ /* 2, 4 */
   else if (as_flag == 2 && ad_flag == 0) {
     if (constant_generator_active) {   /* Source Constant */
       source_value = immediate_constant;
@@ -233,9 +236,9 @@ void decode_formatI(uint16_t instruction)
   /* Indirect - Indexed;      Ex: MOV @Rs, 0x0(Rd)   */
   /* Indirect - Symbolic;     Ex: MOV @Rs, 0xD       */
   /* Indirect - Absolute;     Ex: MOV @Rs, &0xD      */
-  /* Constant Gen - Indexed;  Ex: MOV #C, 0x0(Rd)    */
-  /* Constant Gen - Symbolic; Ex: MOV #C, 0xD        */
-  /* Constant Gen - Absolute; Ex: MOV #C, &0xD       */
+  /* Constant Gen - Indexed;  Ex: MOV #C, 0x0(Rd)    */ /* 2, 4 */
+  /* Constant Gen - Symbolic; Ex: MOV #C, 0xD        */ /* 2, 4 */
+  /* Constant Gen - Absolute; Ex: MOV #C, &0xD       */ /* 2, 4 */
   else if (as_flag == 2 && ad_flag == 1) {
     destination_offset = fetch();
 
@@ -268,11 +271,10 @@ void decode_formatI(uint16_t instruction)
 
   /* Indirect Inc - Register; Ex: MOV @Rs+, Rd */
   /* Immediate - Register;    Ex: MOV #S, Rd   */
-  /* Constant Gen - Register; Ex: MOV #C, Rd   */
+  /* Constant Gen - Register; Ex: MOV #C, Rd   */ /* -1, 8 */
   else if (as_flag == 3 && ad_flag == 0) {  
     if (constant_generator_active) {   /* Source Constant */
       source_value = immediate_constant;
-
       sprintf(asm_operands, "#0x%04X, %s", 
 	      (uint16_t) source_value, d_reg_name);
     }
@@ -299,9 +301,9 @@ void decode_formatI(uint16_t instruction)
   /* Immediate - Indexed;     Ex: MOV #S, 0x0(Rd)   */
   /* Immediate - Symbolic;    Ex: MOV #S, 0xD       */
   /* Immediate - Absolute;    Ex: MOV #S, &0xD      */
-  /* Constant Gen - Indexed;  Ex: MOV #C, 0x0(Rd)   */
-  /* Constant Gen - Symbolic; Ex: MOV #C, 0xD       */
-  /* Constant Gen - Absolute; Ex: MOV #C, &0xD      */
+  /* Constant Gen - Indexed;  Ex: MOV #C, 0x0(Rd)   */ /* -1, 8 */
+  /* Constant Gen - Symbolic; Ex: MOV #C, 0xD       */ /* -1, 8 */
+  /* Constant Gen - Absolute; Ex: MOV #C, &0xD      */ /* -1, 8 */
   else if (as_flag == 3 && ad_flag == 1) {
     if (constant_generator_active) {   /* Source Constant */
       source_value = immediate_constant;
@@ -381,38 +383,95 @@ void decode_formatI(uint16_t instruction)
      */
     case 0x5:{
       bw_flag == 0 ? printf("ADD ") : printf("ADD.B ");
- 
+      uint16_t destination_value = *destination_addr;
+
       if (bw_flag == WORD) {
 	*destination_addr += source_value;
+
+	*destination_addr >> 15 ?              /* Set N flag */ 
+	  SR.negative = 1 : (SR.negative = 0);
+      
+	*destination_addr == 0 ?               /* Set Z flag */ 
+	  SR.zero = 1 : (SR.zero = 0);
+      
+	/* Check for carry from result */
+ 	(65535 - (uint16_t)source_value) < (uint16_t)destination_value ?
+	  SR.carry = 1 : (SR.carry = 0);
+
+	/* Check for overflow from result */
+	SR.overflow = overflowed(source_value, destination_value, 
+				 destination_addr, WORD);
       }
       else if (bw_flag == BYTE) {
 	*((uint8_t *) destination_addr) += (uint8_t) source_value;
+      
+	*((int8_t *) destination_addr) < 0 ?   /* Set N flag */ 
+	  SR.negative = 1 : (SR.negative = 0);
+      
+	*(int8_t *) destination_addr == 0 ?    /* Set Z flag */ 
+	  SR.zero = 1 : (SR.zero = 0);
+      
+       	/* Check for carry from result */
+	(255 - (uint8_t)source_value) < (uint8_t)destination_value ?
+	  SR.carry = 1 : (SR.carry = 0);
+
+	/* Check for overflow from result */	
+	SR.overflow = overflowed(source_value, destination_value, 
+				 destination_addr, BYTE);
       }
-      
-      *destination_addr < 0 ? SR.negative = 1 : (SR.negative = 0);
-      *destination_addr == 0 ? SR.zero = 1 : (SR.zero = 0);
-      // Carry from result?
-      // Arithmetic overflow occured?
-      
+
       break;
     }
 
     /* ADDC SOURCE, DESTINATION 
      *   Ex: ADDC R5, R4
-     *    
      *
      * DESTINATION += (SOURCE + C)
      *
+     * N: Set if result is negative, reset if positive
+     * Z: Set if result is zero, reset otherwise
+     * C: Set if there is a carry from the result, cleared if not
+     * V: Set if an arithmetic overflow occurs, otherwise reset  
      *
      */
     case 0x6:{
       bw_flag == 0 ? printf("ADDC ") : printf("ADDC.B ");
 
+      uint16_t destination_value = *destination_addr;
+
       if (bw_flag == WORD) {
-	
+	*destination_addr += source_value + SR.carry;
+
+	*destination_addr >> 15 ?              /* Set N flag */ 
+	  SR.negative = 1 : (SR.negative = 0);
+      
+	*destination_addr == 0 ?               /* Set Z flag */ 
+	  SR.zero = 1 : (SR.zero = 0);
+      
+	/* Check for carry from result */
+ 	(65535 - (uint16_t)source_value) < (uint16_t)destination_value ?
+	  SR.carry = 1 : (SR.carry = 0);
+
+	/* Check for overflow from result */
+	SR.overflow = overflowed(source_value, destination_value, 
+				 destination_addr, WORD);
       }
       else if (bw_flag == BYTE) {
-	
+	*((uint8_t *) destination_addr) += (uint8_t) source_value + SR.carry;
+      
+	*((int8_t *) destination_addr) < 0 ?   /* Set N flag */ 
+	  SR.negative = 1 : (SR.negative = 0);
+      
+	*(int8_t *) destination_addr == 0 ?    /* Set Z flag */ 
+	  SR.zero = 1 : (SR.zero = 0);
+      
+       	/* Check for carry from result */
+	(255 - (uint8_t)source_value) < (uint8_t)destination_value ?
+	  SR.carry = 1 : (SR.carry = 0);
+
+	/* Check for overflow from result */	
+	SR.overflow = overflowed(source_value, destination_value, 
+				 destination_addr, BYTE);
       }
       
       break;
@@ -566,4 +625,30 @@ void decode_formatI(uint16_t instruction)
 
   
   printf("%s\n", asm_operands);
+}
+
+uint8_t overflowed(int16_t source_value, int16_t destination_value, 
+		   int16_t *result, uint8_t bw_flag) {
+  if (bw_flag == WORD) {
+    if ( (source_value >> 15) == (destination_value >> 15) &&
+	 (*result >> 15) != (destination_value >> 15) ) {
+      return 1;
+    }
+  
+    return 0;
+  }
+  else if (bw_flag == BYTE) {
+    uint8_t dst_prev_value = (uint8_t) destination_value;
+    uint8_t src_value = (uint8_t) source_value;
+    
+    if ( (src_value >> 7) == (dst_prev_value >> 7) && 
+	 (*(uint8_t *)result >> 7) != (dst_prev_value >> 7)) {
+      return 1;
+    }
+    
+    return 0;
+  }
+  else {
+    printf("Error, overflowed function: invalid bw_flag\n");
+  }
 }

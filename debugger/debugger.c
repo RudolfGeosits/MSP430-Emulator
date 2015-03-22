@@ -18,13 +18,30 @@
 
 /* Dump Bytes, Dump Words, Dump Double Words */
 typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
+enum {MAX_BREAKPOINTS = 10};
 
 /* Main command loop */
 void command_loop()
 {
+  static uint8_t go = 0;
+  static uint16_t breakpoint_addresses[MAX_BREAKPOINTS];
+  static uint8_t cur_bp_number = 0;
   char command[32];
 
-  while (1) {
+  /* Check for breakpoints 
+  int i;
+  for (i = 0;i < cur_bp_number;i++) {
+    if (PC = breakpoint_addresses[i]) {
+      go = 0; /* Stop fast execution 
+      printf("\n\t[Breakpoint %d hit]\n\n", i + 1);
+      break;
+    }
+  }
+*/
+
+  display_registers();
+
+  while (!go) {
     memset(command, 0, sizeof(command));
     scanf("%s", command);
     filter_uppercase(command);
@@ -34,9 +51,30 @@ void command_loop()
       break;
     }                                 
 
+    /* go, run the program until a breakpoint is hit */
+    else if ( strncmp("go", command, sizeof "go") == 0 ) {
+      go = 1;
+      break;
+    }
+
     /* Display all 16 registers */
     else if ( strncmp("r", command, sizeof "r") == 0 ) {
       display_registers();
+      continue;
+    }
+    
+    /* Display all breakpoints */
+    else if ( strncmp("bps", command, sizeof "bps" ) == 0) {
+      if (cur_bp_number > 0) {
+	int i;
+	for (i = 0;i < cur_bp_number;i++) {
+	  printf("\t[%d] 0x%04X\n", i + 1, breakpoint_addresses[i]);
+	}
+      }
+      else {
+	puts("You have not set any breakpoints!\n");
+      }
+      
       continue;
     }
 
@@ -102,12 +140,29 @@ void command_loop()
       continue;
     }
 
+    /* setb BREAKPOINT_ADDRESS */
+    else if ( strncmp("setb", command, sizeof "setb") == 0 ) {
+      if (cur_bp_number >= MAX_BREAKPOINTS) {
+	printf("Too many breakpoints.\n");
+      }
+      else {
+	scanf("%X", (unsigned int *) 
+	      &breakpoint_addresses[cur_bp_number]);
+	printf("\n\t[Breakpoint [%d] Set]\n", cur_bp_number + 1);
+      
+	++cur_bp_number;
+      }
+      
+      continue;
+    }
+
     /* help, display a list of debugger commands */
     else if ( strncmp("help", command, sizeof "help") == 0 ) {
       printf("\td(b|w|d) HEX_ADDR|Rn : Dump Memory At HEX_ADDR or Rn\n\tsetr "\
 	     "Rn HEX_VALUE : Set Register Value\n\tst : Step Instruction\n\t"\
 	     "setm HEX_ADDR HEX_VALUE : Set Memory Location HEX_ADDR value " \
-	     "HEX_VALUE\n\n");
+	     "HEX_VALUE\n\tsetb BREAKPOINT_ADDR\n\tbps : view breakpoints\n\n"
+      );
     }
 
     /* End the command loop, next instruction */

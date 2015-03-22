@@ -38,7 +38,6 @@ int main(int argc, char **argv)
   load_program(argv[1], LOAD_POS);
 
   while (1) {            /* Fetch-Decode-Execute Cycle */
-    display_registers();
     decode( fetch() );   /* Instruction Decoder */
     command_loop();      /* Debugger */
   }

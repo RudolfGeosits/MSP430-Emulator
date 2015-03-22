@@ -4,10 +4,21 @@ unsigned int i = 0;
 
 void main(void){
   asm(
-      "MOV #0xFFFF, R4\n"
-      "MOV #0x0005, R5\n"
-      "ADD R5, R4\n"
-      "ADDC #0, R5\n"
+      "MOV #0xFF, R4\n"
+      "MOV #0xFF, R5\n"
+      "SUBC.B R5, R4\n"
+      
+      "MOV #0x7F, R4\n"
+      "MOV #0x7F, R5\n"
+      "SUBC.B R5, R4\n"
+      
+      "MOV #0xFF, R4\n"
+      "MOV #0x80, R5\n"
+      "SUBC.B R5, R4\n"
+      
+      "MOV #0x10, R4\n"
+      "MOV #0x0A, R5\n"
+      "SUBC.B R5, R4\n"
 
       // Official Tester (52 cases)
       "ADD R5, R4\n"    // Reg - reg 

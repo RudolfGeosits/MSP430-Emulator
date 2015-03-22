@@ -23,8 +23,12 @@
 //# S = S_Reg_Name, D = Destination
 //########################################################
 
-uint8_t overflowed(int16_t source, int16_t original_destination, 
-		   int16_t *result_addr, uint8_t bw_flag);
+uint8_t is_overflowed (uint16_t source, uint16_t original_destination, 
+		       uint16_t *result_addr, uint8_t bw_flag);
+uint8_t is_negative (int16_t *result_addr, uint8_t bw_flag);
+uint8_t is_zero (uint16_t *result_addr, uint8_t bw_flag);
+uint8_t is_carried (uint16_t original_dst_value, uint16_t source_value, 
+		    uint8_t bw_flag);
 
 void decode_formatI(uint16_t instruction)
 {
@@ -46,9 +50,11 @@ void decode_formatI(uint16_t instruction)
   uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
   int16_t immediate_constant = 0;           /* Generated Constant */
 
+  /*
   printf("Opcode: 0x%01X  Source bits: 0x%01X  Destination bits: 0x%01X\n" \
 	 "AS_Flag: 0x%01X  AD_Flag: 0x%01X  BW_Flag: 0x%01X\n",
 	 opcode, source, destination, as_flag, ad_flag, bw_flag);
+  */
 
   /* Spot CG1 and CG2 Constant generator instructions */
   if ( (source == 2 && as_flag > 1) || source == 3 ) {
@@ -281,8 +287,14 @@ void decode_formatI(uint16_t instruction)
     else if (source == 0) {            /* Source Immediate */
       source_value = fetch();
 	
-      sprintf(asm_operands, "#0x%04X, %s", 
-	      (uint16_t) source_value, d_reg_name);
+      if (bw_flag == WORD) {
+	sprintf(asm_operands, "#0x%04X, %s", 
+		(uint16_t) source_value, d_reg_name);
+      }
+      else if (bw_flag == BYTE) {
+	sprintf(asm_operands, "#0x%04X, %s",
+		(uint8_t) source_value, d_reg_name);
+      }
     }
     else {                              /* Source Indirect AutoIncrement */
       source_value = *get_addr_ptr(*s_reg);
@@ -383,42 +395,22 @@ void decode_formatI(uint16_t instruction)
      */
     case 0x5:{
       bw_flag == 0 ? printf("ADD ") : printf("ADD.B ");
-      uint16_t destination_value = *destination_addr;
+      uint16_t original_dst_value = *destination_addr;
 
       if (bw_flag == WORD) {
 	*destination_addr += source_value;
-
-	*destination_addr >> 15 ?              /* Set N flag */ 
-	  SR.negative = 1 : (SR.negative = 0);
-      
-	*destination_addr == 0 ?               /* Set Z flag */ 
-	  SR.zero = 1 : (SR.zero = 0);
-      
-	/* Check for carry from result */
- 	(65535 - (uint16_t)source_value) < (uint16_t)destination_value ?
-	  SR.carry = 1 : (SR.carry = 0);
-
-	/* Check for overflow from result */
-	SR.overflow = overflowed(source_value, destination_value, 
-				 destination_addr, WORD);
       }
       else if (bw_flag == BYTE) {
 	*((uint8_t *) destination_addr) += (uint8_t) source_value;
-      
-	*((int8_t *) destination_addr) < 0 ?   /* Set N flag */ 
-	  SR.negative = 1 : (SR.negative = 0);
-      
-	*(int8_t *) destination_addr == 0 ?    /* Set Z flag */ 
-	  SR.zero = 1 : (SR.zero = 0);
-      
-       	/* Check for carry from result */
-	(255 - (uint8_t)source_value) < (uint8_t)destination_value ?
-	  SR.carry = 1 : (SR.carry = 0);
-
-	/* Check for overflow from result */	
-	SR.overflow = overflowed(source_value, destination_value, 
-				 destination_addr, BYTE);
       }
+
+      SR.zero = is_zero(destination_addr, bw_flag);
+      SR.negative = is_negative(destination_addr, bw_flag);
+
+      SR.carry = is_carried(original_dst_value, source_value, bw_flag);
+
+      SR.overflow = is_overflowed(source_value, original_dst_value, 
+				  destination_addr, bw_flag);
 
       break;
     }
@@ -436,76 +428,92 @@ void decode_formatI(uint16_t instruction)
      */
     case 0x6:{
       bw_flag == 0 ? printf("ADDC ") : printf("ADDC.B ");
-
-      uint16_t destination_value = *destination_addr;
+      uint16_t original_dst_value = *destination_addr;
 
       if (bw_flag == WORD) {
 	*destination_addr += source_value + SR.carry;
-
-	*destination_addr >> 15 ?              /* Set N flag */ 
-	  SR.negative = 1 : (SR.negative = 0);
-      
-	*destination_addr == 0 ?               /* Set Z flag */ 
-	  SR.zero = 1 : (SR.zero = 0);
-      
-	/* Check for carry from result */
- 	(65535 - (uint16_t)source_value) < (uint16_t)destination_value ?
-	  SR.carry = 1 : (SR.carry = 0);
-
-	/* Check for overflow from result */
-	SR.overflow = overflowed(source_value, destination_value, 
-				 destination_addr, WORD);
       }
       else if (bw_flag == BYTE) {
 	*((uint8_t *) destination_addr) += (uint8_t) source_value + SR.carry;
-      
-	*((int8_t *) destination_addr) < 0 ?   /* Set N flag */ 
-	  SR.negative = 1 : (SR.negative = 0);
-      
-	*(int8_t *) destination_addr == 0 ?    /* Set Z flag */ 
-	  SR.zero = 1 : (SR.zero = 0);
-      
-       	/* Check for carry from result */
-	(255 - (uint8_t)source_value) < (uint8_t)destination_value ?
-	  SR.carry = 1 : (SR.carry = 0);
-
-	/* Check for overflow from result */	
-	SR.overflow = overflowed(source_value, destination_value, 
-				 destination_addr, BYTE);
       }
       
+      SR.zero = is_zero(destination_addr, bw_flag);
+      SR.negative = is_negative(destination_addr, bw_flag);
+
+      SR.carry = is_carried(original_dst_value, source_value, bw_flag);
+
+      SR.overflow = is_overflowed(source_value, original_dst_value, 
+				  destination_addr, bw_flag);
       break;
     }
  
     /* SUBC SOURCE, DESTINATION
+     *   Ex: SUB R4, R5
+     *
+     *   DST += ~SRC + C
+     *
+     *  N: Set if result is negative, reset if positive
+     *  Z: Set if result is zero, reset otherwise
+     *  C: Set if there is a carry from the MSB of the result, reset otherwise.
+     *     Set to 1 if no borrow, reset if borrow.
+     *  V: Set if an arithmetic overflow occurs, otherwise reset
+     *
      *
      */
     case 0x7:{
       bw_flag == 0 ? printf("SUBC ") : printf("SUBC.B ");
+      int16_t original_dst_value = *destination_addr;
+      source_value = ~source_value; /* 1's comp */
 
       if (bw_flag == WORD) {
-	
+	*(int16_t *)destination_addr += source_value + SR.carry; 
       }
       else if (bw_flag == BYTE) {
-	
+	*(int8_t *)destination_addr += (int8_t) source_value + SR.carry;
       }
-      
+
+      SR.zero = is_zero(destination_addr, bw_flag);
+      SR.negative = is_negative(destination_addr, bw_flag);
+
+      SR.carry = is_carried(original_dst_value, source_value, bw_flag);
+
+      SR.overflow = is_overflowed(source_value, original_dst_value, 
+				  destination_addr, bw_flag);
       break;
     }
 
     /* SUB SOURCE, DESTINATION
+     *   Ex: SUB R4, R5
      *
-     */
+     *   DST -= SRC
+     *
+     *  N: Set if result is negative, reset if positive
+     *  Z: Set if result is zero, reset otherwise
+     *  C: Set if there is a carry from the MSB of the result, reset otherwise.
+     *     Set to 1 if no borrow, reset if borrow.
+     *  V: Set if an arithmetic overflow occurs, otherwise reset
+     *  TODO: SUBTRACTION OVERFLOW FLAG ERROR
+     */  
+
     case 0x8:{
       bw_flag == 0 ? printf("SUB ") : printf("SUB.B ");
+      int16_t original_dst_value = *destination_addr;
+      source_value = ~source_value + 1;
 
       if (bw_flag == WORD) {
-	
+	*(uint16_t *)destination_addr += source_value; 
       }
       else if (bw_flag == BYTE) {
-	
+	*(uint8_t *)destination_addr += (uint8_t) source_value;
       }
 
+      SR.zero = is_zero(destination_addr, bw_flag);
+      SR.negative = is_negative(destination_addr, bw_flag);
+
+      SR.carry = is_carried(original_dst_value, source_value, bw_flag);
+
+      SR.overflow = is_overflowed(source_value, original_dst_value, 
+				  destination_addr, bw_flag);
       break;
     }
 
@@ -627,25 +635,81 @@ void decode_formatI(uint16_t instruction)
   printf("%s\n", asm_operands);
 }
 
-uint8_t overflowed(int16_t source_value, int16_t destination_value, 
-		   int16_t *result, uint8_t bw_flag) {
+uint8_t is_zero (uint16_t *result_addr, uint8_t bw_flag) 
+{
+  if (bw_flag == WORD) {
+    if (*result_addr == 0 ) {
+      return 1;
+    }
+    
+    return 0;
+  }
+  else if (bw_flag == BYTE) {
+    if (*(int8_t *) result_addr == 0) {
+      return 1;
+    }
+
+    return 0;
+  }
+}
+
+uint8_t is_negative(int16_t *result_addr, uint8_t bw_flag) 
+{
+  if (bw_flag == WORD) {
+    if (*result_addr < 0) {
+      return 1;
+    }
+
+    return 0;
+  }
+  else if (bw_flag == BYTE) {
+    if (*((int8_t *) result_addr) < 0) { 
+      return 1;
+    }
+
+    return 0;
+  }
+}
+
+uint8_t is_carried(uint16_t original_dst_value, uint16_t source_value, 
+		   uint8_t bw_flag)
+{
+  if (bw_flag == WORD) {
+    if ((65535 - source_value) < original_dst_value) {
+      return 1;
+    }
+
+    return 0;
+  }
+  else if (bw_flag == BYTE) {
+    if ((255 - (uint8_t)source_value) < (uint8_t)original_dst_value) {
+      return 1;
+    }
+
+    return 0;
+  }
+}
+
+uint8_t is_overflowed(uint16_t source_value, uint16_t destination_value, 
+		      uint16_t *result, uint8_t bw_flag) 
+{
   if (bw_flag == WORD) {
     if ( (source_value >> 15) == (destination_value >> 15) &&
 	 (*result >> 15) != (destination_value >> 15) ) {
       return 1;
     }
-  
+
     return 0;
   }
   else if (bw_flag == BYTE) {
     uint8_t dst_prev_value = (uint8_t) destination_value;
     uint8_t src_value = (uint8_t) source_value;
-    
+
     if ( (src_value >> 7) == (dst_prev_value >> 7) && 
 	 (*(uint8_t *)result >> 7) != (dst_prev_value >> 7)) {
       return 1;
     }
-    
+
     return 0;
   }
   else {

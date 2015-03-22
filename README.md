@@ -14,14 +14,10 @@ MSP430-Emulator
 - TODO
 
   - 8 bit per locations
-  - debugger breakpoints on addr
   - OpenGL GUI of chip and pins
 
   - Instructions
-    ADD
-    ADDC
-    SUBC
-    SUB 
+    SUB (Fix SUB.B overflow flag)
     CMP
     DADD
     BIT

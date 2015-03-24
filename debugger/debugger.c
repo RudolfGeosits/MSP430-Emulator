@@ -16,28 +16,30 @@
   along with this program. If not, see <http://www.gnu.org/licenses            
 */
 
+#include "register_display.c"
+
 /* Dump Bytes, Dump Words, Dump Double Words */
 typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
 enum {MAX_BREAKPOINTS = 10};
 
 /* Main command loop */
+
 void command_loop()
 {
-  static uint8_t go = 0;
+  static bool go = 0;
   static uint16_t breakpoint_addresses[MAX_BREAKPOINTS];
   static uint8_t cur_bp_number = 0;
   char command[32];
 
-  /* Check for breakpoints 
+  /* Check for breakpoints */
   int i;
   for (i = 0;i < cur_bp_number;i++) {
-    if (PC = breakpoint_addresses[i]) {
-      go = 0; /* Stop fast execution 
+    if (PC == breakpoint_addresses[i]) {
+      go = 0; /* Stop fast execution */
       printf("\n\t[Breakpoint %d hit]\n\n", i + 1);
       break;
     }
   }
-*/
 
   display_registers();
 
@@ -53,7 +55,7 @@ void command_loop()
 
     /* go, run the program until a breakpoint is hit */
     else if ( strncmp("go", command, sizeof "go") == 0 ) {
-      go = 1;
+      go = true;
       break;
     }
 
@@ -141,7 +143,7 @@ void command_loop()
     }
 
     /* setb BREAKPOINT_ADDRESS */
-    else if ( strncmp("setb", command, sizeof "setb") == 0 ) {
+    else if ( strncmp("break", command, sizeof "break") == 0 ) {
       if (cur_bp_number >= MAX_BREAKPOINTS) {
 	printf("Too many breakpoints.\n");
       }
@@ -161,7 +163,7 @@ void command_loop()
       printf("\td(b|w|d) HEX_ADDR|Rn : Dump Memory At HEX_ADDR or Rn\n\tsetr "\
 	     "Rn HEX_VALUE : Set Register Value\n\tst : Step Instruction\n\t"\
 	     "setm HEX_ADDR HEX_VALUE : Set Memory Location HEX_ADDR value " \
-	     "HEX_VALUE\n\tsetb BREAKPOINT_ADDR\n\tbps : view breakpoints\n\n"
+	     "HEX_VALUE\n\tbreak ADDR\n\tbps : view breakpoints\n\n"
       );
     }
 
@@ -171,53 +173,6 @@ void command_loop()
       break;
     }
   }
-}
-
-/*   Display all 16 registers
- *      - Toggle between Common mode and Specific mode
- *         (Common: Display all as R0 - R15)
- *         (Specific: Display Register usages like PC, SR, etc.)
- */
-
-enum {COMMON_MODE, SPECIFIC_MODE};
-uint8_t register_display_mode = SPECIFIC_MODE;
-
-void display_registers()
-{
-  typedef enum {UNDEF, LINUX, WINDOWS} System_t;
-  System_t this_system;
-  
-#ifdef __linux
-  this_system = LINUX;
-#else
-  this_system = UNDEF;
-#endif
-  
-  uint16_t r2 = sr_to_value();
-  char *r0_name = "%R0:";
-  char *r1_name = "%R1:";
-  char *r2_name = "%R2:";
-  char *r3_name = "%R3:";
-
-  if (register_display_mode == SPECIFIC_MODE) {
-    r0_name = "PC: ";
-    r1_name = "SP: ";
-    r2_name = "SR: ";
-    r3_name = "CG2:";
-  }
-
-  printf("\n%s%04X %s%04X %s%04X %s%04X %%R4:%04X\n" \
-         "%%R5:%04X %%R6:%04X %%R7:%04X %%R8:%04X %%R9:%04X\n" \
-         "%%R10:%04X   %%r11:%04X  %%r12:%04X   %%R13:%04X\n" \
-         "%%R14:%04X   %%R15:%04X  V:%d   N:%d   Z:%d   C:%d\n\n",
-
-         r0_name, (uint16_t)PC, r1_name, (uint16_t)SP, r2_name, (uint16_t)r2, 
-	 r3_name, (uint16_t)CG2, (uint16_t)r4, (uint16_t)r5, (uint16_t)r6, 
-	 (uint16_t)r7, (uint16_t)r8, (uint16_t)r9, (uint16_t)r10, 
-	 (uint16_t)r11, (uint16_t)r12, (uint16_t)r13, (uint16_t)r14, 
-	 (uint16_t)r15, 
-	
-	 SR.overflow, SR.negative, SR.zero, SR.carry);
 }
 
 //##########+++ Dump Memory Function +++##########

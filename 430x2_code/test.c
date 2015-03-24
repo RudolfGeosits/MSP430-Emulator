@@ -5,20 +5,20 @@ unsigned int i = 0;
 void main(void){
   asm(
       "MOV #0xFF, R4\n"
-      "MOV #0xFF, R5\n"
-      "SUBC.B R5, R4\n"
+      "MOV #0xC1, R5\n"
+      "BIS R5, R4\n"
       
-      "MOV #0x7F, R4\n"
+      "MOV #0x72, R4\n"
       "MOV #0x7F, R5\n"
-      "SUBC.B R5, R4\n"
+      "BIS R5, R4\n"
       
       "MOV #0xFF, R4\n"
       "MOV #0x80, R5\n"
-      "SUBC.B R5, R4\n"
+      "BIS R5, R4\n"
       
       "MOV #0x10, R4\n"
       "MOV #0x0A, R5\n"
-      "SUBC.B R5, R4\n"
+      "BIS R5, R4\n"
 
       // Official Tester (52 cases)
       "ADD R5, R4\n"    // Reg - reg 

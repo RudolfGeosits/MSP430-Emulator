@@ -27,7 +27,7 @@ uint8_t is_overflowed (uint16_t source, uint16_t original_destination,
 		       uint16_t *result_addr, uint8_t bw_flag);
 uint8_t is_negative (int16_t *result_addr, uint8_t bw_flag);
 uint8_t is_zero (uint16_t *result_addr, uint8_t bw_flag);
-uint8_t is_carried (uint16_t original_dst_value, uint16_t source_value, 
+uint8_t is_carried (uint32_t original_dst_value, uint32_t source_value, 
 		    uint8_t bw_flag);
 
 void decode_formatI(uint16_t instruction)
@@ -499,7 +499,7 @@ void decode_formatI(uint16_t instruction)
       bw_flag == 0 ? printf("SUB ") : printf("SUB.B ");
       int16_t original_dst_value = *destination_addr;
       source_value = ~source_value + 1;
-
+ 
       if (bw_flag == WORD) {
 	*(uint16_t *)destination_addr += source_value; 
       }
@@ -519,17 +519,33 @@ void decode_formatI(uint16_t instruction)
 
     /* CMP SOURCE, DESTINATION
      *
+     * N: Set if result is negative, reset if positive (src ≥ dst)
+     * Z: Set if result is zero, reset otherwise (src = dst)
+     * C: Set if there is a carry from the MSB of the result, reset otherwise
+     * V: Set if an arithmetic overflow occurs, otherwise reset   
+     * TODO: Fix overflow error
      */
     case 0x9:{
       bw_flag == 0 ? printf("CMP ") : printf("CMP.B ");
+      int16_t original_dst_value = *destination_addr;
+      uint16_t unsigned_source_value = ((uint16_t)~source_value + 1);
+      int16_t result;
       
       if (bw_flag == WORD) {
-	
+	result = *destination_addr + (uint16_t) unsigned_source_value; 
       }
       else if (bw_flag == BYTE) {
-	
+	result = *(uint8_t *)destination_addr + (uint8_t) unsigned_source_value;
       }
       
+      SR.negative = is_negative(&result, bw_flag);
+      
+      SR.zero = is_zero(&result, bw_flag);
+
+      SR.carry = is_carried(original_dst_value, unsigned_source_value,bw_flag);
+
+      SR.overflow = is_overflowed(unsigned_source_value, original_dst_value, 
+				  &result, bw_flag);
       break;
     }
 
@@ -551,31 +567,47 @@ void decode_formatI(uint16_t instruction)
 
     /* BIT SOURCE, DESTINATION
      *
-     */
+     * N: Set if MSB of result is set, reset otherwise
+     * Z: Set if result is zero, reset otherwise
+     * C: Set if result is not zero, reset otherwise (.NOT. Zero)
+     * V: Reset
+    */
     case 0xB:{
       bw_flag == 0 ? printf("BIT ") : printf("BIT.B ");
-    
+
       if (bw_flag == WORD) {
-	
+	uint16_t result = ((uint16_t) source_value) & (*destination_addr);
+
+	SR.zero = (result == 0);
+	SR.negative = result >> 15;
+	SR.carry = (result != 0);
       }
       else if (bw_flag == BYTE) {
-	
+	uint8_t result = 
+	  ((uint8_t) source_value) & (*(uint8_t *) destination_addr);
+
+	SR.zero = (result == 0);
+	SR.negative = result >> 7;
+	SR.carry = (result != 0);
       }
+
+      SR.overflow = false;
 
       break;
     }     
 
     /* BIC SOURCE, DESTINATION
      *
+     * No status bits affected
      */
     case 0xC:{
       bw_flag == 0 ? printf("BIC ") : printf("BIC.B ");
       
       if (bw_flag == WORD) {
-	
+	*destination_addr &= (uint16_t) ~source_value;
       }
       else if (bw_flag == BYTE) {
-	
+	*(uint8_t *) destination_addr &= (uint8_t) ~source_value;	
       }
       
       break;
@@ -671,18 +703,20 @@ uint8_t is_negative(int16_t *result_addr, uint8_t bw_flag)
   }
 }
 
-uint8_t is_carried(uint16_t original_dst_value, uint16_t source_value, 
+uint8_t is_carried(uint32_t original_dst_value, uint32_t source_value, 
 		   uint8_t bw_flag)
 {
   if (bw_flag == WORD) {
-    if ((65535 - source_value) < original_dst_value) {
+    if ((65535 - (uint16_t)source_value) < (uint16_t)original_dst_value ||
+	((original_dst_value + source_value) >> 16) != 0) {
       return 1;
     }
 
     return 0;
   }
   else if (bw_flag == BYTE) {
-    if ((255 - (uint8_t)source_value) < (uint8_t)original_dst_value) {
+    if ((255 - (uint8_t)source_value) < (uint8_t)original_dst_value ||
+	((original_dst_value + source_value) >> 8) != 0) {
       return 1;
     }
 

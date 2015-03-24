@@ -20,13 +20,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "devices/memory/memspace.h"
 #include "devices/cpu/registers.h"
 #include "utils.h"
 #include "debugger/debugger.h"
 #include "devices/cpu/decoder.h"
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
   if (argv[1] == NULL) {
     display_help();

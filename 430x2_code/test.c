@@ -4,21 +4,25 @@ unsigned int i = 0;
 
 void main(void){
   asm(
-      "MOV #0xFF, R4\n"
-      "MOV #0xC1, R5\n"
-      "BIS R5, R4\n"
+      "LABEL1:\n"
+      "MOV #0xF43F, R4\n"
+      "MOV #0x0041, R5\n"
+      "CMP R5, R4\n"
+      "JL LABEL1\n"
+
+      /*
       
-      "MOV #0x72, R4\n"
-      "MOV #0x7F, R5\n"
-      "BIS R5, R4\n"
+      "MOV #0x7112, R4\n"
+      "MOV #0x73F, R5\n"
+      "AND.B R5, R4\n"
       
-      "MOV #0xFF, R4\n"
-      "MOV #0x80, R5\n"
-      "BIS R5, R4\n"
+      "MOV #0xFFF4, R4\n"
+      "MOV #0x8032, R5\n"
+      "AND.B R5, R4\n"
       
       "MOV #0x10, R4\n"
-      "MOV #0x0A, R5\n"
-      "BIS R5, R4\n"
+      "MOV #0x0A11, R5\n"
+      "AND.B R5, R4\n"
 
       // Official Tester (52 cases)
       "ADD R5, R4\n"    // Reg - reg 
@@ -81,7 +85,7 @@ void main(void){
       "ADD #-1, &0xA\n"       // Const Gen - Absolute 
       "ADD #8, &0xA\n"      
 
-      /* End Official Tester */
+      // End Official Tester
 
       "CALL #0x1\n" 
       "CALL #0x8\n" 
@@ -133,6 +137,7 @@ void main(void){
       "SXT -0x2(R5)\n"
       "SXT @R5\n"
       "SXT @R5+\n"
+      */
       );
   
   // Stop the watchdog timer
@@ -146,7 +151,7 @@ void main(void){
 
   while(1){
     P1OUT ^= 0x10;
-    for(i = 0;i < 30000;i++);
+    for(i = 30000;i > 0;i--);
   }
  
 }

@@ -8,31 +8,16 @@ MSP430-Emulator
 
   After that, other devices on the chip may be implemented providing a 
   simulated interface for serial communication, and general pin and 
-  electronics testing with the 430 using openGL to create a graphics 
-  interface for virtual breadboarding.
+  electronics testing with the 430 using WebGL to create a browser graphics 
+  interface for virtual breadboarding. 
 
 - TODO
 
   - 8 bit per locations
-  - OpenGL GUI of chip and pins
+  - WebGL Interface of Launchpad & Debugger (WebSockets)
 
   - Instructions
-    SUB (Fix SUB.B overflow flag)
-    CMP
-    DADD
-    BIT
-    BIC
-    BIS
-    XOR
-    AND
-    
-    RETI
-
-    JNE
-    JEQ
-    JNC
-    JC
-    JN
-    JGE
-    JL
-    JMP
+    - SUB (Fix SUB.B overflow flag)
+    - CMP (Fix CMP.B overflow flag)
+    - DADD (BCD math)    
+    - RETI (Return from Interrupt)

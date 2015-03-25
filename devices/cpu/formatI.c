@@ -23,13 +23,6 @@
 //# S = S_Reg_Name, D = Destination
 //########################################################
 
-uint8_t is_overflowed (uint16_t source, uint16_t original_destination, 
-		       uint16_t *result_addr, uint8_t bw_flag);
-uint8_t is_negative (int16_t *result_addr, uint8_t bw_flag);
-uint8_t is_zero (uint16_t *result_addr, uint8_t bw_flag);
-uint8_t is_carried (uint32_t original_dst_value, uint32_t source_value, 
-		    uint8_t bw_flag);
-
 void decode_formatI(uint16_t instruction)
 {
   uint8_t opcode = (instruction & 0xF000) >> 12;
@@ -620,10 +613,10 @@ void decode_formatI(uint16_t instruction)
       bw_flag == 0 ? printf("BIS ") : printf("BIS.B ");
       
       if (bw_flag == WORD) {
-	
+	*destination_addr |= (uint16_t) source_value;
       }
       else if (bw_flag == BYTE) {
-	
+	*(uint8_t *) destination_addr |= (uint8_t) source_value;	
       }
       
       break;
@@ -631,15 +624,33 @@ void decode_formatI(uint16_t instruction)
     
     /* XOR SOURCE, DESTINATION
      *
+     * N: Set if result MSB is set, reset if not set
+     * Z: Set if result is zero, reset otherwise
+     * C: Set if result is not zero, reset otherwise ( = .NOT. Zero)
+     * V: Set if both operands are negative
      */
     case 0xE:{
       bw_flag == 0 ? printf("XOR ") : printf("XOR.B ");
 
       if (bw_flag == WORD) {
-	
+	SR.overflow = 
+	  (*destination_addr >> 15) && ((uint16_t)source_value >> 15);
+
+	*destination_addr ^= (uint16_t)source_value;	
+
+	SR.negative = (*destination_addr) >> 15;
+	SR.zero = (*destination_addr == 0);
+	SR.carry = (*destination_addr != 0);
       }
       else if (bw_flag == BYTE) {
-	
+	SR.overflow = 
+	  (*(uint8_t *)destination_addr >> 7) && ((uint8_t)source_value >> 7);
+
+	*(uint8_t *) destination_addr ^= (uint8_t) source_value;	
+
+	SR.negative = (*(uint8_t *) destination_addr) >> 7;
+	SR.zero = (*(uint8_t *)destination_addr == 0);
+	SR.carry = (*(uint8_t *)destination_addr != 0);
       }
       
       break;
@@ -647,16 +658,30 @@ void decode_formatI(uint16_t instruction)
 
     /* AND SOURCE, DESTINATION
      *
+     *  N: Set if result MSB is set, reset if not set
+     *  Z: Set if result is zero, reset otherwise
+     *  C: Set if result is not zero, reset otherwise ( = .NOT. Zero)
+     *  V: Reset
      */
     case 0xF:{
       bw_flag == 0 ? printf("AND ") : printf("AND.B ");
 
       if (bw_flag == WORD) {
-	
+	*destination_addr &= (uint16_t)source_value;	
+
+	SR.negative = (*destination_addr) >> 15;
+	SR.zero = (*destination_addr == 0);
+	SR.carry = (*destination_addr != 0);
       }
       else if (bw_flag == BYTE) {
-	
+	*(uint8_t *) destination_addr &= (uint8_t) source_value;	
+
+	SR.negative = (*(uint8_t *) destination_addr) >> 7;
+	SR.zero = (*(uint8_t *)destination_addr == 0);
+	SR.carry = (*(uint8_t *)destination_addr != 0);
       }
+
+      SR.overflow = false;
       
       break;
     }
@@ -665,88 +690,4 @@ void decode_formatI(uint16_t instruction)
 
   
   printf("%s\n", asm_operands);
-}
-
-uint8_t is_zero (uint16_t *result_addr, uint8_t bw_flag) 
-{
-  if (bw_flag == WORD) {
-    if (*result_addr == 0 ) {
-      return 1;
-    }
-    
-    return 0;
-  }
-  else if (bw_flag == BYTE) {
-    if (*(int8_t *) result_addr == 0) {
-      return 1;
-    }
-
-    return 0;
-  }
-}
-
-uint8_t is_negative(int16_t *result_addr, uint8_t bw_flag) 
-{
-  if (bw_flag == WORD) {
-    if (*result_addr < 0) {
-      return 1;
-    }
-
-    return 0;
-  }
-  else if (bw_flag == BYTE) {
-    if (*((int8_t *) result_addr) < 0) { 
-      return 1;
-    }
-
-    return 0;
-  }
-}
-
-uint8_t is_carried(uint32_t original_dst_value, uint32_t source_value, 
-		   uint8_t bw_flag)
-{
-  if (bw_flag == WORD) {
-    if ((65535 - (uint16_t)source_value) < (uint16_t)original_dst_value ||
-	((original_dst_value + source_value) >> 16) != 0) {
-      return 1;
-    }
-
-    return 0;
-  }
-  else if (bw_flag == BYTE) {
-    if ((255 - (uint8_t)source_value) < (uint8_t)original_dst_value ||
-	((original_dst_value + source_value) >> 8) != 0) {
-      return 1;
-    }
-
-    return 0;
-  }
-}
-
-uint8_t is_overflowed(uint16_t source_value, uint16_t destination_value, 
-		      uint16_t *result, uint8_t bw_flag) 
-{
-  if (bw_flag == WORD) {
-    if ( (source_value >> 15) == (destination_value >> 15) &&
-	 (*result >> 15) != (destination_value >> 15) ) {
-      return 1;
-    }
-
-    return 0;
-  }
-  else if (bw_flag == BYTE) {
-    uint8_t dst_prev_value = (uint8_t) destination_value;
-    uint8_t src_value = (uint8_t) source_value;
-
-    if ( (src_value >> 7) == (dst_prev_value >> 7) && 
-	 (*(uint8_t *)result >> 7) != (dst_prev_value >> 7)) {
-      return 1;
-    }
-
-    return 0;
-  }
-  else {
-    printf("Error, overflowed function: invalid bw_flag\n");
-  }
 }

@@ -97,10 +97,10 @@ void display_registers()
     c_flag = "C";
   }
   
-  printf("\n%s%s:   %s%04X\t%s%s:   %s%04X\t%s%s:   %s%04X\t%s%s:  %s%04X\n"\
-	 "%s%s:  %s%04X\t%s%s:  %s%04X\t%s%s:  %s%04X\t%s%s:  %s%04X\n"\
-	 "%s%s:  %s%04X\t%s%s:  %s%04X\t%s%s: %s%04X\t%s%s: %s%04X\n"\
-	 "%s%s: %s%04X\t%s%s: %s%04X\t%s%s: %s%04X\t%s%s: %s%04X\n"\
+  printf("\n%s%s:   %s%04X  %s%s:   %s%04X  %s%s:   %s%04X  %s%s:  %s%04X\n"\
+	 "%s%s:  %s%04X  %s%s:  %s%04X  %s%s:  %s%04X  %s%s:  %s%04X\n"\
+	 "%s%s:  %s%04X  %s%s:  %s%04X  %s%s: %s%04X  %s%s: %s%04X\n"\
+	 "%s%s: %s%04X  %s%s: %s%04X  %s%s: %s%04X  %s%s: %s%04X\n"\
 	 "%s%s:%d   %s%s:%d   %s%s:%d   %s%s:%d\n\n",
 	 
 	 red, r0_name, green, (uint16_t)PC, 

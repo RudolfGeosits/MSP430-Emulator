@@ -26,55 +26,128 @@
 void decode_formatIII( uint16_t instruction )
 {
   uint8_t condition = (instruction & 0x1C00) >> 10;
-  int16_t signed_offset = (instruction & 0x03FF);
+  int16_t signed_offset = (instruction & 0x03FF) * 2;
+  bool negative = signed_offset >> 9;
+
+  if (negative) { /* Sign Extend for Arithmetic Operations */
+    signed_offset |= 0xF800;
+  }
 
   switch(condition){
   
-  //# JNE/JNZ Jump if not equal/zero             
+  /* JNE/JNZ Jump if not equal/zero             
+  *
+  * If Z = 0: PC + 2 offset → PC
+  * If Z = 1: execute following instruction
+  */
   case 0x0:{
-    printf("JNZ 0x%04X\n", PC + (signed_offset*2));
+    printf("JNZ 0x%04X\n", PC + signed_offset);
+
+    if (SR.zero == false) {
+      PC += signed_offset;
+    }
+
     break;
   }
   
-  //# JEQ/JZ Jump is equal/zero
+  /* JEQ/JZ Jump is equal/zero
+   * If Z = 1: PC + 2 offset → PC
+   * If Z = 0: execute following instruction
+  */
   case 0x1:{
-    printf("JZ 0x%04X\n", PC + (signed_offset*2));
+    printf("JZ 0x%04X\n", PC + signed_offset);
+
+    if (SR.zero == true) {
+      PC += signed_offset;
+    }
+
     break;
   }
   
-  //# JNC/JLO Jump if no carry/lower
+  /* JNC/JLO Jump if no carry/lower
+  *
+  *  if C = 0: PC + 2 offset → PC
+  *  if C = 1: execute following instruction
+  */
   case 0x2:{
-    printf("JNC 0x%04X\n", PC + (signed_offset*2));
+    printf("JNC 0x%04X\n", PC + signed_offset);
+
+    if (SR.carry == false) {
+      PC += signed_offset;
+    }    
+    
     break;
   }
 
-  //# JC/JHS Jump if carry/higher or same
+  /* JC/JHS Jump if carry/higher or same
+  *
+  * If C = 1: PC + 2 offset → PC
+  * If C = 0: execute following instruction
+  */
   case 0x3:{
-    printf("JC 0x%04X\n", PC + (signed_offset*2));
+    printf("JC 0x%04X\n", PC + signed_offset);
+    
+    if (SR.carry == true) {
+      PC += signed_offset;
+    }    
+
     break;
   }
   
-  //# JN Jump if negative
+  /* JN Jump if negative
+  *
+  *  if N = 1: PC + 2 ×offset → PC
+  *  if N = 0: execute following instruction
+  */
   case 0x4:{
-    printf("JN 0x%04X\n", PC + (signed_offset*2));
+    printf("JN 0x%04X\n", PC + signed_offset);
+
+    if (SR.negative == true) {
+      PC += signed_offset;
+    }    
+
     break;
   }
    
-  //# JGE Jump if greater or equal (N == V)
+  /* JGE Jump if greater or equal (N == V)
+  *
+  *  If (N .XOR. V) = 0 then jump to label: PC + 2 P offset → PC
+  *  If (N .XOR. V) = 1 then execute the following instruction
+  */
   case 0x5:{
-    printf("JGE 0x%04X\n", PC + (signed_offset*2));
+    printf("JGE 0x%04X\n", PC + signed_offset);
+
+    if ((SR.negative ^ SR.overflow) == false) {
+      PC += signed_offset;
+    }    
+    
     break;
   }
     
-  //# JL Jump if less (N != V)  
+  /* JL Jump if less (N != V)  
+  *
+  *  If (N .XOR. V) = 1 then jump to label: PC + 2 offset → PC
+  *  If (N .XOR. V) = 0 then execute following instruction
+  */
   case 0x6:{
-    printf("JL 0x%04X\n", PC + (signed_offset*2));
+    printf("JL 0x%04X\n", PC + signed_offset);
+
+    if ((SR.negative ^ SR.overflow) == true) {
+      PC += signed_offset;
+    }    
+    
     break;
   }
  
-  //# JMP Jump Unconditionally
+  /* JMP Jump Unconditionally
+   *   
+   *  PC + 2 × offset → PC
+   *
+   */
   case 0x7:{
-    printf("JMP 0x%04X\n", PC + (signed_offset*2));
+    printf("JMP 0x%04X\n", PC + signed_offset);
+
+    PC += signed_offset;
     break;
   }
 

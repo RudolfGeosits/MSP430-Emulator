@@ -13,7 +13,8 @@ MSP430-Emulator
 
 - TODO
 
-  - 8 bit per locations
+  - JIT Disassembly Abilities
+  - Basic Clock Module Emulation
   - WebGL Interface of Launchpad & Debugger (WebSockets)
 
   - Instructions

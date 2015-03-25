@@ -1,14 +1,17 @@
 /*
   MSP430 Emulator
   Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)
+
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
+
   You should have received a copy of the GNU General Public License
   along with this program. If not, see <http://www.gnu.org/licenses
 */
@@ -63,10 +66,8 @@ void decode_formatI(uint16_t instruction)
   int16_t source_value, source_offset;
   int16_t destination_offset;
   uint16_t *destination_addr;
-  char asm_operands[20], asm_op2[20];
-  
-  memset(asm_operands, 0, sizeof asm_operands);
-  memset(asm_op2, 0, sizeof asm_op2);
+  char asm_operands[20] = {0}, asm_op2[20] = {0};
+  char mnemonic[50] = {0};
 
   /* Register - Register;     Ex: MOV Rs, Rd */
   /* Constant Gen - Register; Ex: MOV #C, Rd */ /* 0 */
@@ -360,7 +361,9 @@ void decode_formatI(uint16_t instruction)
      * 
      */
     case 0x4: {
-      bw_flag == 0 ? printf("MOV ") : printf("MOV.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "MOV ", sizeof mnemonic) :
+	strncpy(mnemonic, "MOV.B ", sizeof mnemonic);
 
       if (bw_flag == WORD) {		
 	*destination_addr = source_value;
@@ -387,7 +390,10 @@ void decode_formatI(uint16_t instruction)
      *
      */
     case 0x5:{
-      bw_flag == 0 ? printf("ADD ") : printf("ADD.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "ADD ", sizeof mnemonic) :
+	strncpy(mnemonic, "ADD.B ", sizeof mnemonic);
+
       uint16_t original_dst_value = *destination_addr;
 
       if (bw_flag == WORD) {
@@ -420,7 +426,10 @@ void decode_formatI(uint16_t instruction)
      *
      */
     case 0x6:{
-      bw_flag == 0 ? printf("ADDC ") : printf("ADDC.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "ADDC ", sizeof mnemonic) :
+	strncpy(mnemonic, "ADDC.B ", sizeof mnemonic);
+
       uint16_t original_dst_value = *destination_addr;
 
       if (bw_flag == WORD) {
@@ -454,7 +463,10 @@ void decode_formatI(uint16_t instruction)
      *
      */
     case 0x7:{
-      bw_flag == 0 ? printf("SUBC ") : printf("SUBC.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "SUBC ", sizeof mnemonic) :
+	strncpy(mnemonic, "SUBC.B ", sizeof mnemonic);
+
       int16_t original_dst_value = *destination_addr;
       source_value = ~source_value; /* 1's comp */
 
@@ -489,7 +501,10 @@ void decode_formatI(uint16_t instruction)
      */  
 
     case 0x8:{
-      bw_flag == 0 ? printf("SUB ") : printf("SUB.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "SUB ", sizeof mnemonic) :
+	strncpy(mnemonic, "SUB.B ", sizeof mnemonic);
+
       int16_t original_dst_value = *destination_addr;
       source_value = ~source_value + 1;
  
@@ -519,7 +534,10 @@ void decode_formatI(uint16_t instruction)
      * TODO: Fix overflow error
      */
     case 0x9:{
-      bw_flag == 0 ? printf("CMP ") : printf("CMP.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "CMP ", sizeof mnemonic) :
+	strncpy(mnemonic, "CMP.B ", sizeof mnemonic);
+
       int16_t original_dst_value = *destination_addr;
       uint16_t unsigned_source_value = ((uint16_t)~source_value + 1);
       int16_t result;
@@ -546,7 +564,9 @@ void decode_formatI(uint16_t instruction)
      *
      */
     case 0xA:{
-      bw_flag == 0 ? printf("DADD ") : printf("DADD.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "DADD ", sizeof mnemonic) :
+	strncpy(mnemonic, "DADD.B ", sizeof mnemonic);
     
       if (bw_flag == WORD) {
 	
@@ -566,7 +586,9 @@ void decode_formatI(uint16_t instruction)
      * V: Reset
     */
     case 0xB:{
-      bw_flag == 0 ? printf("BIT ") : printf("BIT.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "BIT ", sizeof mnemonic) :
+	strncpy(mnemonic, "BIT.B ", sizeof mnemonic);
 
       if (bw_flag == WORD) {
 	uint16_t result = ((uint16_t) source_value) & (*destination_addr);
@@ -594,7 +616,9 @@ void decode_formatI(uint16_t instruction)
      * No status bits affected
      */
     case 0xC:{
-      bw_flag == 0 ? printf("BIC ") : printf("BIC.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "BIC ", sizeof mnemonic) :
+	strncpy(mnemonic, "BIC.B ", sizeof mnemonic);
       
       if (bw_flag == WORD) {
 	*destination_addr &= (uint16_t) ~source_value;
@@ -610,7 +634,9 @@ void decode_formatI(uint16_t instruction)
      *
      */
     case 0xD:{
-      bw_flag == 0 ? printf("BIS ") : printf("BIS.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "BIS ", sizeof mnemonic) :
+	strncpy(mnemonic, "BIS.B ", sizeof mnemonic);
       
       if (bw_flag == WORD) {
 	*destination_addr |= (uint16_t) source_value;
@@ -630,7 +656,9 @@ void decode_formatI(uint16_t instruction)
      * V: Set if both operands are negative
      */
     case 0xE:{
-      bw_flag == 0 ? printf("XOR ") : printf("XOR.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "XOR ", sizeof mnemonic) :
+	strncpy(mnemonic, "XOR.B ", sizeof mnemonic);
 
       if (bw_flag == WORD) {
 	SR.overflow = 
@@ -664,7 +692,9 @@ void decode_formatI(uint16_t instruction)
      *  V: Reset
      */
     case 0xF:{
-      bw_flag == 0 ? printf("AND ") : printf("AND.B ");
+      bw_flag == WORD ? 
+	strncpy(mnemonic, "AND ", sizeof mnemonic) :
+	strncpy(mnemonic, "AND.B ", sizeof mnemonic);
 
       if (bw_flag == WORD) {
 	*destination_addr &= (uint16_t)source_value;	
@@ -688,6 +718,6 @@ void decode_formatI(uint16_t instruction)
 
   } //# End of switch
 
-  
-  printf("%s\n", asm_operands);
+  strncat(mnemonic, asm_operands, sizeof asm_operands);
+  printf("%s\n", mnemonic);
 }

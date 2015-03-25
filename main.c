@@ -24,6 +24,7 @@
 #include "devices/memory/memspace.h"
 #include "devices/cpu/registers.h"
 #include "utils.h"
+#include "devices/peripherals/setup.h"
 #include "debugger/debugger.h"
 #include "devices/cpu/decoder.h"
 
@@ -36,9 +37,12 @@ int main(int argc, char *argv[])
 
   initialize_msp_memspace();
   initialize_msp_registers();
+  ports_setup();
+
   load_program(argv[1], LOAD_POS);
 
   while (1) {            /* Fetch-Decode-Execute Cycle */
+    handle_port1();
     decode( fetch() );   /* Instruction Decoder */
     command_loop();      /* Debugger */
   }

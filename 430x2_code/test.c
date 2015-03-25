@@ -5,12 +5,11 @@ unsigned int i = 0;
 void main(void){
   asm(
       "LABEL1:\n"
+      /*
       "MOV #0xF43F, R4\n"
       "MOV #0x0041, R5\n"
       "CMP R5, R4\n"
       "JL LABEL1\n"
-
-      /*
       
       "MOV #0x7112, R4\n"
       "MOV #0x73F, R5\n"
@@ -143,15 +142,15 @@ void main(void){
   // Stop the watchdog timer
   WDTCTL = WDTPW + WDTHOLD;
 
-  i = 182;
+  i = 0;
     
   // A register that configures the direction of a port pin as an
   // input or output 
-  P1DIR |= 0x10;
+  P1DIR |= BIT0;
 
   while(1){
-    P1OUT ^= 0x10;
-    for(i = 30000;i > 0;i--);
+    P1OUT ^= BIT0;
+    for(i = 20000;i > 0;i--);
   }
  
 }

@@ -21,6 +21,7 @@
 /* Dump Bytes, Dump Words, Dump Double Words */
 typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
 enum {MAX_BREAKPOINTS = 10};
+bool debugger_print = true;
 
 /* Main command loop */
 
@@ -36,11 +37,13 @@ void command_loop()
   for (i = 0;i < cur_bp_number;i++) {
     if (PC == breakpoint_addresses[i]) {
       go = 0; /* Stop fast execution */
+      debugger_print = true;
       printf("\n\t[Breakpoint %d hit]\n\n", i + 1);
       break;
     }
   }
 
+  /* print debugger info only if debugging */
   display_registers();
 
   while (!go) {
@@ -56,6 +59,8 @@ void command_loop()
     /* go, run the program until a breakpoint is hit */
     else if ( strncmp("go", command, sizeof "go") == 0 ) {
       go = true;
+      debugger_print = false;
+      
       break;
     }
 

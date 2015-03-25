@@ -26,7 +26,7 @@ typedef struct {
   uint8_t OSCOFF : 1;    //# Oscillator Off. LFXT1CLK ON = 0; LFXT1CLK OFF = 1;
 
   uint8_t CPUOFF : 1;     //# CPU off; CPU OFF = 1; CPU ON = 0;
-  uint8_t GIE : 1;   //# General Interupt enable; Enable maskable ints = 1; 0 = dont 
+  uint8_t GIE : 1;   //# General Inter enabl; Enbl maskable ints = 1; 0 = dont 
 
   uint8_t negative : 1;   //# Negative flag
   uint8_t zero : 1;       //# Zero flag

@@ -21,18 +21,33 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <pthread.h>
+#include <gtk/gtk.h>
+
+int global_argc; char **global_argv;
 #include "devices/memory/memspace.h"
 #include "devices/cpu/registers.h"
 #include "utils.h"
 #include "devices/peripherals/setup.h"
 #include "debugger/debugger.h"
 #include "devices/cpu/decoder.h"
+#include "debugger/gui/gui.c"
 
 int main(int argc, char *argv[])
 {
   if (argv[1] == NULL) {
     display_help();
     exit(1);
+  }
+
+  global_argc = argc;
+  global_argv = argv;
+
+  pthread_t gui_thread;
+  int x;
+  if( pthread_create(&gui_thread, NULL, gui, (void *)NULL ) ) {
+    fprintf(stderr, "Error creating thread\n");
+    return 1;
   }
 
   initialize_msp_memspace();

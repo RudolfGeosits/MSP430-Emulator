@@ -4,9 +4,6 @@
  *     (Specific: Display Register usages like PC, SR, etc.)               
  */
 
-enum {COMMON_MODE, SPECIFIC_MODE};
-uint8_t register_display_mode = SPECIFIC_MODE;
-
 void display_registers()
 {
   typedef enum {UNDEF, LINUX, WINDOWS} System_t;
@@ -18,44 +15,42 @@ void display_registers()
 #else
   this_system = UNDEF;
 #endif
-  
-  char *r0_name, *r1_name, *r2_name, *r3_name,
-    *r4_name, *r5_name, *r6_name, *r7_name,
-    *r8_name, *r9_name, *r10_name, *r11_name,
-    *r12_name, *r13_name, *r14_name, *r15_name;
-  
+
   char *v_flag, *n_flag, *z_flag, *c_flag;
-  char *red, *green, *cyan;
+  char *red, *green, *cyan, *clear, *blue, *white, *yellow;
+  char *reg_col, *spec_reg_col, *decor_col, *value_col;
+
+  char *r0_name = "PC";
+  char *r1_name = "SP";
+  char *r2_name = "SR";
+  char *r3_name = "CG2";
+  char *r4_name = "R4";
+  char *r5_name = "R5";
+  char *r6_name = "R6";
+  char *r7_name = "R7";
+  char *r8_name = "R8";
+  char *r9_name = "R9";
+  char *r10_name = "R10";
+  char *r11_name = "R11";
+  char *r12_name = "R12";
+  char *r13_name = "R13";
+  char *r14_name = "R14";
+  char *r15_name = "R15";    
+
 
   if (this_system == LINUX) {
-    r0_name = "%R0";
-    r1_name = "%R1";
-    r2_name = "%R2";
-    r3_name = "%R3";
-
     red = "\x1b[31;1m";
     green = "\x1b[32;1m";
     cyan = "\x1b[36;1m";
+    blue = "\x1b[34;1m";
+    white = "\x1b[37;1m";
+    yellow = "\x1b[33;1m";
+    clear = "";
 
-    r4_name = "%R4";
-    r5_name = "%R5";
-    r6_name = "%R6";
-    r7_name = "%R7";
-    r8_name = "%R8";
-    r9_name = "%R9";
-    r10_name = "%R10";
-    r11_name = "%R11";
-    r12_name = "%R12";
-    r13_name = "%R13";
-    r14_name = "%R14";
-    r15_name = "%R15";
-
-    if (register_display_mode == SPECIFIC_MODE) {
-      r0_name = "PC";
-      r1_name = "SP";
-      r2_name = "SR";
-      r3_name = "CG2";
-    }
+    reg_col = blue;
+    value_col = white;
+    spec_reg_col = red;
+    decor_col = green;
 
     v_flag = "V\x1b[0m";
     n_flag = "\x1b[36;1mN\x1b[0m";
@@ -63,33 +58,13 @@ void display_registers()
     c_flag = "\x1b[36;1mC\x1b[0m";
   }
   else {
-    r0_name = "%R0";
-    r1_name = "%R1";
-    r2_name = "%R2";
-    r3_name = "%R3";
-
     green = "";
     red = "";
     cyan = "";
-    r4_name = "%R4";
-    r5_name = "%R5";
-    r6_name = "%R6";
-    r7_name = "%R7";
-    r8_name = "%R8";
-    r9_name = "%R9";
-    r10_name = "%R10";
-    r11_name = "%R11";
-    r12_name = "%R12";
-    r13_name = "%R13";
-    r14_name = "%R14";
-    r15_name = "%R15";
+    blue = "";
+    clear = "";
     
-    if (register_display_mode == SPECIFIC_MODE) {
-      r0_name = "PC";
-      r1_name = "SP";
-      r2_name = "SR";
-      r3_name = "CG2";
-    }
+    reg_col = "";
 
     v_flag = "V";
     n_flag = "N";
@@ -97,31 +72,52 @@ void display_registers()
     c_flag = "C";
   }
   
-  printf("\n%s%s:   %s%04X  %s%s:   %s%04X  %s%s:   %s%04X  %s%s:  %s%04X\n"\
-	 "%s%s:  %s%04X  %s%s:  %s%04X  %s%s:  %s%04X  %s%s:  %s%04X\n"\
-	 "%s%s:  %s%04X  %s%s:  %s%04X  %s%s: %s%04X  %s%s: %s%04X\n"\
-	 "%s%s: %s%04X  %s%s: %s%04X  %s%s: %s%04X  %s%s: %s%04X\n"\
-	 "%s%s:%d   %s%s:%d   %s%s:%d   %s%s:%d\n\n",
+  printf("\n%s%s%s:   %s%04X  "\
+	 "%s%s%s:   %s%04X  "\
+	 "%s%s%s:   %s%04X  "\
+	 "%s%s%s:  %s%04X  "\
+	 "%s%s%s: %s%d\n"\
+	 "%s%%%s%s%s:  %s%04X  "\
+	 "%s%%%s%s%s:  %s%04X  "\
+	 "%s%%%s%s%s:  %s%04X  "\
+	 "%s%%%s%s%s:  %s%04X  "\
+	 "%s%s%s: %s%d\n"\
+	 "%s%%%s%s%s:  %s%04X  "\
+	 "%s%%%s%s%s:  %s%04X  "\
+	 "%s%%%s%s%s: %s%04X  "\
+	 "%s%%%s%s%s: %s%04X  "\
+	 "%s%s%s: %s%d\n"\
+	 "%s%%%s%s%s: %s%04X  "\
+	 "%s%%%s%s%s: %s%04X  "\
+	 "%s%%%s%s%s: %s%04X  "\
+	 "%s%%%s%s%s: %s%04X  "\
+	 "%s%s%s: %s%d\n\n",
 	 
-	 red, r0_name, green, (uint16_t)PC, 
-	 red, r1_name, green, (uint16_t)SP, 
-	 red, r2_name, green, (uint16_t)r2, 
-	 red, r3_name, green, (uint16_t)CG2, 
-	 red, r4_name, green, (uint16_t)r4, 
-	 red, r5_name, green, (uint16_t)r5, 
-	 red, r6_name, green, (uint16_t)r6,
-	 red, r7_name, green, (uint16_t)r7, 
-	 red, r8_name, green, (uint16_t)r8, 
-	 red, r9_name, green, (uint16_t)r9, 
-	 red, r10_name, green, (uint16_t)r10,
-	 red, r11_name, green, (uint16_t)r11, 
-	 red, r12_name, green, (uint16_t)r12, 
-	 red, r13_name, green, (uint16_t)r13, 
-	 red, r14_name, green, (uint16_t)r14,
-	 red, r15_name, green, (uint16_t)r15,
+	 red, r0_name, decor_col, value_col, (uint16_t)PC, 
+	 red, r1_name, decor_col, value_col, (uint16_t)SP, 
+	 red, r2_name, decor_col, value_col, (uint16_t)r2, 
+	 red, r3_name, decor_col, value_col, (uint16_t)CG2, 
 
-	 cyan, v_flag, SR.overflow, 
-	 cyan, n_flag, SR.negative, 
-	 cyan, z_flag, SR.zero, 
-	 cyan, c_flag, SR.carry);
+	 cyan, c_flag, decor_col, value_col, SR.carry,
+
+	 decor_col, reg_col, r4_name, decor_col, value_col, (uint16_t)r4, 
+	 decor_col, reg_col, r5_name, decor_col, value_col, (uint16_t)r5, 
+	 decor_col, reg_col, r6_name, decor_col, value_col, (uint16_t)r6,
+	 decor_col, reg_col, r7_name, decor_col, value_col, (uint16_t)r7, 
+
+	 cyan, z_flag, decor_col, value_col, SR.zero,
+
+	 decor_col, reg_col, r8_name, decor_col, value_col, (uint16_t)r8, 
+	 decor_col, reg_col, r9_name, decor_col, value_col, (uint16_t)r9, 
+	 decor_col, reg_col, r10_name, decor_col, value_col, (uint16_t)r10,
+	 decor_col, reg_col, r11_name, decor_col, value_col, (uint16_t)r11, 
+
+	 cyan, n_flag, decor_col, value_col, SR.negative, 
+
+	 decor_col, reg_col, r12_name, decor_col, value_col, (uint16_t)r12, 
+	 decor_col, reg_col, r13_name, decor_col, value_col, (uint16_t)r13, 
+	 decor_col, reg_col, r14_name, decor_col, value_col, (uint16_t)r14,
+	 decor_col, reg_col, r15_name, decor_col, value_col, (uint16_t)r15,
+
+	 cyan, v_flag, decor_col, value_col, SR.overflow);
 }

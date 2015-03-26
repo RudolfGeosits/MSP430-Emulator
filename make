@@ -1,0 +1,1 @@
+gcc main.c -o MSP430 `pkg-config --cflags --libs gtk+-2.0`

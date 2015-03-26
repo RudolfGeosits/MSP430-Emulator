@@ -1,0 +1,1 @@
+gcc sample_gui.c -o sample_gui `pkg-config --cflags --libs gtk+-2.0`

@@ -32,6 +32,7 @@ void decode(uint16_t instruction)
 {  
   int done = 0;
   uint8_t format_id;
+  memset(mnemonic, 0, sizeof mnemonic);
 
   format_id = (uint8_t)(instruction >> 12);
 
@@ -44,6 +45,8 @@ void decode(uint16_t instruction)
   else if (format_id >= 0x4) {
     decode_formatI(instruction);   /* format I (two operand) instruction */
   }
+
+  puts(mnemonic);
 }
 
 int16_t run_constant_generator(uint8_t source, uint8_t as_flag) 

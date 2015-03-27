@@ -22,31 +22,28 @@
 typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
 enum {MAX_BREAKPOINTS = 10};
 bool debugger_print = true;
+bool disassemble_mode = false;
 
 /* Main command loop */
-
 void command_loop()
 {
-  static bool go = 0;
+  static bool run = 0;
   static uint16_t breakpoint_addresses[MAX_BREAKPOINTS];
   static uint8_t cur_bp_number = 0;
-  char command[32];
+  char command[333];
 
   /* Check for breakpoints */
   int i;
   for (i = 0;i < cur_bp_number;i++) {
     if (PC == breakpoint_addresses[i]) {
-      go = 0; /* Stop fast execution */
+      run = 0; /* Stop fast execution */
       debugger_print = true;
       printf("\n\t[Breakpoint %d hit]\n\n", i + 1);
       break;
     }
   }
 
-  /* print debugger info only if debugging */
-  display_registers();
-
-  while (!go) {
+  while (!run) {
     memset(command, 0, sizeof(command));
     scanf("%s", command);
     filter_uppercase(command);
@@ -56,9 +53,9 @@ void command_loop()
       break;
     }                                 
 
-    /* go, run the program until a breakpoint is hit */
-    else if ( strncmp("go", command, sizeof "go") == 0 ) {
-      go = true;
+    /* run, run the program until a breakpoint is hit */
+    else if ( strncmp("run", command, sizeof "run") == 0 ) {
+      run = true;
       debugger_print = false;
       
       break;
@@ -97,10 +94,10 @@ void command_loop()
       scanf("%s", param1);
       filter_uppercase(param1);
 
-      if (param1[0] >= 0x30 && param1[0] <= 0x39) {   /* Got hex ADDRESS */
+      if (param1[0] >= 0x30 && param1[0] <= 0x39) {   /* Runt hex ADDRESS */
 	sscanf(param1, "%X", &start_addr);
       }
-      else if (param1[0] == '%' || param1[0] == 'r') {   /* Got Register */
+      else if (param1[0] == '%' || param1[0] == 'r') {   /* got Register */
 	start_addr = (uint16_t) *get_reg_ptr( reg_name_to_num(param1) );
       }
       

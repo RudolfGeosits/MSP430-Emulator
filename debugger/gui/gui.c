@@ -1,40 +1,55 @@
 GtkWidget *window = NULL;
-GtkWidget *main_image = NULL;
-GtkWidget *power_led_image = NULL;
+GtkWidget *msp_power_led = NULL;
+GtkWidget *msp_no_power = NULL;
 
 static gboolean main_loop(GtkWidget *widget)
 {
-  static gboolean show = TRUE;
+  static bool others_on = false;
   if (widget->window == NULL) return FALSE;
 
-  if (show) {
-    gtk_widget_show(main_image);
+  if (P1DIR_0 && P1OUT_0) {
+    gtk_image_set_from_file( (GtkImage *)msp_no_power, 
+			     "debugger/gui/msp_p1.0.png");  
+    others_on = true;
   }
-  else {
-    gtk_widget_hide(main_image);
+  
+  if (P1DIR_6 && P1OUT_6) {
+    gtk_image_set_from_file( (GtkImage *)msp_no_power, 
+			     "debugger/gui/msp_p1.6.png");      
+
+    others_on = true;
   }
 
-  //show = !show;
-  //g_print("sss\n");
+  if (P1DIR_0 && P1OUT_0 && P1DIR_6 && P1OUT_6) {
+    gtk_image_set_from_file( (GtkImage *)msp_no_power, 
+			     "debugger/gui/msp_p1.0_p1.6.png");      
+
+    others_on = true;    
+  }
+  
+  if (!others_on) {
+    gtk_image_set_from_file((GtkImage *)msp_no_power, 
+  			    "debugger/gui/msp_power_on.png");
+    others_on = false;
+  }
 
   return TRUE;
 }
 
-
 void *gui(void *arg)
 {
   /* Initialize GTK */
-  gtk_init(&global_argc, &global_argv);
+  gtk_init(NULL, NULL);
   
   /* Creat Widgets */
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title(GTK_WINDOW (window), "MSP430-Emulator");
 
-  main_image = gtk_image_new_from_file("debugger/gui/msp.png");
-  //power_led_image = gtk_image_new_from_file("power_led.png");
+  msp_power_led = gtk_image_new_from_file("debugger/gui/msp_power_on.png");
+  msp_no_power = gtk_image_new_from_file("debugger/gui/msp_power_static.png");
 
-  if (main_image == NULL) {
-    g_printerr("Could not open \"msp.png\"\n");
+  if (msp_no_power == NULL || msp_power_led == NULL) {
+    g_print("Image not loaded\n");
     exit(1);
   }
   
@@ -44,10 +59,9 @@ void *gui(void *arg)
   /* attach standard event handlers */
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-  g_timeout_add(333, (GSourceFunc) main_loop, (gpointer) window);
+  g_timeout_add(300, (GSourceFunc) main_loop, (gpointer) window);
 
-  gtk_container_add(GTK_CONTAINER(window), main_image);
-  //gtk_container_add(GTK_CONTAINER(window), power_led_image);
+  gtk_container_add(GTK_CONTAINER(window), msp_no_power);
   gtk_widget_show_all(GTK_WIDGET(window));
 
   gtk_main();

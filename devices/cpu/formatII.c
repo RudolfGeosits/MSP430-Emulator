@@ -38,15 +38,17 @@ void decode_formatII( uint16_t instruction )
   uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
   int16_t immediate_constant = 0;           /* Generated Constant */
 
+  /*
   printf("Opcode: 0x%01X  Source bits: 0x%01X\nAS_Flag: 0x%01X  "\
 	 "BW_Flag: 0x%01X\n",
          opcode, source, as_flag, bw_flag);
-  
+  */
+
   /* Spot CG1 and CG2 Constant generator instructions */
   if ( (source == 2 && as_flag > 1) || source == 3 ) {
     constant_generator_active = 1;
     immediate_constant = run_constant_generator(source, as_flag);
-    printf("Got constant: %d, using it.\n", immediate_constant);
+    //printf("Got constant: %d, using it.\n", immediate_constant);
   }
   else {
     constant_generator_active = 0;
@@ -57,6 +59,7 @@ void decode_formatII( uint16_t instruction )
   //# RRC Rotate right through carry      
   case 0x0:{
     bw_flag == WORD ? printf("RRC ") : printf("RRC.B ");
+    if (disassemble_mode) break; 
     
     uint8_t CF = SR.carry;
 
@@ -89,7 +92,8 @@ void decode_formatII( uint16_t instruction )
     else if (as_flag == 0x1) {   /* RRC 0x0(Rn) */
       int16_t source_offset = fetch();
       printf("0x%04X(%s)\n", (uint16_t)source_offset, reg_name);
-
+      if (disassemble_mode) break; 
+    
       if (bw_flag == WORD) {
         uint16_t *address = (uint16_t *)
           ( (void *)MEMSPACE + *reg+source_offset );
@@ -129,7 +133,8 @@ void decode_formatII( uint16_t instruction )
 
     else if (as_flag == 0x2) {   /* RRC @Rn */
       printf("@%s\n", reg_name);
-
+      if (disassemble_mode) break; 
+    
       if (bw_flag == WORD) {
         uint16_t *address = (uint16_t *) ( (void *)MEMSPACE + *reg );
         uint16_t val = *address;
@@ -161,7 +166,8 @@ void decode_formatII( uint16_t instruction )
 
     else if (as_flag == 0x3) {   /* RRC @Rn+ */
       printf("@%s+\n", reg_name);
-      
+      if (disassemble_mode) break; 
+    
       if (bw_flag == WORD) {
         uint16_t *address = (uint16_t *) ( (void *)MEMSPACE + *reg );
         uint16_t val = *address;
@@ -208,6 +214,7 @@ void decode_formatII( uint16_t instruction )
     //# Direct register SWPB Rn
     if (as_flag == 0x0) {
       printf("SWPB %s\n", reg_name);
+      if (disassemble_mode) break; 
       
       uint8_t new_low_byte = (*reg & 0xFF00) >> 8;   /* Swapped byte values */ 
       uint8_t new_high_byte = (*reg & 0x00FF);
@@ -219,6 +226,7 @@ void decode_formatII( uint16_t instruction )
     else if (as_flag == 0x1) {
       int16_t source_offset = fetch();
       printf("SWPB 0x%04X(%s)\n", source_offset, reg_name);
+      if (disassemble_mode) break; 
     
       uint16_t *address = (uint16_t *) 
         ( (void *)MEMSPACE + *reg + source_offset );
@@ -232,7 +240,8 @@ void decode_formatII( uint16_t instruction )
     //# indirect register SWPB @Rn
     else if (as_flag == 0x2) {
       printf("SWPB @%s\n", reg_name);
-
+      if (disassemble_mode) break; 
+    
       uint16_t *address = (uint16_t *) ((void *)MEMSPACE + *reg);
       
       uint8_t new_low_byte = (*address & 0xFF00) >> 8;
@@ -244,7 +253,8 @@ void decode_formatII( uint16_t instruction )
     //# Indirect register autoincrement SWPB @Rn+
     else if (as_flag == 0x3) {
       printf("SWPB @%s+\n", reg_name);
-
+      if (disassemble_mode) break; 
+    
       uint16_t *address = (uint16_t *) ((void *)MEMSPACE + *reg);
       
       uint8_t new_low_byte = (*address & 0xFF00) >> 8;
@@ -261,7 +271,8 @@ void decode_formatII( uint16_t instruction )
   case 0x2:{
 
     bw_flag == 0 ? printf("RRA ") : printf("RRA.B ");
-
+    if (disassemble_mode) break; 
+    
     if (as_flag == 0x0) {        /* RRA Rn */
       printf("%s\n", reg_name);
 
@@ -298,7 +309,8 @@ void decode_formatII( uint16_t instruction )
     else if (as_flag == 0x1) {   /* RRA 0x0(Rn) */
       int16_t source_offset = fetch();
       printf("0x%04X(%s)\n", source_offset, reg_name);
-
+      if (disassemble_mode) break; 
+    
       if (bw_flag == WORD) {
         uint16_t *address = (uint16_t *) 
           ((void *) MEMSPACE + *reg + source_offset);
@@ -335,7 +347,8 @@ void decode_formatII( uint16_t instruction )
 
     else if (as_flag == 0x2) {   /* RRA @Rn */
       printf("@%s\n", reg_name);
-
+      if (disassemble_mode) break; 
+    
       if (bw_flag == WORD) {
         uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
         uint16_t msb;
@@ -369,7 +382,8 @@ void decode_formatII( uint16_t instruction )
 
     else if (as_flag == 0x3) {   /* RRA @Rn+ */
       printf("@%s+\n", reg_name);
-
+      if (disassemble_mode) break; 
+    
       if (bw_flag == WORD) {
         uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
         uint16_t msb;
@@ -415,7 +429,8 @@ void decode_formatII( uint16_t instruction )
 
     if(as_flag == 0x0){   /* SXT Rn */
       printf("SXT %s\n", reg_name);
-
+      if (disassemble_mode) break; 
+    
       uint8_t low_byte_sign = (*reg & 0x0080) >> 7;
       low_byte_sign ? *reg |= 0xFF00 : (*reg &= 0x00FF);
       
@@ -426,6 +441,7 @@ void decode_formatII( uint16_t instruction )
     else if(as_flag == 0x1){   /* SXT 0x0(Rn) */
       int16_t source_offset = fetch();      
       printf("SXT 0x%04X(%s)\n", (uint16_t)source_offset, reg_name);
+      if (disassemble_mode) break; 
     
       uint16_t *address = (uint16_t *)
         ((void *) MEMSPACE + *reg + source_offset);
@@ -439,7 +455,8 @@ void decode_formatII( uint16_t instruction )
 
     else if(as_flag == 0x2){   /* SXT @Rn */
       printf("SXT @%s\n", reg_name);
-
+      if (disassemble_mode) break; 
+    
       uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
       uint8_t low_byte_sign = (*address & 0x0080) >> 7;
 
@@ -450,7 +467,8 @@ void decode_formatII( uint16_t instruction )
 
     else if(as_flag == 0x3){   /* SXT @Rn+ */
       printf("SXT @%s+\n", reg_name);
-
+      if (disassemble_mode) break; 
+    
       uint16_t *address = (uint16_t *) ((void *) MEMSPACE + *reg);
       uint8_t low_byte_sign = (*address & 0x0080) >> 7;
 
@@ -469,7 +487,6 @@ void decode_formatII( uint16_t instruction )
   case 0x4:{
 
     bw_flag == 0 ? printf("PUSH ") : printf("PUSH.B ");    
-    SP -= 2;   /* Decrement Stack pointer by two, always */
     
     uint16_t *stack_addr = (uint16_t *) ( (void *) MEMSPACE + SP );
       
@@ -485,6 +502,10 @@ void decode_formatII( uint16_t instruction )
 	printf("%s\n", reg_name);
 	source_value = *reg;
       }
+      
+      if (disassemble_mode) break; 
+      
+      SP -= 2;   /* Decrement Stack pointer by two, always */
       
       if (bw_flag == WORD) {
         *stack_addr = source_value;
@@ -527,6 +548,8 @@ void decode_formatII( uint16_t instruction )
 	printf("0x%04X(%s)\n", (uint16_t)source_offset, reg_name);
       }
 
+      if (disassemble_mode) break; 
+      
       if (bw_flag == WORD) {
         *stack_addr = source_value;
       }
@@ -549,6 +572,8 @@ void decode_formatII( uint16_t instruction )
 	source_value = (int16_t) *get_addr_ptr(*reg);
       }
 
+      if (disassemble_mode) break; 
+      
       if (bw_flag == WORD) {
         *stack_addr = source_value;
       }
@@ -561,6 +586,7 @@ void decode_formatII( uint16_t instruction )
     else if(as_flag == 0x3){   /* PUSH @Rn+ */
                                /* PUSH #S   */
       int16_t source_value;
+      if (disassemble_mode) break; 
       
       if (constant_generator_active) {   /* Check if CG1 or CG2 available */
 	source_value = immediate_constant;
@@ -602,7 +628,8 @@ void decode_formatII( uint16_t instruction )
     
   case 0x5:{
     printf("CALL ");
-
+    if (disassemble_mode) break; 
+      
     SP -= 2;              /* Decrement Stack pointer by a word */
     uint16_t* stack_addr = get_stack_ptr();    
     *stack_addr = PC;     /* Place old PC onto stack */
@@ -690,6 +717,7 @@ void decode_formatII( uint16_t instruction )
   //# RETI Return from interrupt: Pop SR then pop PC
   case 0x6:{
     printf("RETI\n");
+    if (disassemble_mode) break; 
    
     break;
   }

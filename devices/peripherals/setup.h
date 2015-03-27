@@ -26,6 +26,16 @@ uint8_t *P1SEL;  /* r/w     PUC reset */
 uint8_t *P1SEL2; /* r/w     PUC reset */
 uint8_t *P1REN;  /* r/w     PUC reset */
 
+/* Peripherals activation flags */
+bool P1DIR_0, P1OUT_0, P1IFG_0, P1IE_0;
+bool P1DIR_1, P1OUT_1, P1IFG_1, P1IE_1;
+bool P1DIR_2, P1OUT_2, P1IFG_2, P1IE_2;
+bool P1DIR_3, P1OUT_3, P1IFG_3, P1IE_3;
+bool P1DIR_4, P1OUT_4, P1IFG_4, P1IE_4;
+bool P1DIR_5, P1OUT_5, P1IFG_5, P1IE_5;
+bool P1DIR_6, P1OUT_6, P1IFG_6, P1IE_6;
+bool P1DIR_7, P1OUT_7, P1IFG_7, P1IE_7;
+
 void ports_setup();
 void power_up_clear();
 

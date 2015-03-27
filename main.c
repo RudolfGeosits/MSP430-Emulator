@@ -24,7 +24,6 @@
 #include <pthread.h>
 #include <gtk/gtk.h>
 
-int global_argc; char **global_argv;
 #include "devices/memory/memspace.h"
 #include "devices/cpu/registers.h"
 #include "utils.h"
@@ -33,18 +32,25 @@ int global_argc; char **global_argv;
 #include "devices/cpu/decoder.h"
 #include "debugger/gui/gui.c"
 
+void disassemble_next_instruction(){
+  uint16_t saved_pc = PC;
+  
+  disassemble_mode = true;
+  decode( fetch() );
+  disassemble_mode = false;
+
+  PC = saved_pc;
+}
+
 int main(int argc, char *argv[])
 {
+  pthread_t gui_thread;
+  
   if (argv[1] == NULL) {
     display_help();
     exit(1);
   }
 
-  global_argc = argc;
-  global_argv = argv;
-
-  pthread_t gui_thread;
-  int x;
   if( pthread_create(&gui_thread, NULL, gui, (void *)NULL ) ) {
     fprintf(stderr, "Error creating thread\n");
     return 1;
@@ -57,9 +63,12 @@ int main(int argc, char *argv[])
   load_program(argv[1], LOAD_POS);
 
   while (1) {            /* Fetch-Decode-Execute Cycle */
+    command_loop();      /* Debugger */
+
+    display_registers();
+
     handle_port1();
     decode( fetch() );   /* Instruction Decoder */
-    command_loop();      /* Debugger */
   }
 
   uninitialize_msp_memspace();

@@ -15,7 +15,6 @@ MSP430-Emulator
 
   - JIT Disassembly Abilities
   - Basic Clock Module Emulation
-  - WebGL Interface of Launchpad & Debugger (WebSockets)
 
   - Instructions
     - SUB (Fix SUB.B overflow flag)

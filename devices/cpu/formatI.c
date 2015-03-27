@@ -46,17 +46,10 @@ void decode_formatI(uint16_t instruction)
   uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
   int16_t immediate_constant = 0;           /* Generated Constant */
 
-  /*
-  printf("Opcode: 0x%01X  Source bits: 0x%01X  Destination bits: 0x%01X\n" \
-	 "AS_Flag: 0x%01X  AD_Flag: 0x%01X  BW_Flag: 0x%01X\n",
-	 opcode, source, destination, as_flag, ad_flag, bw_flag);
-  */
-
   /* Spot CG1 and CG2 Constant generator instructions */
   if ( (source == 2 && as_flag > 1) || source == 3 ) {
     constant_generator_active = 1;
     immediate_constant = run_constant_generator(source, as_flag);
-    printf("Got constant: %d, using it.\n", immediate_constant);
   }
   else {
     constant_generator_active = 0;
@@ -67,7 +60,6 @@ void decode_formatI(uint16_t instruction)
   int16_t destination_offset;
   uint16_t *destination_addr;
   char asm_operands[20] = {0}, asm_op2[20] = {0};
-  char mnemonic[50] = {0};
 
   /* Register - Register;     Ex: MOV Rs, Rd */
   /* Constant Gen - Register; Ex: MOV #C, Rd */ /* 0 */
@@ -365,6 +357,8 @@ void decode_formatI(uint16_t instruction)
 	strncpy(mnemonic, "MOV ", sizeof mnemonic) :
 	strncpy(mnemonic, "MOV.B ", sizeof mnemonic);
 
+      if (disassemble_mode) break;
+
       if (bw_flag == WORD) {		
 	*destination_addr = source_value;
       }
@@ -393,6 +387,8 @@ void decode_formatI(uint16_t instruction)
       bw_flag == WORD ? 
 	strncpy(mnemonic, "ADD ", sizeof mnemonic) :
 	strncpy(mnemonic, "ADD.B ", sizeof mnemonic);
+
+      if (disassemble_mode) break;
 
       uint16_t original_dst_value = *destination_addr;
 
@@ -430,6 +426,8 @@ void decode_formatI(uint16_t instruction)
 	strncpy(mnemonic, "ADDC ", sizeof mnemonic) :
 	strncpy(mnemonic, "ADDC.B ", sizeof mnemonic);
 
+      if (disassemble_mode) break;
+
       uint16_t original_dst_value = *destination_addr;
 
       if (bw_flag == WORD) {
@@ -466,6 +464,8 @@ void decode_formatI(uint16_t instruction)
       bw_flag == WORD ? 
 	strncpy(mnemonic, "SUBC ", sizeof mnemonic) :
 	strncpy(mnemonic, "SUBC.B ", sizeof mnemonic);
+
+      if (disassemble_mode) break;
 
       int16_t original_dst_value = *destination_addr;
       source_value = ~source_value; /* 1's comp */
@@ -505,6 +505,8 @@ void decode_formatI(uint16_t instruction)
 	strncpy(mnemonic, "SUB ", sizeof mnemonic) :
 	strncpy(mnemonic, "SUB.B ", sizeof mnemonic);
 
+      if (disassemble_mode) break;
+
       int16_t original_dst_value = *destination_addr;
       source_value = ~source_value + 1;
  
@@ -538,6 +540,8 @@ void decode_formatI(uint16_t instruction)
 	strncpy(mnemonic, "CMP ", sizeof mnemonic) :
 	strncpy(mnemonic, "CMP.B ", sizeof mnemonic);
 
+      if (disassemble_mode) break;
+
       int16_t original_dst_value = *destination_addr;
       uint16_t unsigned_source_value = ((uint16_t)~source_value + 1);
       int16_t result;
@@ -568,6 +572,8 @@ void decode_formatI(uint16_t instruction)
 	strncpy(mnemonic, "DADD ", sizeof mnemonic) :
 	strncpy(mnemonic, "DADD.B ", sizeof mnemonic);
     
+      if (disassemble_mode) break;
+
       if (bw_flag == WORD) {
 	
       }
@@ -589,6 +595,8 @@ void decode_formatI(uint16_t instruction)
       bw_flag == WORD ? 
 	strncpy(mnemonic, "BIT ", sizeof mnemonic) :
 	strncpy(mnemonic, "BIT.B ", sizeof mnemonic);
+
+      if (disassemble_mode) break;
 
       if (bw_flag == WORD) {
 	uint16_t result = ((uint16_t) source_value) & (*destination_addr);
@@ -620,6 +628,8 @@ void decode_formatI(uint16_t instruction)
 	strncpy(mnemonic, "BIC ", sizeof mnemonic) :
 	strncpy(mnemonic, "BIC.B ", sizeof mnemonic);
       
+      if (disassemble_mode) break;
+
       if (bw_flag == WORD) {
 	*destination_addr &= (uint16_t) ~source_value;
       }
@@ -638,6 +648,8 @@ void decode_formatI(uint16_t instruction)
 	strncpy(mnemonic, "BIS ", sizeof mnemonic) :
 	strncpy(mnemonic, "BIS.B ", sizeof mnemonic);
       
+      if (disassemble_mode) break;
+
       if (bw_flag == WORD) {
 	*destination_addr |= (uint16_t) source_value;
       }
@@ -659,6 +671,8 @@ void decode_formatI(uint16_t instruction)
       bw_flag == WORD ? 
 	strncpy(mnemonic, "XOR ", sizeof mnemonic) :
 	strncpy(mnemonic, "XOR.B ", sizeof mnemonic);
+
+      if (disassemble_mode) break;
 
       if (bw_flag == WORD) {
 	SR.overflow = 
@@ -696,6 +710,8 @@ void decode_formatI(uint16_t instruction)
 	strncpy(mnemonic, "AND ", sizeof mnemonic) :
 	strncpy(mnemonic, "AND.B ", sizeof mnemonic);
 
+      if (disassemble_mode) break;
+
       if (bw_flag == WORD) {
 	*destination_addr &= (uint16_t)source_value;	
 
@@ -719,5 +735,4 @@ void decode_formatI(uint16_t instruction)
   } //# End of switch
 
   strncat(mnemonic, asm_operands, sizeof asm_operands);
-  printf("%s\n", mnemonic);
 }

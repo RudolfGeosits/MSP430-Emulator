@@ -24,6 +24,7 @@ uint8_t is_zero (uint16_t *result_addr, uint8_t bw_flag);
 uint8_t is_carried (uint32_t original_dst_value, uint32_t source_value,
                     uint8_t bw_flag);
 
+char mnemonic[50] = {0};
 void decode_formatI(uint16_t instruction);
 void decode_formatII(uint16_t instruction);
 void deocde_formatIII(uint16_t instruction);

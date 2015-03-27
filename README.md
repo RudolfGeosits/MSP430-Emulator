@@ -13,7 +13,7 @@ MSP430-Emulator
 
 - TODO
 
-  - JIT Disassembly Abilities
+  - Disassembly Coloring
   - Basic Clock Module Emulation
 
   - Instructions

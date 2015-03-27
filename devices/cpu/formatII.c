@@ -40,15 +40,16 @@ void decode_formatII( uint16_t instruction )
   uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
   int16_t immediate_constant = 0;           /* Generated Constant */
 
+  /*
   printf("Opcode: 0x%01X  Source bits: 0x%01X\nAS_Flag: 0x%01X  "\
 	 "BW_Flag: 0x%01X\n",
          opcode, source, as_flag, bw_flag);
-  
+  */
+
   /* Spot CG1 and CG2 Constant generator instructions */
   if ( (source == 2 && as_flag > 1) || source == 3 ) {
     constant_generator_active = 1;
     immediate_constant = run_constant_generator(source, as_flag);
-    printf("Got constant: %d, using it.\n", immediate_constant);
   }
   else {
     constant_generator_active = 0;
@@ -178,13 +179,14 @@ void decode_formatII( uint16_t instruction )
    */
   case 0x0:{
     bw_flag == WORD ?
-      strncpy(mnemonic, "RRC ", sizeof mnemonic) :
-      strncpy(mnemonic, "RRC.B ", sizeof mnemonic);    
+      strncpy(mnemonic, "RRC", sizeof mnemonic) :
+      strncpy(mnemonic, "RRC.B", sizeof mnemonic);    
+    if (disassemble_mode) break; 
 
     bool CF = SR.carry;
 
     if (bw_flag == WORD) {
-      SR.carry = (*source_address & 0x0001);/* Set CF from LSB */
+      SR.carry = *source_address & 0x0001;  /* Set CF from LSB */
       *source_address >>= 1;                /* Shift one right */
       CF ? *source_address |= 0x8000 : 0;   /* Set MSB from prev CF */
     }
@@ -206,8 +208,9 @@ void decode_formatII( uint16_t instruction )
   * Bits 15 to 8 ↔ bits 7 to 0
   */
   case 0x1:{
-    strncpy(mnemonic, "SWPB ", sizeof mnemonic);    
-    
+    strncpy(mnemonic, "SWPB", sizeof mnemonic);    
+    if (disassemble_mode) break; 
+	
     uint8_t upper_nibble, lower_nibble;
     upper_nibble = (*source_address & 0xFF00) >> 8;
     lower_nibble = *source_address & 0x00FF;
@@ -217,28 +220,91 @@ void decode_formatII( uint16_t instruction )
     break;
   }
     
-  //# RRA Rotate right arithmetic 
+  /* RRA Rotate right arithmetic 
+   *   MSB → MSB, MSB → MSB-1, ... LSB+1 → LSB, LSB → C
+   * 
+   * N: Set if result is negative, reset if positive
+   * Z: Set if result is zero, reset otherwise
+   * C: Loaded from the LSB
+   * V: Reset
+   */
   case 0x2:{
     bw_flag == WORD ?
-      strncpy(mnemonic, "RRA ", sizeof mnemonic) :
-      strncpy(mnemonic, "RRA.B ", sizeof mnemonic);    
-    
+      strncpy(mnemonic, "RRA", sizeof mnemonic) :
+      strncpy(mnemonic, "RRA.B", sizeof mnemonic);     
+    if (disassemble_mode) break; 
+   
+    if (bw_flag == WORD) {
+      SR.carry = *source_address & 0x0001;
+      bool msb = *source_address >> 15;
+      *source_address >>= 1;
+      msb ? *source_address |= 0x8000 : 0; /* Extend Sign */
+    }
+    else if (bw_flag == BYTE) {
+      SR.carry = *source_address & 0x0001;
+      bool msb = *source_address >> 7;
+      *source_address >>= 1;
+      msb ? *source_address |= 0x0080 : 0;
+    }
+
+    SR.zero = is_zero(source_address, bw_flag);
+    SR.negative = is_negative(source_address, bw_flag);
+    SR.overflow = false;
     break;
   }
 
-  //# SXT Sign extend byte to word
-  //# bw flag always 0 (word)
+  /* SXT Sign extend byte to word
+   *   bw flag always 0 (word)
+   *
+   * Bit 7 → Bit 8 ......... Bit 15
+   * 
+   * N: Set if result is negative, reset if positive
+   * Z: Set if result is zero, reset otherwise
+   * C: Set if result is not zero, reset otherwise (.NOT. Zero)
+   * V: Reset
+  */
+
   case 0x3:{
-    strncpy(mnemonic, "SXT ", sizeof mnemonic);    
+    strncpy(mnemonic, "SXT", sizeof mnemonic);    
+    if (disassemble_mode) break; 
+
+    if (*source_address & 0x0080) {
+      *source_address |= 0xFF00;
+    }
+    else {
+      *source_address &= 0x00FF;
+    }
     
+    SR.negative = is_negative(source_address, WORD);
+    SR.zero = is_zero(source_address, WORD);
+    SR.carry = ! SR.zero;
+    SR.overflow = false;
+
     break;
   }
   
-  //# PUSH push value on to the stack
+  /* PUSH push value on to the stack
+   *   
+   *   SP - 2 → SP
+   *   src → @SP
+   *
+   */
   case 0x4:{
     bw_flag == WORD ?
-      strncpy(mnemonic, "PUSH ", sizeof mnemonic) :
-      strncpy(mnemonic, "PUSH.B ", sizeof mnemonic);    
+      strncpy(mnemonic, "PUSH", sizeof mnemonic) :
+      strncpy(mnemonic, "PUSH.B", sizeof mnemonic);    
+    if (disassemble_mode) break; 
+
+    SP -= 2; /* Yes, even for BYTE Instructions */
+    uint16_t *stack_address = get_stack_ptr();
+    
+    if (bw_flag == WORD) {
+      *stack_address = source_value;
+    }
+    else if (bw_flag == BYTE) {
+      *stack_address &= 0xFF00; /* Zero out bottom half for pushed byte */
+      *stack_address |= (uint8_t) source_value;
+    }
 
     break;
   }
@@ -250,14 +316,21 @@ void decode_formatII( uint16_t instruction )
    */
     
   case 0x5:{
-    printf("CALL ");
-      
+    strncpy(mnemonic, "CALL", sizeof mnemonic);    
+    if (disassemble_mode) break; 
+    
+    SP -= 2;
+    uint16_t *stack_address = get_stack_ptr();
+    *stack_address = PC;
+    PC = *source_address;
+
     break;
   }
   
   //# RETI Return from interrupt: Pop SR then pop PC
   case 0x6:{
-    printf("RETI ");
+    strncpy(mnemonic, "RETI", sizeof mnemonic);    
+    if (disassemble_mode) break; 
        
     break;
   }
@@ -267,7 +340,7 @@ void decode_formatII( uint16_t instruction )
 
   } //# End of Switch
 
+  strncat(mnemonic, "\t", sizeof mnemonic);
   strncat(mnemonic, asm_operand, sizeof mnemonic);
-  
 }
 

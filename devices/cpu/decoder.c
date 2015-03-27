@@ -46,7 +46,9 @@ void decode(uint16_t instruction)
     decode_formatI(instruction);   /* format I (two operand) instruction */
   }
 
-  puts(mnemonic);
+  if (disassemble_mode) {
+    puts(mnemonic);
+  }
 }
 
 int16_t run_constant_generator(uint8_t source, uint8_t as_flag) 

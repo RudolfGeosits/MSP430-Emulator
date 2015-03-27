@@ -28,6 +28,8 @@ void decode_formatIII(uint16_t instruction)
   uint8_t condition = (instruction & 0x1C00) >> 10;
   int16_t signed_offset = (instruction & 0x03FF) * 2;
   bool negative = signed_offset >> 9;
+  
+  char value[20];
 
   if (negative) { /* Sign Extend for Arithmetic Operations */
     signed_offset |= 0xF800;
@@ -41,7 +43,8 @@ void decode_formatIII(uint16_t instruction)
   * If Z = 1: execute following instruction
   */
   case 0x0:{
-    sprintf(mnemonic, "JNZ 0x%04X", PC + signed_offset);
+    sprintf(mnemonic, "JNZ"); 
+    sprintf(value, "0x%04X", PC + signed_offset);
     if (disassemble_mode) break;
 
     if (SR.zero == false) {
@@ -56,7 +59,8 @@ void decode_formatIII(uint16_t instruction)
    * If Z = 0: execute following instruction
   */
   case 0x1:{
-    sprintf(mnemonic, "JZ 0x%04X", PC + signed_offset);
+    sprintf(mnemonic, "JZ");
+    sprintf(value, "0x%04X", PC + signed_offset);
     if (disassemble_mode) break;
 
     if (SR.zero == true) {
@@ -72,7 +76,8 @@ void decode_formatIII(uint16_t instruction)
   *  if C = 1: execute following instruction
   */
   case 0x2:{
-    sprintf(mnemonic, "JNC 0x%04X", PC + signed_offset);
+    sprintf(mnemonic, "JNC");
+    sprintf(value, "0x%04X", PC + signed_offset);
     if (disassemble_mode) break;
 
     if (SR.carry == false) {
@@ -88,7 +93,8 @@ void decode_formatIII(uint16_t instruction)
   * If C = 0: execute following instruction
   */
   case 0x3:{
-    sprintf(mnemonic, "JC 0x%04X", PC + signed_offset);
+    sprintf(mnemonic, "JC");
+    sprintf(value, "0x%04X", PC + signed_offset);
     if (disassemble_mode) break;
     
     if (SR.carry == true) {
@@ -104,7 +110,8 @@ void decode_formatIII(uint16_t instruction)
   *  if N = 0: execute following instruction
   */
   case 0x4:{
-    sprintf(mnemonic, "JN 0x%04X", PC + signed_offset);
+    sprintf(mnemonic, "JN");
+    sprintf(value, "0x%04X", PC + signed_offset);
     if (disassemble_mode) break;
 
     if (SR.negative == true) {
@@ -120,7 +127,8 @@ void decode_formatIII(uint16_t instruction)
   *  If (N .XOR. V) = 1 then execute the following instruction
   */
   case 0x5:{
-    sprintf(mnemonic, "JGE 0x%04X", PC + signed_offset);
+    sprintf(mnemonic, "JGE");    
+    sprintf(value, "0x%04X", PC + signed_offset);
     if (disassemble_mode) break;
 
     if ((SR.negative ^ SR.overflow) == false) {
@@ -136,7 +144,8 @@ void decode_formatIII(uint16_t instruction)
   *  If (N .XOR. V) = 0 then execute following instruction
   */
   case 0x6:{
-    sprintf(mnemonic, "JL 0x%04X", PC + signed_offset);
+    sprintf(mnemonic, "JL");
+    sprintf(value, "0x%04X", PC + signed_offset);
     if (disassemble_mode) break;
 
     if ((SR.negative ^ SR.overflow) == true) {
@@ -152,8 +161,9 @@ void decode_formatIII(uint16_t instruction)
    *
    */
   case 0x7:{
+    sprintf(mnemonic, "JMP");
+    sprintf(value, "0x%04X", PC + signed_offset);
     if (disassemble_mode) break;
-    sprintf(mnemonic, "JMP 0x%04X", PC + signed_offset);
 
     PC += signed_offset;
     break;
@@ -165,5 +175,7 @@ void decode_formatIII(uint16_t instruction)
   }
   
   } //# End of Switch
-  
+
+  strncat(mnemonic, "\t", sizeof(mnemonic));
+  strncat(mnemonic, value, sizeof(mnemonic));
 }

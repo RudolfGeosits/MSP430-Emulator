@@ -77,7 +77,9 @@ void decode_formatI(uint16_t instruction)
 
     destination_addr = d_reg;          /* Destination Register */
 
-    bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
+    if (!disassemble_mode) {
+      bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
+    }
   }
   
   /* Register - Indexed;      Ex: MOV Rs, 0x0(Rd) */
@@ -149,7 +151,10 @@ void decode_formatI(uint16_t instruction)
     }
 
     destination_addr = d_reg;          /* Destination register */
-    bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
+    
+    if (!disassemble_mode) {
+      bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
+    }
   }
 
   /* Indexed - Indexed;       Ex: MOV 0x0(Rs), 0x0(Rd) */
@@ -222,7 +227,10 @@ void decode_formatI(uint16_t instruction)
     }
 
     destination_addr = d_reg;          /* Destination Register */
-    bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
+
+    if (!disassemble_mode) {
+      bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
+    }
   }
 
   /* Indirect - Indexed;      Ex: MOV @Rs, 0x0(Rd)   */
@@ -286,11 +294,17 @@ void decode_formatI(uint16_t instruction)
       source_value = *get_addr_ptr(*s_reg);
 
       sprintf(asm_operands, "@%s+, %s", s_reg_name, d_reg_name);
-      bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
+      
+      if (!disassemble_mode) {
+	bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
+      }
     }
 
     destination_addr = d_reg;           /* Destination Register */
-    bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
+
+    if (!disassemble_mode) {
+      bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
+    }
   }
 
   /* Indirect Inc - Indexed;  Ex: MOV @Rs+, 0x0(Rd) */
@@ -315,7 +329,10 @@ void decode_formatI(uint16_t instruction)
       source_value = *get_addr_ptr(*s_reg); 
 
       sprintf(asm_operands, "@%s+, ", s_reg_name);	
-      bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
+
+      if (!disassemble_mode) {
+	bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
+      }
     }
 
     destination_offset = fetch();
@@ -354,8 +371,8 @@ void decode_formatI(uint16_t instruction)
      */
     case 0x4: {
       bw_flag == WORD ? 
-	strncpy(mnemonic, "MOV ", sizeof mnemonic) :
-	strncpy(mnemonic, "MOV.B ", sizeof mnemonic);
+	strncpy(mnemonic, "MOV", sizeof mnemonic) :
+	strncpy(mnemonic, "MOV.B", sizeof mnemonic);
 
       if (disassemble_mode) break;
 
@@ -385,8 +402,8 @@ void decode_formatI(uint16_t instruction)
      */
     case 0x5:{
       bw_flag == WORD ? 
-	strncpy(mnemonic, "ADD ", sizeof mnemonic) :
-	strncpy(mnemonic, "ADD.B ", sizeof mnemonic);
+	strncpy(mnemonic, "ADD", sizeof mnemonic) :
+	strncpy(mnemonic, "ADD.B", sizeof mnemonic);
 
       if (disassemble_mode) break;
 
@@ -423,8 +440,8 @@ void decode_formatI(uint16_t instruction)
      */
     case 0x6:{
       bw_flag == WORD ? 
-	strncpy(mnemonic, "ADDC ", sizeof mnemonic) :
-	strncpy(mnemonic, "ADDC.B ", sizeof mnemonic);
+	strncpy(mnemonic, "ADDC", sizeof mnemonic) :
+	strncpy(mnemonic, "ADDC.B", sizeof mnemonic);
 
       if (disassemble_mode) break;
 
@@ -462,8 +479,8 @@ void decode_formatI(uint16_t instruction)
      */
     case 0x7:{
       bw_flag == WORD ? 
-	strncpy(mnemonic, "SUBC ", sizeof mnemonic) :
-	strncpy(mnemonic, "SUBC.B ", sizeof mnemonic);
+	strncpy(mnemonic, "SUBC", sizeof mnemonic) :
+	strncpy(mnemonic, "SUBC.B", sizeof mnemonic);
 
       if (disassemble_mode) break;
 
@@ -502,8 +519,8 @@ void decode_formatI(uint16_t instruction)
 
     case 0x8:{
       bw_flag == WORD ? 
-	strncpy(mnemonic, "SUB ", sizeof mnemonic) :
-	strncpy(mnemonic, "SUB.B ", sizeof mnemonic);
+	strncpy(mnemonic, "SUB", sizeof mnemonic) :
+	strncpy(mnemonic, "SUB.B", sizeof mnemonic);
 
       if (disassemble_mode) break;
 
@@ -537,8 +554,8 @@ void decode_formatI(uint16_t instruction)
      */
     case 0x9:{
       bw_flag == WORD ? 
-	strncpy(mnemonic, "CMP ", sizeof mnemonic) :
-	strncpy(mnemonic, "CMP.B ", sizeof mnemonic);
+	strncpy(mnemonic, "CMP", sizeof mnemonic) :
+	strncpy(mnemonic, "CMP.B", sizeof mnemonic);
 
       if (disassemble_mode) break;
 
@@ -569,8 +586,8 @@ void decode_formatI(uint16_t instruction)
      */
     case 0xA:{
       bw_flag == WORD ? 
-	strncpy(mnemonic, "DADD ", sizeof mnemonic) :
-	strncpy(mnemonic, "DADD.B ", sizeof mnemonic);
+	strncpy(mnemonic, "DADD", sizeof mnemonic) :
+	strncpy(mnemonic, "DADD.B", sizeof mnemonic);
     
       if (disassemble_mode) break;
 
@@ -593,8 +610,8 @@ void decode_formatI(uint16_t instruction)
     */
     case 0xB:{
       bw_flag == WORD ? 
-	strncpy(mnemonic, "BIT ", sizeof mnemonic) :
-	strncpy(mnemonic, "BIT.B ", sizeof mnemonic);
+	strncpy(mnemonic, "BIT", sizeof mnemonic) :
+	strncpy(mnemonic, "BIT.B", sizeof mnemonic);
 
       if (disassemble_mode) break;
 
@@ -625,8 +642,8 @@ void decode_formatI(uint16_t instruction)
      */
     case 0xC:{
       bw_flag == WORD ? 
-	strncpy(mnemonic, "BIC ", sizeof mnemonic) :
-	strncpy(mnemonic, "BIC.B ", sizeof mnemonic);
+	strncpy(mnemonic, "BIC", sizeof mnemonic) :
+	strncpy(mnemonic, "BIC.B", sizeof mnemonic);
       
       if (disassemble_mode) break;
 
@@ -645,8 +662,8 @@ void decode_formatI(uint16_t instruction)
      */
     case 0xD:{
       bw_flag == WORD ? 
-	strncpy(mnemonic, "BIS ", sizeof mnemonic) :
-	strncpy(mnemonic, "BIS.B ", sizeof mnemonic);
+	strncpy(mnemonic, "BIS", sizeof mnemonic) :
+	strncpy(mnemonic, "BIS.B", sizeof mnemonic);
       
       if (disassemble_mode) break;
 
@@ -669,8 +686,8 @@ void decode_formatI(uint16_t instruction)
      */
     case 0xE:{
       bw_flag == WORD ? 
-	strncpy(mnemonic, "XOR ", sizeof mnemonic) :
-	strncpy(mnemonic, "XOR.B ", sizeof mnemonic);
+	strncpy(mnemonic, "XOR", sizeof mnemonic) :
+	strncpy(mnemonic, "XOR.B", sizeof mnemonic);
 
       if (disassemble_mode) break;
 
@@ -707,8 +724,8 @@ void decode_formatI(uint16_t instruction)
      */
     case 0xF:{
       bw_flag == WORD ? 
-	strncpy(mnemonic, "AND ", sizeof mnemonic) :
-	strncpy(mnemonic, "AND.B ", sizeof mnemonic);
+	strncpy(mnemonic, "AND", sizeof mnemonic) :
+	strncpy(mnemonic, "AND.B", sizeof mnemonic);
 
       if (disassemble_mode) break;
 
@@ -734,5 +751,6 @@ void decode_formatI(uint16_t instruction)
 
   } //# End of switch
 
+  strncat(mnemonic, "\t", sizeof mnemonic);
   strncat(mnemonic, asm_operands, sizeof mnemonic);
 }

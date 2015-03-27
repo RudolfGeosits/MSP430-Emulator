@@ -2,6 +2,10 @@
 
 unsigned int i = 0;
 
+int function (int x) {
+  return ++x;
+}
+
 void main(void){
   asm(
       "LABEL1:\n"
@@ -88,24 +92,32 @@ void main(void){
       */
 
       // Begin official FormatII Tester
-
-      "SWPB R5\n"
-      "SWPB #0x0\n"
-      "SWPB 0x2(R5)\n"
-      "SWPB 0x10\n"
-      "SWPB &0x200\n"
-      "SWPB #1\n"
-      "SWPB @R5\n"
-      "SWPB #2\n"
-      "SWPB #4\n"
-      "SWPB @R5+\n"
-      "SWPB #0x1234\n"
-      "SWPB #-1\n"
-      "SWPB #8\n"
-
+      /*
+      "MOV #0xFFF0, R5\n"
+      "CALL R5\n"
+      "MOV #0x00F1, R5\n"
+      "CALL R5\n"
+      "MOV #0x0001, R5\n"
+      "CALL R5\n"
+      "MOV #0x0000, R5\n"
+      "CALL R5\n"
+      "CALL #0x0\n"
+      "CALL 0x2(R5)\n"
+      "CALL 0x10\n"
+      "CALL &0x200\n"
+      "CALL #1\n"
+      "CALL @R5\n"
+      "CALL #2\n"
+      "CALL #4\n"
+      "CALL @R5+\n"
+      "CALL #0x1234\n"
+      "CALL #-1\n"
+      "CALL #8\n"
+      */
       // End Official FormatII Tester
       );
-  
+
+  int y = function(0xA);
   // Stop the watchdog timer
   WDTCTL = WDTPW + WDTHOLD;
 

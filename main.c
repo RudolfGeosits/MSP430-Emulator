@@ -51,10 +51,10 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  if( pthread_create(&gui_thread, NULL, gui, (void *)NULL ) ) {
-    fprintf(stderr, "Error creating thread\n");
-    return 1;
-  }
+  //if( pthread_create(&gui_thread, NULL, gui, (void *)NULL ) ) {
+  //  fprintf(stderr, "Error creating thread\n");
+  //  return 1;
+  //}
 
   initialize_msp_memspace();
   initialize_msp_registers();

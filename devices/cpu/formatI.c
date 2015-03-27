@@ -734,5 +734,5 @@ void decode_formatI(uint16_t instruction)
 
   } //# End of switch
 
-  strncat(mnemonic, asm_operands, sizeof asm_operands);
+  strncat(mnemonic, asm_operands, sizeof mnemonic);
 }

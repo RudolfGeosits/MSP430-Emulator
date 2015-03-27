@@ -85,58 +85,25 @@ void main(void){
       "ADD #8, &0xA\n"      
 
       // End Official Tester
-
-      "CALL #0x1\n" 
-      "CALL #0x8\n" 
-      "CALL #-0x1\n" 
-      "CALL &0x1234\n" 
-      "CALL #0x72A\n" 
-      "CALL 0x4\n" 
-      "CALL &0x4\n" 
-
-      "CALL R5\n"
-      "CALL 0x2(R5)\n" 
-      "CALL @R5\n" 
-      "CALL @R5+\n" 
-
-      "PUSH -0x2\n" 
-      "PUSH 0x2\n" 
-      "PUSH.B 0x4\n" 
-      
-      "PUSH &0xC000\n" 
-      "PUSH.B &0xC010\n" 
-      
-      "PUSH #4\n" 
-      "PUSH #8\n" 
-      "PUSH #0\n"
-      "PUSH #1\n"
-      "PUSH #2\n"
-      "PUSH #-1\n"
-      
-      "PUSH.B #4\n"
-      "PUSH.B #8\n"
-      "PUSH.B #0\n"
-      "PUSH.B #1\n"
-      "PUSH.B #2\n"
-      "PUSH.B #-1\n"
-      
-      "PUSH #0x1234\n"
-      "PUSH.B #0x78AB\n"
-
-      "PUSH R5\n"
-      "PUSH.B R5\n"
-      "PUSH 0x2(R5)\n"
-      "PUSH.B 0x2(R5)\n"
-      "PUSH @R5\n"
-      "PUSH.B @R5\n"
-      "PUSH @R5+\n"
-      "PUSH.B @R5+\n"
-      
-      "SXT R5\n"
-      "SXT -0x2(R5)\n"
-      "SXT @R5\n"
-      "SXT @R5+\n"
       */
+
+      // Begin official FormatII Tester
+
+      "SWPB R5\n"
+      "SWPB #0x0\n"
+      "SWPB 0x2(R5)\n"
+      "SWPB 0x10\n"
+      "SWPB &0x200\n"
+      "SWPB #1\n"
+      "SWPB @R5\n"
+      "SWPB #2\n"
+      "SWPB #4\n"
+      "SWPB @R5+\n"
+      "SWPB #0x1234\n"
+      "SWPB #-1\n"
+      "SWPB #8\n"
+
+      // End Official FormatII Tester
       );
   
   // Stop the watchdog timer

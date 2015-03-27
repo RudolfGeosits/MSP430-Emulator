@@ -53,6 +53,15 @@ void command_loop()
       break;
     }                                 
 
+    else if ( strncmp("reset", command, sizeof "reset") == 0 ) {
+      uninitialize_msp_memspace();
+      initialize_msp_memspace();
+      initialize_msp_registers();
+      ports_setup();
+      load_program("test.bin", LOAD_POS);
+      break;
+    }                                 
+
     /* run, run the program until a breakpoint is hit */
     else if ( strncmp("run", command, sizeof "run") == 0 ) {
       run = true;

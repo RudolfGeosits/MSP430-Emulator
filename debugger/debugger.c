@@ -22,7 +22,6 @@
 typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
 enum {MAX_BREAKPOINTS = 10};
 bool debugger_print = true;
-bool disassemble_mode = false;
 
 /* Main command loop */
 void command_loop()
@@ -43,35 +42,49 @@ void command_loop()
     }
   }
 
+  if (! disassemble_mode) {
+    display_registers();
+    disassemble(1, false);
+  }
+
   while (!run) {
     memset(command, 0, sizeof(command));
     scanf("%s", command);
     filter_uppercase(command);
 
-    /* st X, step X instructions forward, defaults to 1 */
-    if ( strncmp("st", command, sizeof "st") == 0 ) {
-      break;
-    }                                 
+    /* s NUM_STEPS, step X instructions forward, defaults to 1 */
+    if ( strncmp("s", command, sizeof "s") == 0 ||
+	 strncmp("step", command, sizeof "step") == 0) {
+      unsigned int num_of_steps = 0;
+      
+      if (command[1] == ' ') {
+	scanf("%u", &num_of_steps);
+	printf("TODO:Stepping %u\n", num_of_steps);
+      }
 
-    else if ( strncmp("reset", command, sizeof "reset") == 0 ) {
-      uninitialize_msp_memspace();
-      initialize_msp_memspace();
-      initialize_msp_registers();
-      ports_setup();
-      load_program("test.bin", LOAD_POS);
       break;
     }                                 
 
     /* run, run the program until a breakpoint is hit */
-    else if ( strncmp("run", command, sizeof "run") == 0 ) {
+    else if ( strncmp("run", command, sizeof "run") == 0 ||
+	      strncmp("r", command, sizeof "r") == 0) {
       run = true;
       debugger_print = false;
       
       break;
     }
 
+    /* Display disassembly */
+    else if ( strncmp("disas", command, sizeof "disas") == 0 ||
+	      strncmp("dis", command, sizeof "dis") == 0 ||
+	      strncmp("disassemble", command, sizeof "disassemble") == 0) {
+
+      disassemble(10, false);
+      continue;
+    }
+
     /* Display all 16 registers */
-    else if ( strncmp("r", command, sizeof "r") == 0 ) {
+    else if ( strncmp("regs", command, sizeof "regs") == 0 ) {
       display_registers();
       continue;
     }
@@ -123,37 +136,27 @@ void command_loop()
       dump_memory(MEMSPACE, 0x0, start_addr, stride);	
     }
 
-    /* dis ADDRESS, Dump a disassembly from ADDRESS */
-    else if ( strncmp("dis", command, sizeof "dis") == 0 ) {
-      printf("DISASSEMBLY\n");
-    }
-
-    /* setr REG_VAL, set a register to some value */
-    else if ( strncmp("setr", command, sizeof "setr") == 0 ) {
+    /* Set REG/LOC VALUE */
+    else if ( strncmp("set", command, sizeof "set") == 0 ) {
       int value = 0;
-      char reg_name[10];
+      char reg_name_or_addr[33];
       
-      scanf("%s %X", reg_name, &value);
-      filter_uppercase(reg_name);
+      scanf("%s %X", reg_name_or_addr, &value);
 
-      uint16_t *reg = get_reg_ptr( reg_name_to_num(reg_name) );
-      *reg = value;
-      
+      if ( reg_name_to_num(reg_name_or_addr) != -1 ) {
+	*get_reg_ptr( reg_name_to_num(reg_name_or_addr) ) = value;
+	display_registers();
+	disassemble(1, false);
+      }
+      else {
+	uint16_t virtual_addr = (uint16_t) strtol(reg_name_or_addr, NULL, 0);
+	*get_addr_ptr(virtual_addr) = value;
+      }
+
       continue;
     }
 
-    /* setm MEMLOC VAL, set a memory location to some value */
-    else if ( strncmp("setm", command, sizeof "setm") == 0 ) {
-      uint16_t value = 0;
-      uint16_t virtual_addr;
-
-      scanf("%X %X", (unsigned int *) &virtual_addr, (unsigned int *)&value);
-      *get_addr_ptr(virtual_addr) = value;
-      
-      continue;
-    }
-
-    /* setb BREAKPOINT_ADDRESS */
+    /* break BREAKPOINT_ADDRESS */
     else if ( strncmp("break", command, sizeof "break") == 0 ) {
       if (cur_bp_number >= MAX_BREAKPOINTS) {
 	printf("Too many breakpoints.\n");
@@ -171,10 +174,14 @@ void command_loop()
 
     /* help, display a list of debugger commands */
     else if ( strncmp("help", command, sizeof "help") == 0 ) {
-      printf("\td(b|w|d) HEX_ADDR|Rn : Dump Memory At HEX_ADDR or Rn\n\tsetr "\
-	     "Rn HEX_VALUE : Set Register Value\n\tst : Step Instruction\n\t"\
-	     "setm HEX_ADDR HEX_VALUE : Set Memory Location HEX_ADDR value " \
-	     "HEX_VALUE\n\tbreak ADDR\n\tbps : view breakpoints\n\n"
+      printf("\n  run :\t\t\t\tRun Program Until Breakpoint is Hit\n"\
+	     "  step :\t\t\tStep Into Instruction\n"\
+	     "  disassemble :\t\t\tDisassemble Instructions\n"\
+	     "  break ADDR :\t\t\tSet a Breakpoint\n"\
+	     "  set HEX_ADDR|Rn :\t\tSet Memory or Register\n"\
+	     "  bps :\t\t\t\tDisplay Breakpoints\n"\
+	     "  regs :\t\t\tDisplay Registers\n"\
+	     "  d(b|w|d) HEX_ADDR|Rn :\tDump Memory or Register\n"\
       );
     }
 

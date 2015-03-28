@@ -28,22 +28,10 @@
 #include "devices/cpu/registers.h"
 #include "utils.h"
 #include "devices/peripherals/setup.h"
-#include "debugger/debugger.h"
 #include "devices/cpu/decoder.h"
+#include "debugger/disassembler.c"
+#include "debugger/debugger.h"
 #include "debugger/gui/gui.c"
-
-void disassemble(uint8_t times){
-  uint16_t saved_pc = PC;
-  uint8_t i;
-
-  disassemble_mode = true;
-  for (i = 0;i < times;i++) {
-    decode( fetch() );
-  }
-   
-  disassemble_mode = false;
-  PC = saved_pc;
-}
 
 int main(int argc, char *argv[])
 {
@@ -66,9 +54,6 @@ int main(int argc, char *argv[])
   load_program(argv[1], LOAD_POS);
 
   while (1) {            /* Fetch-Decode-Execute Cycle */
-    display_registers();
-    disassemble(10);
-
     command_loop();      /* Debugger */
 
     handle_port1();

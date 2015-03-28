@@ -100,7 +100,7 @@ void filter_uppercase(char *buffer)
 **    uint8_t n = reg_name_to_num("%r1");
 ** Returns number on success, -1 on invalid name
 */
-uint8_t reg_name_to_num(char *name)
+int8_t reg_name_to_num(char *name)
 {
   if ( 
        strncmp("%r0", name, sizeof "%r0") == 0 ||
@@ -191,11 +191,8 @@ uint8_t reg_name_to_num(char *name)
   
     return 15;
   }
-
-  else {
-    return -1;
-  }
-
+  
+  return -1;
 }
 
 /* Convert register number into its ASCII name

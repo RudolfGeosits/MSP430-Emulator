@@ -14,6 +14,7 @@ MSP430-Emulator
   If you think this sounds fun, please feel free to contribute! (TODO list below!)
   
   <img>http://s2.postimg.org/hti7fnwbd/emulator_screengrab.png</img>
+  ![Screen Grab](http://s2.postimg.org/hti7fnwbd/emulator_screengrab.png "Screen Grab")
 
 - TODO
 

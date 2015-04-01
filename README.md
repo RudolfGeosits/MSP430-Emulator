@@ -1,15 +1,19 @@
 MSP430-Emulator
 ===============
 
-- Providing a software model of the MSP430 instruction set
+- Currently providing a complete software model of the MSP430 instruction set
+- An interactive debugger for advanced exploit development and analysis
+- Peripheral port 1 is currently being configured
 
-  The first project goal is to provide a software model of the MSP430 
-  instruction set, complete with an interactive debugger. 
-
-  After that, other devices on the chip may be implemented providing a 
-  simulated interface for serial communication, and general pin and 
-  electronics testing with the 430 using WebGL to create a browser graphics 
-  interface for virtual breadboarding. 
+  The project goal is to simulate all peripherals and devices on the TIMSP430 Launchpad starter kit, 
+  to be able to test run software and fuzz hardware inputs like UART or some of the other 
+  digital ports via programmable means. Then moving on to a more device agnostic end game. We would 
+  like to develop a web interface for remote debugging as well.
+  
+  Ultimately, we would like to develop a simple and configurable framework that can handle many architectures.
+  If you think this sounds fun, please feel free to contribute! (TODO list below!)
+  
+  <img>http://s2.postimg.org/hti7fnwbd/emulator_screengrab.png</img>
 
 - TODO
 

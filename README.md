@@ -13,8 +13,7 @@ MSP430-Emulator
   Ultimately, we would like to develop a simple and configurable framework that can handle many architectures.
   If you think this sounds fun, please feel free to contribute! (TODO list below!)
   
-  <img>http://s2.postimg.org/hti7fnwbd/emulator_screengrab.png</img>
-  ![Screen Grab](http://s2.postimg.org/hti7fnwbd/emulator_screengrab.png "Screen Grab")
+  ![Screen Grab](http://s14.postimg.org/6wzj6wydd/MSP3.png "Screen Grab")
 
 - TODO
 

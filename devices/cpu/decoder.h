@@ -26,6 +26,7 @@ uint8_t is_carried (uint32_t original_dst_value, uint32_t source_value,
 
 char mnemonic[50] = {0};
 bool disassemble_mode = false;
+bool debug_mode = true;
 
 void decode_formatI(uint16_t instruction);
 void decode_formatII(uint16_t instruction);

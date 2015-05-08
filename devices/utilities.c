@@ -33,7 +33,7 @@ void load_program(char *program_name, uint8_t *MEM)
   rewind(fd);
 
   result = fread(MEM, 1, size, fd);
-  printf("Placed %d bytes into flash\n\n\n", result);
+  printf("Placed %d bytes into flash\n\n", result);
 
   fclose(fd);
 }

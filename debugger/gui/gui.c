@@ -1,6 +1,7 @@
 GtkWidget *window = NULL;
 GtkWidget *msp_power_led = NULL;
 GtkWidget *msp_no_power = NULL;
+GtkWidget *msp_p1_0 = NULL;
 
 static gboolean main_loop(GtkWidget *widget)
 {
@@ -9,21 +10,24 @@ static gboolean main_loop(GtkWidget *widget)
 
   if (P1DIR_0 && P1OUT_0) {
     gtk_image_set_from_file( (GtkImage *)msp_no_power, 
-			     "debugger/gui/msp_p1.0.png");  
+    			     "debugger/gui/msp_p1.0.png");  
+
+    //puts("*RED ON\n");
     others_on = true;
   }
   
   if (P1DIR_6 && P1OUT_6) {
     gtk_image_set_from_file( (GtkImage *)msp_no_power, 
-			     "debugger/gui/msp_p1.6.png");      
+    			     "debugger/gui/msp_p1.6.png");      
 
+    //puts("*GREEN ON\n");
     others_on = true;
   }
 
   if (P1DIR_0 && P1OUT_0 && P1DIR_6 && P1OUT_6) {
     gtk_image_set_from_file( (GtkImage *)msp_no_power, 
-			     "debugger/gui/msp_p1.0_p1.6.png");      
-
+    			     "debugger/gui/msp_p1.0_p1.6.png");      
+    //puts("*BOTH ON\n");
     others_on = true;    
   }
   
@@ -36,7 +40,7 @@ static gboolean main_loop(GtkWidget *widget)
   return TRUE;
 }
 
-void *gui(void *arg)
+void *gui(void *x)
 {
   /* Initialize GTK */
   gtk_init(NULL, NULL);
@@ -47,6 +51,7 @@ void *gui(void *arg)
 
   msp_power_led = gtk_image_new_from_file("debugger/gui/msp_power_on.png");
   msp_no_power = gtk_image_new_from_file("debugger/gui/msp_power_static.png");
+  msp_p1_0 = gtk_image_new_from_file("debugger/gui/msp_p1.0.png");
 
   if (msp_no_power == NULL || msp_power_led == NULL) {
     g_print("Image not loaded\n");

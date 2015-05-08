@@ -47,7 +47,9 @@ void decode(uint16_t instruction)
   }
 
   if (disassemble_mode) {
-    puts(mnemonic);
+    if (debug_mode) {
+      puts(mnemonic);
+    }
   }
 }
 

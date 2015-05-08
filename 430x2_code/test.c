@@ -2,10 +2,6 @@
 
 unsigned int i = 0;
 
-int function (int x) {
-  return ++x;
-}
-
 void main(void){
   asm(
       "LABEL1:\n"
@@ -117,7 +113,6 @@ void main(void){
       // End Official FormatII Tester
       );
 
-  int y = function(0xA);
   // Stop the watchdog timer
   WDTCTL = WDTPW + WDTHOLD;
 
@@ -131,7 +126,7 @@ void main(void){
 
   while(1){
     P1OUT ^= BIT0 | BIT6;
-    for(i = 100;i > 0;i--);
+    for(i = 0;i < 20000;i++);
   }
  
 }

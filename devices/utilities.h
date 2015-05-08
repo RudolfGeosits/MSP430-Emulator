@@ -23,4 +23,4 @@ int8_t reg_name_to_num(char *name);
 uint16_t *get_stack_ptr();
 uint16_t *get_addr_ptr(uint16_t addr);
 
-#include "utils.c"
+#include "utilities.c"

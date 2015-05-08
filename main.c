@@ -26,7 +26,7 @@
 
 #include "devices/memory/memspace.h"
 #include "devices/cpu/registers.h"
-#include "utils.h"
+#include "devices/utilities.h"
 #include "devices/peripherals/setup.h"
 #include "devices/cpu/decoder.h"
 #include "debugger/disassembler.c"
@@ -58,6 +58,7 @@ int main(int argc, char *argv[])
 
     handle_port1();
     decode( fetch() );   /* Instruction Decoder */
+    usleep(100);
   }
 
   uninitialize_msp_memspace();

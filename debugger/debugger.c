@@ -21,11 +21,11 @@
 /* Dump Bytes, Dump Words, Dump Double Words */
 typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
 enum {MAX_BREAKPOINTS = 10};
+bool run = false;
 
 /* Main command loop */
 void command_loop()
 {
-  static bool run = 0;
   static uint16_t breakpoint_addresses[MAX_BREAKPOINTS];
   static uint8_t cur_bp_number = 0;
   char command[333];
@@ -63,6 +63,13 @@ void command_loop()
 
       break;
     }                                 
+
+    /* run, run the program until a breakpoint is hit */
+    else if ( strncmp("exit", command, sizeof "exit") == 0 ||
+	      strncmp("e", command, sizeof "e") == 0) {
+      exit(0);
+      break;
+    }
 
     /* run, run the program until a breakpoint is hit */
     else if ( strncmp("run", command, sizeof "run") == 0 ||
@@ -181,6 +188,8 @@ void command_loop()
 	     "  bps :\t\t\t\tDisplay Breakpoints\n"\
 	     "  regs :\t\t\tDisplay Registers\n"\
 	     "  d(b|w|d) HEX_ADDR|Rn :\tDump Memory or Register\n"\
+	     "  CTRL+C :\t\t\tPause Execution\n"\
+	     "  quit :\t\t\tExit program\n"\
       );
     }
 
@@ -226,4 +235,15 @@ void dump_memory(uint8_t *MEM, uint32_t size,
   }
 
   puts("");
+}
+
+void handle_sigint(int sig)
+{
+  run = false;
+  debug_mode = true;
+}
+
+void register_signal(int sig)
+{
+  signal(sig, handle_sigint);
 }

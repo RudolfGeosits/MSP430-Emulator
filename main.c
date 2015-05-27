@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <pthread.h>
 #include <gtk/gtk.h>
@@ -46,6 +47,8 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Error creating thread\n");
     return 1;
   }
+
+  register_signal(SIGINT);
 
   initialize_msp_memspace();
   initialize_msp_registers();

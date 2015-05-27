@@ -12,12 +12,13 @@
   GNU General Public License for more details.                                 
                                                                                
   You should have received a copy of the GNU General Public License            
-  along with MSP430 Emulator.  If not, see <http://www.gnu.org/licenses/>.       
+  along with MSP430 Emulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 void dump_memory(uint8_t *MEM, uint32_t size, uint32_t start_addr, 
 		 uint8_t stride);
 
+void handle_sigint(int signal);
 void display_registers();
 void command_loop();
 

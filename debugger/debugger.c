@@ -54,6 +54,7 @@ void command_loop()
     /* s NUM_STEPS, step X instructions forward, defaults to 1 */
     if ( strncmp("s", command, sizeof "s") == 0 ||
 	 strncmp("step", command, sizeof "step") == 0) {
+
       unsigned int num_of_steps = 0;
       
       if (command[1] == ' ') {

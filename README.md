@@ -17,11 +17,10 @@ MSP430-Emulator
 
 - TODO
 
+  - Support for ELF binary format
   - Disassembly Coloring
-  - Basic Clock Module Emulation
-
+  - Basic Clock Module
+  
   - Instructions
-    - SUB (Fix SUB.B overflow flag)
-    - CMP (Fix CMP.B overflow flag)
     - DADD (BCD math)    
     - RETI (Return from Interrupt)

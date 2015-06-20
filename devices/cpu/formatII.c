@@ -24,7 +24,7 @@
 //#       A = Addressing mode for source
 //#       S = Source 
 //########################################################
-void decode_formatII( uint16_t instruction )
+void decode_formatII(Cpu *cpu, uint16_t instruction)
 {
   uint8_t opcode = (instruction & 0x0380) >> 7;
   uint8_t bw_flag = (instruction & 0x0040) >> 6;
@@ -34,7 +34,7 @@ void decode_formatII( uint16_t instruction )
   char reg_name[10];
   reg_num_to_name(source, reg_name);
   
-  uint16_t *reg = get_reg_ptr(source);
+  uint16_t *reg = get_reg_ptr(cpu, source);
   uint16_t bogus_reg; /* For immediate values to be operated on */
 
   uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
@@ -91,22 +91,22 @@ void decode_formatII( uint16_t instruction )
       sprintf(asm_operand, "#0x%04X", source_value);
     }
     else if (source == 0) {            /* Source Symbolic */
-      source_offset = fetch();
-      uint16_t virtual_addr = PC + source_offset;
+      source_offset = fetch(cpu);
+      uint16_t virtual_addr = cpu->pc + source_offset;
 
       source_address = get_addr_ptr(virtual_addr);
 
       sprintf(asm_operand, "0x%04X", virtual_addr);
     }
     else if (source == 2) {            /* Source Absolute */
-      source_offset = fetch();
+      source_offset = fetch(cpu);
       source_address = get_addr_ptr(source_offset);
       source_value = *source_address;
 
       sprintf(asm_operand, "&0x%04X", (uint16_t) source_offset);
     }
     else {                             /* Source Indexed */
-      source_offset = fetch();
+      source_offset = fetch(cpu);
       source_address = get_addr_ptr(*reg + source_offset);
       source_value = *source_address;
 
@@ -142,7 +142,7 @@ void decode_formatII( uint16_t instruction )
       sprintf(asm_operand, "#0x%04X", (uint16_t) source_value);
     }
     else if (source == 0) {            /* Source Immediate */
-      source_value = bogus_reg = fetch();
+      source_value = bogus_reg = fetch(cpu);
       source_address = &bogus_reg;
 
       if (bw_flag == WORD) {
@@ -183,22 +183,22 @@ void decode_formatII( uint16_t instruction )
       strncpy(mnemonic, "RRC.B", sizeof mnemonic);    
     if (disassemble_mode) break; 
 
-    bool CF = SR.carry;
+    bool CF = cpu->sr.carry;
 
     if (bw_flag == WORD) {
-      SR.carry = *source_address & 0x0001;  /* Set CF from LSB */
+      cpu->sr.carry = *source_address & 0x0001;  /* Set CF from LSB */
       *source_address >>= 1;                /* Shift one right */
       CF ? *source_address |= 0x8000 : 0;   /* Set MSB from prev CF */
     }
     else if (bw_flag == BYTE){
-      SR.carry = *(uint8_t *) source_address & 0x01;
+      cpu->sr.carry = *(uint8_t *) source_address & 0x01;
       *(uint8_t *) source_address >>= 1;
       CF ? *(uint8_t *) source_address |= 0x80 : 0;
     }
 
-    SR.zero = is_zero(source_address, bw_flag);
-    SR.negative = is_negative(source_address, bw_flag);
-    SR.overflow = false;
+    cpu->sr.zero = is_zero(source_address, bw_flag);
+    cpu->sr.negative = is_negative(source_address, bw_flag);
+    cpu->sr.overflow = false;
 
     break;
   }
@@ -235,21 +235,21 @@ void decode_formatII( uint16_t instruction )
     if (disassemble_mode) break; 
    
     if (bw_flag == WORD) {
-      SR.carry = *source_address & 0x0001;
+      cpu->sr.carry = *source_address & 0x0001;
       bool msb = *source_address >> 15;
       *source_address >>= 1;
       msb ? *source_address |= 0x8000 : 0; /* Extend Sign */
     }
     else if (bw_flag == BYTE) {
-      SR.carry = *source_address & 0x0001;
+      cpu->sr.carry = *source_address & 0x0001;
       bool msb = *source_address >> 7;
       *source_address >>= 1;
       msb ? *source_address |= 0x0080 : 0;
     }
 
-    SR.zero = is_zero(source_address, bw_flag);
-    SR.negative = is_negative(source_address, bw_flag);
-    SR.overflow = false;
+    cpu->sr.zero = is_zero(source_address, bw_flag);
+    cpu->sr.negative = is_negative(source_address, bw_flag);
+    cpu->sr.overflow = false;
     break;
   }
 
@@ -275,10 +275,10 @@ void decode_formatII( uint16_t instruction )
       *source_address &= 0x00FF;
     }
     
-    SR.negative = is_negative(source_address, WORD);
-    SR.zero = is_zero(source_address, WORD);
-    SR.carry = ! SR.zero;
-    SR.overflow = false;
+    cpu->sr.negative = is_negative(source_address, WORD);
+    cpu->sr.zero = is_zero(source_address, WORD);
+    cpu->sr.carry = ! cpu->sr.zero;
+    cpu->sr.overflow = false;
 
     break;
   }
@@ -293,10 +293,11 @@ void decode_formatII( uint16_t instruction )
     bw_flag == WORD ?
       strncpy(mnemonic, "PUSH", sizeof mnemonic) :
       strncpy(mnemonic, "PUSH.B", sizeof mnemonic);    
+
     if (disassemble_mode) break; 
 
-    SP -= 2; /* Yes, even for BYTE Instructions */
-    uint16_t *stack_address = get_stack_ptr();
+    cpu->sp -= 2; /* Yes, even for BYTE Instructions */
+    uint16_t *stack_address = get_stack_ptr(cpu);
     
     if (bw_flag == WORD) {
       *stack_address = source_value;
@@ -319,10 +320,10 @@ void decode_formatII( uint16_t instruction )
     strncpy(mnemonic, "CALL", sizeof mnemonic);    
     if (disassemble_mode) break; 
     
-    SP -= 2;
-    uint16_t *stack_address = get_stack_ptr();
-    *stack_address = PC;
-    PC = *source_address;
+    cpu->sp -= 2;
+    uint16_t *stack_address = get_stack_ptr(cpu);
+    *stack_address = cpu->pc;
+    cpu->pc = *source_address;
 
     break;
   }

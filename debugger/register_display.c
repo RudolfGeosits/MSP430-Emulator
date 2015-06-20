@@ -4,11 +4,11 @@
  *     (Specific: Display Register usages like PC, SR, etc.)               
  */
 
-void display_registers()
+void display_registers(Cpu *cpu)
 {
   typedef enum {UNDEF, LINUX, WINDOWS} System_t;
   System_t this_system;
-  uint16_t r2 = sr_to_value();
+  uint16_t r2 = sr_to_value(cpu);
 
 #ifdef __linux
   this_system = LINUX;
@@ -93,31 +93,31 @@ void display_registers()
 	 "%s%%%s%s%s: %s%04X  "\
 	 "%s%s%s: %s%d\n\n",
 	 
-	 red, r0_name, decor_col, value_col, (uint16_t)PC, 
-	 red, r1_name, decor_col, value_col, (uint16_t)SP, 
+	 red, r0_name, decor_col, value_col, (uint16_t)cpu->pc, 
+	 red, r1_name, decor_col, value_col, (uint16_t)cpu->sp, 
 	 red, r2_name, decor_col, value_col, (uint16_t)r2, 
-	 red, r3_name, decor_col, value_col, (uint16_t)CG2, 
+	 red, r3_name, decor_col, value_col, (uint16_t)cpu->cg2, 
 
-	 cyan, c_flag, decor_col, value_col, SR.carry,
+	 cyan, c_flag, decor_col, value_col, cpu->sr.carry,
 
-	 decor_col, reg_col, r4_name, decor_col, value_col, (uint16_t)r4, 
-	 decor_col, reg_col, r5_name, decor_col, value_col, (uint16_t)r5, 
-	 decor_col, reg_col, r6_name, decor_col, value_col, (uint16_t)r6,
-	 decor_col, reg_col, r7_name, decor_col, value_col, (uint16_t)r7, 
+	 decor_col, reg_col, r4_name, decor_col, value_col, (uint16_t)cpu->r4, 
+	 decor_col, reg_col, r5_name, decor_col, value_col, (uint16_t)cpu->r5, 
+	 decor_col, reg_col, r6_name, decor_col, value_col, (uint16_t)cpu->r6,
+	 decor_col, reg_col, r7_name, decor_col, value_col, (uint16_t)cpu->r7, 
 
-	 cyan, z_flag, decor_col, value_col, SR.zero,
+	 cyan, z_flag, decor_col, value_col, cpu->sr.zero,
 
-	 decor_col, reg_col, r8_name, decor_col, value_col, (uint16_t)r8, 
-	 decor_col, reg_col, r9_name, decor_col, value_col, (uint16_t)r9, 
-	 decor_col, reg_col, r10_name, decor_col, value_col, (uint16_t)r10,
-	 decor_col, reg_col, r11_name, decor_col, value_col, (uint16_t)r11, 
+	 decor_col, reg_col, r8_name, decor_col,value_col, (uint16_t)cpu->r8, 
+	 decor_col, reg_col, r9_name, decor_col,value_col, (uint16_t)cpu->r9, 
+	 decor_col, reg_col, r10_name, decor_col,value_col,(uint16_t)cpu->r10,
+	 decor_col, reg_col, r11_name, decor_col,value_col,(uint16_t)cpu->r11, 
 
-	 cyan, n_flag, decor_col, value_col, SR.negative, 
+	 cyan, n_flag, decor_col, value_col, cpu->sr.negative, 
 
-	 decor_col, reg_col, r12_name, decor_col, value_col, (uint16_t)r12, 
-	 decor_col, reg_col, r13_name, decor_col, value_col, (uint16_t)r13, 
-	 decor_col, reg_col, r14_name, decor_col, value_col, (uint16_t)r14,
-	 decor_col, reg_col, r15_name, decor_col, value_col, (uint16_t)r15,
+	 decor_col, reg_col, r12_name, decor_col,value_col,(uint16_t)cpu->r12, 
+	 decor_col, reg_col, r13_name, decor_col,value_col,(uint16_t)cpu->r13, 
+	 decor_col, reg_col, r14_name, decor_col,value_col,(uint16_t)cpu->r14,
+	 decor_col, reg_col, r15_name, decor_col,value_col,(uint16_t)cpu->r15,
 
-	 cyan, v_flag, decor_col, value_col, SR.overflow);
+	 cyan, v_flag, decor_col, value_col, cpu->sr.overflow);
 }

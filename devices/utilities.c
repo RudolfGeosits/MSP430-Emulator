@@ -38,8 +38,8 @@ void load_program(char *program_name, uint8_t *MEM)
   fclose(fd);
 }
 
-uint16_t *get_stack_ptr() {
-  return (uint16_t *) ( ((void *)MEMSPACE + SP) );
+uint16_t *get_stack_ptr(Cpu *cpu) {
+  return (uint16_t *) ( ((void *)MEMSPACE + cpu->sp) );
 }
 
 uint16_t *get_addr_ptr(uint16_t addr) {
@@ -51,35 +51,35 @@ uint16_t *get_addr_ptr(uint16_t addr) {
 **    int16_t *r4_ptr = reg_name_to_num(4);
 ** Returns a signed 16 bit pointer
 */
-int16_t *get_reg_ptr(uint8_t reg)
-{  
+int16_t *get_reg_ptr(Cpu *cpu, uint8_t reg)
+{
   static int16_t r2 = 0;
-
+  
   switch (reg) {  
-    case 0x0: return &PC;
-    case 0x1: return &SP;
+    case 0x0: return &cpu->pc;
+    case 0x1: return &cpu->sp;
 
     case 0x2:{
-      r2 = sr_to_value();
+      r2 = sr_to_value(cpu);
       return &r2;
     }
-
-    case 0x3: return &CG2;
-    case 0x4: return &r4;
-    case 0x5: return &r5;
-    case 0x6: return &r6;
-    case 0x7: return &r7;
-    case 0x8: return &r8;
-    case 0x9: return &r9;
-    case 0xA: return &r10;
-    case 0xB: return &r11;
-    case 0xC: return &r12;
-    case 0xD: return &r13;
-    case 0xE: return &r14;
-    case 0xF: return &r15;
+      
+    case 0x3: return &cpu->cg2;
+    case 0x4: return &cpu->r4;
+    case 0x5: return &cpu->r5;
+    case 0x6: return &cpu->r6;
+    case 0x7: return &cpu->r7;
+    case 0x8: return &cpu->r8;
+    case 0x9: return &cpu->r9;
+    case 0xA: return &cpu->r10;
+    case 0xB: return &cpu->r11;
+    case 0xC: return &cpu->r12;
+    case 0xD: return &cpu->r13;
+    case 0xE: return &cpu->r14;
+    case 0xF: return &cpu->r15;
       
     default:{
-      printf("Invalid Register Number");
+      puts("Invalid Register Number");
       return 0;
     }
   }
@@ -114,7 +114,7 @@ int8_t reg_name_to_num(char *name)
 	    strncmp("r1", name, sizeof "r1") == 0   ||
 	    strncmp("%sp", name, sizeof "%sp") == 0   ||
 	    strncmp("sp", name, sizeof "sp") == 0 ) {
-  
+    
     return 1;
   }
   else if ( strncmp("%r2", name, sizeof "%r2") == 0 ||
@@ -128,7 +128,7 @@ int8_t reg_name_to_num(char *name)
 	    strncmp("r3", name, sizeof "r3") == 0   ||
 	    strncmp("%cg2", name, sizeof "%cg2") == 0 ||
 	    strncmp("cg2", name, sizeof "cg2") == 0 ) {            
-
+    
     return 3;
   }
   else if ( strncmp("%r4", name, sizeof "%r4") == 0 ||

@@ -1,12 +1,12 @@
 /*                                                                             
   This file is part of MSP430 Emulator                                         
                                                                                
-  MSP430 Emulator is free software: you can redistribute it and/or modify               
+  MSP430 Emulator is free software: you can redistribute it and/or modify     
   it under the terms of the GNU General Public License as published by         
   the Free Software Foundation, either version 3 of the License, or            
   (at your option) any later version.                                          
                                                                                
-  MSP430 Emulator is distributed in the hope that it will be useful,                    
+  MSP430 Emulator is distributed in the hope that it will be useful,     
   but WITHOUT ANY WARRANTY; without even the implied warranty of               
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
   GNU General Public License for more details.                                 
@@ -15,7 +15,39 @@
   along with MSP430 Emulator.  If not, see <http://www.gnu.org/licenses/>.    
 */
 
-uint16_t sr_to_value();
-void initialize_msp_registers();
+#ifndef _REGISTERS_H_
+#define _REGISTERS_H_
+
+typedef struct Status_reg Status_reg;
+typedef struct Cpu Cpu;
+
+/* r2 or SR, the status register */
+typedef struct Status_reg {
+  uint8_t reserved : 7;   // Reserved bits                                 
+  uint8_t overflow : 1;   // Overflow flag                                 
+  uint8_t SCG1 : 1;       // System Clock Generator SMCLK; ON = 0; OFF = 1;   
+  uint8_t SCG0 : 1;   // System Clock Generator DCOCLK DCO ON = 0; DCO OFF = 1;
+  uint8_t OSCOFF : 1;    // Oscillator Off. LFXT1CLK ON = 0; LFXT1CLK OFF = 1; 
+  uint8_t CPUOFF : 1;     // CPU off; CPU OFF = 1; CPU ON = 0;                
+  uint8_t GIE : 1;    // General Inter enabl; Enbl maskable ints = 1; 0 = dont 
+  uint8_t negative : 1;   // Negative flag                                  
+  uint8_t zero : 1;       // Zero flag                                     
+  uint8_t carry : 1;      // Carry flag; Set when result produces a carry   
+} Status_reg;
+
+/* Main CPU structure */
+typedef struct Cpu {
+  uint16_t pc, sp;   /* R0 and R1 respectively */
+  Status_reg sr;     /* Status register fields */
+  int16_t cg2;       /* R3 or Constant Generator #2 */
+  
+  int16_t r4, r5, r6, r7;   /* R4-R15 General Purpose Registers */
+  int16_t r8, r9, r10, r11;
+  int16_t r12, r13, r14, r15;
+} Cpu;
+
+uint16_t sr_to_value(Cpu *cpu);
+void initialize_msp_registers(Cpu *cpu);
 
 #include "registers.c"
+#endif

@@ -4,7 +4,10 @@ unsigned int i = 0;
 
 void main(void){
   asm(
-      "LABEL1:\n"
+      "CMP #0x0, R15\n"
+      "SUB #0x0, R15\n"
+      "SUBC #0x0, R15\n"
+
       /*
       "MOV #0xF43F, R4\n"
       "MOV #0x0041, R5\n"
@@ -109,24 +112,24 @@ void main(void){
       "CALL #0x1234\n"
       "CALL #-1\n"
       "CALL #8\n"
-      */
       // End Official FormatII Tester
+      */
       );
-
+      
   // Stop the watchdog timer
   WDTCTL = WDTPW + WDTHOLD;
-
+  
   i = 0;
-    
+  
   // A register that configures the direction of a port pin as an
   // input or output 
   P1DIR |= BIT0 | BIT6;
   P1OUT |= BIT0;
   P1OUT &= ~BIT6;
-
+  
   while(1){
     P1OUT ^= BIT0 | BIT6;
-    for(i = 0;i < 20000;i++);
+    for(i = 0;i < 200;i++);
   }
  
 }

@@ -1,2 +1,1 @@
-#msp430-gcc -mmcu=msp430g2553 main.c -o main
-msp430-gcc -mmcu=msp430g2553 serial.c -o serial
+msp430-gcc -mmcu=msp430g2553 main.c -o main

@@ -30,40 +30,41 @@
 #include "devices/utilities.h"
 #include "devices/peripherals/setup.h"
 #include "devices/cpu/decoder.h"
-#include "debugger/disassembler.c"
+#include "debugger/disassembler.h"
 #include "debugger/debugger.h"
 #include "debugger/gui/gui.c"
 
 int main(int argc, char *argv[])
 {
+  Cpu *msp = (Cpu *) malloc( sizeof(Cpu) );
   pthread_t gui_thread;
   
   if (argv[1] == NULL) {
     display_help();
     exit(1);
   }
-
+  
   if( pthread_create(&gui_thread, NULL, gui, (void *)NULL ) ) {
     fprintf(stderr, "Error creating thread\n");
     return 1;
   }
 
   register_signal(SIGINT);
-
+  
   initialize_msp_memspace();
-  initialize_msp_registers();
+  initialize_msp_registers(msp);
   ports_setup();
-
+  
   load_program(argv[1], LOAD_POS);
 
-  while (1) {            /* Fetch-Decode-Execute Cycle */
-    command_loop();      /* Debugger */
+  while (true) {         /* Fetch-Decode-Execute Cycle */
+    command_loop(msp);   /* Debugger */
 
     handle_port1();
-    decode( fetch() );   /* Instruction Decoder */
+    decode( msp, fetch(msp) );   /* Instruction Decoder */
     usleep(100);
   }
-
-  uninitialize_msp_memspace();
+  
+  uninitialize_msp_memspace(msp);
   return 0;
 }

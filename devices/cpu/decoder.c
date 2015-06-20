@@ -17,18 +17,18 @@
 */
 
 /*##########+++ CPU Fetch Cycle  +++##########*/
-uint16_t fetch()
+uint16_t fetch(Cpu *cpu)
 {
   uint16_t word;
-
-  word = *get_addr_ptr(PC);
-  PC += 2;
-
+  
+  word = *get_addr_ptr(cpu->pc);
+  cpu->pc += 2;
+  
   return word;
 }
 
 /*##########+++ CPU Decode Cycle +++##########*/
-void decode(uint16_t instruction)
+void decode(Cpu *cpu, uint16_t instruction)
 {  
   int done = 0;
   uint8_t format_id;
@@ -37,13 +37,16 @@ void decode(uint16_t instruction)
   format_id = (uint8_t)(instruction >> 12);
 
   if (format_id == 0x1) {
-    decode_formatII(instruction);  /* format II (single operand) instruction */
+    /* format II (single operand) instruction */
+    decode_formatII(cpu, instruction);  
   }    
   else if (format_id >= 0x2 && format_id <= 3) {
-    decode_formatIII(instruction); /* format III (jump) instruction */
+    /* format III (jump) instruction */
+    decode_formatIII(cpu, instruction);
   }
   else if (format_id >= 0x4) {
-    decode_formatI(instruction);   /* format I (two operand) instruction */
+    /* format I (two operand) instruction */
+    decode_formatI(cpu, instruction);
   }
 
   if (disassemble_mode) {

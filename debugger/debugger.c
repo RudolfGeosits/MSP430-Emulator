@@ -24,16 +24,16 @@ enum {MAX_BREAKPOINTS = 10};
 bool run = false;
 
 /* Main command loop */
-void command_loop()
+void command_loop(Cpu *cpu)
 {
   static uint16_t breakpoint_addresses[MAX_BREAKPOINTS];
   static uint8_t cur_bp_number = 0;
-  char command[333];
+  char command[512];
 
   /* Check for breakpoints */
   int i;
   for (i = 0;i < cur_bp_number;i++) {
-    if (PC == breakpoint_addresses[i]) {
+    if (cpu->pc == breakpoint_addresses[i]) {
       run = 0; /* Stop fast execution */
       debug_mode = true;
       printf("\n\t[Breakpoint %d hit]\n\n", i + 1);
@@ -42,8 +42,8 @@ void command_loop()
   }
 
   if (!disassemble_mode && debug_mode) {
-    display_registers();
-    disassemble(1, false);
+    display_registers(cpu);
+    disassemble(cpu, 1, false);
   }
 
   while (!run) {
@@ -86,13 +86,13 @@ void command_loop()
 	      strncmp("dis", command, sizeof "dis") == 0 ||
 	      strncmp("disassemble", command, sizeof "disassemble") == 0) {
 
-      disassemble(10, false);
+      disassemble(cpu, 10, false);
       continue;
     }
 
     /* Display all 16 registers */
     else if ( strncmp("regs", command, sizeof "regs") == 0 ) {
-      display_registers();
+      display_registers(cpu);
       continue;
     }
     
@@ -127,7 +127,7 @@ void command_loop()
 	sscanf(param1, "%X", &start_addr);
       }
       else if (param1[0] == '%' || param1[0] == 'r') {   /* got Register */
-	start_addr = (uint16_t) *get_reg_ptr( reg_name_to_num(param1) );
+	start_addr = (uint16_t) *get_reg_ptr(cpu, reg_name_to_num(param1));
       }
       
       if (command[1] == 'b') {
@@ -151,9 +151,9 @@ void command_loop()
       scanf("%s %X", reg_name_or_addr, &value);
 
       if ( reg_name_to_num(reg_name_or_addr) != -1 ) {
-	*get_reg_ptr( reg_name_to_num(reg_name_or_addr) ) = value;
-	display_registers();
-	disassemble(1, false);
+	*get_reg_ptr( cpu, reg_name_to_num(reg_name_or_addr) ) = value;
+	display_registers(cpu);
+	disassemble(cpu, 1, false);
       }
       else {
 	uint16_t virtual_addr = (uint16_t) strtol(reg_name_or_addr, NULL, 0);
@@ -181,16 +181,16 @@ void command_loop()
 
     /* help, display a list of debugger commands */
     else if ( strncmp("help", command, sizeof "help") == 0 ) {
-      printf("\n  run :\t\t\t\tRun Program Until Breakpoint is Hit\n"\
-	     "  step :\t\t\tStep Into Instruction\n"\
-	     "  disassemble :\t\t\tDisassemble Instructions\n"\
-	     "  break ADDR :\t\t\tSet a Breakpoint\n"\
-	     "  set HEX_ADDR|Rn :\t\tSet Memory or Register\n"\
-	     "  bps :\t\t\t\tDisplay Breakpoints\n"\
-	     "  regs :\t\t\tDisplay Registers\n"\
-	     "  d(b|w|d) HEX_ADDR|Rn :\tDump Memory or Register\n"\
-	     "  CTRL+C :\t\t\tPause Execution\n"\
-	     "  quit :\t\t\tExit program\n"\
+      printf("\n  run\t\t\t\tRun Program Until Breakpoint is Hit\n"\
+	     "  step\t\t\tStep Into Instruction\n"\
+	     "  disassemble\t\t\tDisassemble Instructions\n"\
+	     "  break ADDR\t\t\tSet a Breakpoint\n"\
+	     "  set HEX_ADDR|Rn\t\tSet Memory or Register\n"\
+	     "  bps\t\t\t\tDisplay Breakpoints\n"\
+	     "  regs\t\t\tDisplay Registers\n"\
+	     "  d(b|w|d) HEX_ADDR|Rn\tDump Memory or Register\n"\
+	     "  CTRL+C\t\t\tPause Execution\n"\
+	     "  quit\t\t\tExit program\n"\
       );
     }
 

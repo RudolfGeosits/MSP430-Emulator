@@ -66,8 +66,8 @@ void command_loop(Cpu *cpu)
     }                                 
 
     /* run, run the program until a breakpoint is hit */
-    else if ( strncmp("exit", command, sizeof "exit") == 0 ||
-	      strncmp("e", command, sizeof "e") == 0) {
+    else if ( strncmp("quit", command, sizeof "quit") == 0 ||
+	      strncmp("q", command, sizeof "q") == 0) {
       exit(0);
       break;
     }
@@ -182,15 +182,15 @@ void command_loop(Cpu *cpu)
     /* help, display a list of debugger commands */
     else if ( strncmp("help", command, sizeof "help") == 0 ) {
       printf("\n  run\t\t\t\tRun Program Until Breakpoint is Hit\n"\
-	     "  step\t\t\tStep Into Instruction\n"\
+	     "  step\t\t\t\tStep Into Instruction\n"\
 	     "  disassemble\t\t\tDisassemble Instructions\n"\
 	     "  break ADDR\t\t\tSet a Breakpoint\n"\
 	     "  set HEX_ADDR|Rn\t\tSet Memory or Register\n"\
 	     "  bps\t\t\t\tDisplay Breakpoints\n"\
-	     "  regs\t\t\tDisplay Registers\n"\
-	     "  d(b|w|d) HEX_ADDR|Rn\tDump Memory or Register\n"\
+	     "  regs\t\t\t\tDisplay Registers\n"\
+	     "  d(b|w|d) HEX_ADDR|Rn\t\tDump Memory or Register\n"\
 	     "  CTRL+C\t\t\tPause Execution\n"\
-	     "  quit\t\t\tExit program\n"\
+	     "  quit\t\t\t\tExit program\n"\
       );
     }
 

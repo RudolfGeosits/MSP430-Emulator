@@ -5,8 +5,8 @@ unsigned int i = 0;
 void main(void){
   asm(
       "CMP #0x0, R15\n"
-      "SUB #0x0, R15\n"
-      "SUBC #0x0, R15\n"
+      //"SUB #0x0, R15\n"
+      //"SUBC #0x0, R15\n"
 
       /*
       "MOV #0xF43F, R4\n"
@@ -129,7 +129,7 @@ void main(void){
   
   while(1){
     P1OUT ^= BIT0 | BIT6;
-    for(i = 0;i < 200;i++);
+    for(i = 0;i < 10;i++);
   }
  
 }

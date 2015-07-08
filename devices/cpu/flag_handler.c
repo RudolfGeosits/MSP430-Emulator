@@ -33,6 +33,7 @@ uint8_t is_negative(int16_t *result_addr, uint8_t bw_flag)
     return 0;
   }
 }
+
 uint8_t is_carried(uint32_t original_dst_value, uint32_t source_value,
                    uint8_t bw_flag)
 {
@@ -53,6 +54,7 @@ uint8_t is_carried(uint32_t original_dst_value, uint32_t source_value,
     return 0;
   }
 }
+
 uint8_t is_overflowed(uint16_t source_value, uint16_t destination_value,
                       uint16_t *result, uint8_t bw_flag)
 {

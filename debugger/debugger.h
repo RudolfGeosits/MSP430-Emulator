@@ -25,7 +25,7 @@ void handle_sigint(int signal);
 
 void display_registers(Cpu *cpu);
 
-void command_loop(Cpu *cpu);
+bool command_loop(Cpu *cpu);
 
 #include "debugger.c"
 #endif

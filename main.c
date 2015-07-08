@@ -36,7 +36,7 @@
 
 int main(int argc, char *argv[])
 {
-  Cpu *msp = (Cpu *) malloc( sizeof(Cpu) );
+  Cpu *msp430 = (Cpu *) malloc( sizeof(Cpu) );
   pthread_t gui_thread;
   
   if (argv[1] == NULL) {
@@ -52,19 +52,19 @@ int main(int argc, char *argv[])
   register_signal(SIGINT);
   
   initialize_msp_memspace();
-  initialize_msp_registers(msp);
+  initialize_msp_registers(msp430);
   ports_setup();
   
   load_program(argv[1], LOAD_POS);
 
-  while (true) {         /* Fetch-Decode-Execute Cycle */
-    command_loop(msp);   /* Debugger */
-
+  /* Fetch-Decode-Execute Cycle */
+  while ( command_loop(msp430) ) {
     handle_port1();
-    decode( msp, fetch(msp) );   /* Instruction Decoder */
-    usleep(100);
+    decode( msp430, fetch(msp430) );   /* Instruction Decoder */
+    usleep(10);
   }
   
-  uninitialize_msp_memspace(msp);
+  uninitialize_msp_memspace(msp430);
+  free(msp430);
   return 0;
 }

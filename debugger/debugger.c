@@ -24,7 +24,7 @@ enum {MAX_BREAKPOINTS = 10};
 bool run = false;
 
 /* Main command loop */
-void command_loop(Cpu *cpu)
+bool command_loop(Cpu *cpu)
 {
   static uint16_t breakpoint_addresses[MAX_BREAKPOINTS];
   static uint8_t cur_bp_number = 0;
@@ -52,8 +52,8 @@ void command_loop(Cpu *cpu)
     filter_uppercase(command);
 
     /* s NUM_STEPS, step X instructions forward, defaults to 1 */
-    if ( strncmp("s", command, sizeof "s") == 0 ||
-	 strncmp("step", command, sizeof "step") == 0) {
+    if ( !strncasecmp("s", command, sizeof "s") ||
+	 !strncasecmp("step", command, sizeof "step")) {
 
       unsigned int num_of_steps = 0;
       
@@ -66,15 +66,14 @@ void command_loop(Cpu *cpu)
     }                                 
 
     /* run, run the program until a breakpoint is hit */
-    else if ( strncmp("quit", command, sizeof "quit") == 0 ||
-	      strncmp("q", command, sizeof "q") == 0) {
-      exit(0);
-      break;
+    else if ( !strncasecmp("quit", command, sizeof "quit") ||
+	      !strncasecmp("q", command, sizeof "q")) {
+      return false;
     }
 
     /* run, run the program until a breakpoint is hit */
-    else if ( strncmp("run", command, sizeof "run") == 0 ||
-	      strncmp("r", command, sizeof "r") == 0) {
+    else if ( !strncasecmp("run", command, sizeof "run") ||
+	      !strncasecmp("r", command, sizeof "r")) {
       run = true;
       debug_mode = false;
       
@@ -82,22 +81,22 @@ void command_loop(Cpu *cpu)
     }
 
     /* Display disassembly */
-    else if ( strncmp("disas", command, sizeof "disas") == 0 ||
-	      strncmp("dis", command, sizeof "dis") == 0 ||
-	      strncmp("disassemble", command, sizeof "disassemble") == 0) {
+    else if ( !strncasecmp("disas", command, sizeof "disas") ||
+	      !strncasecmp("dis", command, sizeof "dis") ||
+	      !strncasecmp("disassemble", command, sizeof "disassemble")) {
 
       disassemble(cpu, 10, false);
       continue;
     }
 
     /* Display all 16 registers */
-    else if ( strncmp("regs", command, sizeof "regs") == 0 ) {
+    else if ( !strncasecmp("regs", command, sizeof "regs")) {
       display_registers(cpu);
       continue;
     }
     
     /* Display all breakpoints */
-    else if ( strncmp("bps", command, sizeof "bps" ) == 0) {
+    else if ( !strncasecmp("bps", command, sizeof "bps" )) {
       if (cur_bp_number > 0) {
 	int i;
 	for (i = 0;i < cur_bp_number;i++) {
@@ -144,7 +143,7 @@ void command_loop(Cpu *cpu)
     }
 
     /* Set REG/LOC VALUE */
-    else if ( strncmp("set", command, sizeof "set") == 0 ) {
+    else if ( !strncasecmp("set", command, sizeof "set") ) {
       int value = 0;
       char reg_name_or_addr[33];
       
@@ -164,7 +163,7 @@ void command_loop(Cpu *cpu)
     }
 
     /* break BREAKPOINT_ADDRESS */
-    else if ( strncmp("break", command, sizeof "break") == 0 ) {
+    else if ( !strncasecmp("break", command, sizeof "break") ) {
       if (cur_bp_number >= MAX_BREAKPOINTS) {
 	printf("Too many breakpoints.\n");
       }
@@ -180,7 +179,9 @@ void command_loop(Cpu *cpu)
     }
 
     /* help, display a list of debugger commands */
-    else if ( strncmp("help", command, sizeof "help") == 0 ) {
+    else if ( !strncasecmp("help", command, sizeof "help") ||
+	      !strncasecmp("h", command, sizeof "h") ) {
+
       printf("\n  run\t\t\t\tRun Program Until Breakpoint is Hit\n"\
 	     "  step\t\t\t\tStep Into Instruction\n"\
 	     "  disassemble\t\t\tDisassemble Instructions\n"\
@@ -196,10 +197,12 @@ void command_loop(Cpu *cpu)
 
     /* End the command loop, next instruction */
     else {
-      
-      break;
+      puts("\t[Invalid command, type \"help\".]");
+      continue;
     }
   }
+
+  return true;
 }
 
 //##########+++ Dump Memory Function +++##########

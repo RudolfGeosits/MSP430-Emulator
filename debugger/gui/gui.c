@@ -88,4 +88,5 @@ void *gui(void *x)
   gtk_widget_show_all(GTK_WIDGET(window));
 
   gtk_main();
+  return NULL;
 }

@@ -24,6 +24,8 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include <gtk/gtk.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include "devices/memory/memspace.h"
 #include "devices/cpu/registers.h"
@@ -50,12 +52,11 @@ int main(int argc, char *argv[])
   }
 
   register_signal(SIGINT);
-  
   initialize_msp_memspace();
   initialize_msp_registers(msp430);
   ports_setup();
   
-  load_program(argv[1], LOAD_POS);
+  load_firmware(argv[1], LOAD_POS);
 
   /* Fetch-Decode-Execute Cycle */
   while ( command_loop(msp430) ) {

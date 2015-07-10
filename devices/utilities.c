@@ -15,15 +15,21 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses             
 */
 
-void load_program(char *program_name, uint8_t *MEM)
+/**
+ * @brief This function loads firmware from a binary file on disk into the
+ * virtual memory of the emulated device at base virt_loc
+ * @param file_name The file name of the binary to load into virtual memory
+ * @param virt_loc The location in virtual memory to load the firmware
+ */
+void load_firmware(char *file_name, uint8_t *virt_loc)
 {
   uint32_t size, result;
-  printf("Loading Program: ( %s )\n", program_name);
+  printf("Loading Program: ( %s )\n", file_name);
 
-  FILE *fd = fopen(program_name, "rb+");
+  FILE *fd = fopen(file_name, "rb+");
   
   if (fd == NULL) {
-    printf("Could not open %s, exiting.\n", program_name);
+    printf("Could not open %s, exiting.\n", file_name);
     exit(1);
   }
 
@@ -32,7 +38,7 @@ void load_program(char *program_name, uint8_t *MEM)
   size = ftell(fd);
   rewind(fd);
 
-  result = fread(MEM, 1, size, fd);
+  result = fread(virt_loc, 1, size, fd);
   printf("Placed %d bytes into flash\n\n", result);
 
   fclose(fd);
@@ -42,22 +48,29 @@ uint16_t *get_stack_ptr(Cpu *cpu) {
   return (uint16_t *) ( ((void *)MEMSPACE + cpu->sp) );
 }
 
-uint16_t *get_addr_ptr(uint16_t addr) {
-  return (uint16_t *) ( (void *)MEMSPACE + addr );
+/**
+ * @brief Get the host's pointer to the virtual address of the guest
+ * @param virt_addr The virtual address of the guest to translate to a useable
+ * one in context of the host
+ * @return Pointer to the host's location of the guest's memory address
+ */
+uint16_t *get_addr_ptr(uint16_t virt_addr) {
+  return (uint16_t *) ( (void *)MEMSPACE + virt_addr );
 }
 
-/* Get a pointer to the register specified by name REG
-** Ex:
-**    int16_t *r4_ptr = reg_name_to_num(4);
-** Returns a signed 16 bit pointer
-*/
+/**
+ * @brief Get a pointer to the register specified by the numeric register value
+ * @param cpu A pointer to the CPU structure
+ * @param reg The numeric value of the register
+ * @return Pointer to the register in question, NULL if register doesn't exist
+ */
 int16_t *get_reg_ptr(Cpu *cpu, uint8_t reg)
 {
   static int16_t r2 = 0;
   
   switch (reg) {  
-    case 0x0: return &cpu->pc;
-    case 0x1: return &cpu->sp;
+    case 0x0: return (int16_t *) &cpu->pc;
+    case 0x1: return (int16_t *) &cpu->sp;
 
     case 0x2:{
       r2 = sr_to_value(cpu);
@@ -85,109 +98,99 @@ int16_t *get_reg_ptr(Cpu *cpu, uint8_t reg)
   }
 }
 
-/* Convert upper case letters in string to lower case
-**    Ex:   filter_uppercase(buffer);
-*/
-void filter_uppercase(char *buffer)
-{
-  for (buffer; *buffer; ++buffer) {
-    *buffer = *buffer > 0x40 && *buffer < 0x5b ? *buffer | 0x60 : *buffer;
-  }
-}
-
-/* Convert register name to respective opcode number
-** Ex:
-**    uint8_t n = reg_name_to_num("%r1");
-** Returns number on success, -1 on invalid name
-*/
+/**
+ * @brief Convert register ASCII name to it's respective numeric value
+ * @param name The register's ASCII name
+ * @return The numeric equivalent for the register on success, -1 if an 
+ * invalid name was supplied
+ */
 int8_t reg_name_to_num(char *name)
 {
-  if ( 
-       strncmp("%r0", name, sizeof "%r0") == 0 ||
-       strncmp("r0", name, sizeof "r0") == 0   ||
-       strncmp("%pc", name, sizeof "%pc") == 0 ||
-       strncmp("pc", name, sizeof "pc") == 0 ) {
+  if ( !strncasecmp("%r0", name, sizeof "%r0") ||
+       !strncasecmp("r0", name, sizeof "r0")   ||
+       !strncasecmp("%pc", name, sizeof "%pc") ||
+       !strncasecmp("pc", name, sizeof "pc") ) {
     
     return 0;
   }
-  else if ( strncmp("%r1", name, sizeof "%r1") == 0 ||
-	    strncmp("r1", name, sizeof "r1") == 0   ||
-	    strncmp("%sp", name, sizeof "%sp") == 0   ||
-	    strncmp("sp", name, sizeof "sp") == 0 ) {
+  else if ( !strncasecmp("%r1", name, sizeof "%r1") ||
+	    !strncasecmp("r1", name, sizeof "r1")   ||
+	    !strncasecmp("%sp", name, sizeof "%sp")   ||
+	    !strncasecmp("sp", name, sizeof "sp") ) {
     
     return 1;
   }
-  else if ( strncmp("%r2", name, sizeof "%r2") == 0 ||
-	    strncmp("r2", name, sizeof "r2") == 0   ||
-	    strncmp("%sr", name, sizeof "%sr") == 0   ||
-	    strncmp("sr", name, sizeof "sr") == 0 ) {
+  else if ( !strncasecmp("%r2", name, sizeof "%r2") ||
+	    !strncasecmp("r2", name, sizeof "r2")   ||
+	    !strncasecmp("%sr", name, sizeof "%sr")   ||
+	    !strncasecmp("sr", name, sizeof "sr") ) {
   
     return 2;
   }
-  else if ( strncmp("%r3", name, sizeof "%r3") == 0 ||
-	    strncmp("r3", name, sizeof "r3") == 0   ||
-	    strncmp("%cg2", name, sizeof "%cg2") == 0 ||
-	    strncmp("cg2", name, sizeof "cg2") == 0 ) {            
+  else if ( !strncasecmp("%r3", name, sizeof "%r3") ||
+	    !strncasecmp("r3", name, sizeof "r3")   ||
+	    !strncasecmp("%cg2", name, sizeof "%cg2") ||
+	    !strncasecmp("cg2", name, sizeof "cg2") ) {            
     
     return 3;
   }
-  else if ( strncmp("%r4", name, sizeof "%r4") == 0 ||
-	    strncmp("r4", name, sizeof "r4") == 0 ) {
+  else if ( !strncasecmp("%r4", name, sizeof "%r4") ||
+	    !strncasecmp("r4", name, sizeof "r4") ) {
   
     return 4;
   }
-  else if ( strncmp("%r5", name, sizeof "%r5") == 0 ||
-	    strncmp("r5", name, sizeof "r5") == 0 ) {
+  else if ( !strncasecmp("%r5", name, sizeof "%r5") ||
+	    !strncasecmp("r5", name, sizeof "r5") ) {
   
     return 5;
   }
-  else if ( strncmp("%r6", name, sizeof "%r6") == 0 ||
-	    strncmp("r6", name, sizeof "r6") == 0 ) {
+  else if ( !strncasecmp("%r6", name, sizeof "%r6") ||
+	    !strncasecmp("r6", name, sizeof "r6") ) {
   
     return 6;
   }
-  else if ( strncmp("%r7", name, sizeof "%r7") == 0 ||
-	    strncmp("r7", name, sizeof "r7") == 0 ) {
+  else if ( !strncasecmp("%r7", name, sizeof "%r7") ||
+	    !strncasecmp("r7", name, sizeof "r7") ) {
   
     return 7;
   }
-  else if ( strncmp("%r8", name, sizeof "%r8") == 0 ||
-	    strncmp("r8", name, sizeof "r8") == 0 ) {
+  else if ( !strncasecmp("%r8", name, sizeof "%r8") ||
+	    !strncasecmp("r8", name, sizeof "r8") ) {
   
     return 8;
   }
-  else if ( strncmp("%r9", name, sizeof "%r9") == 0 ||
-	    strncmp("r9", name, sizeof "r9") == 0 ) {
+  else if ( !strncasecmp("%r9", name, sizeof "%r9") ||
+	    !strncasecmp("r9", name, sizeof "r9") ) {
   
     return 9;
   }
-  else if ( strncmp("%r10", name, sizeof "%r10") == 0 ||
-	    strncmp("r10", name, sizeof "r10") == 0 ) {
+  else if ( !strncasecmp("%r10", name, sizeof "%r10") ||
+	    !strncasecmp("r10", name, sizeof "r10") ) {
   
     return 10;
   }
-  else if ( strncmp("%r11", name, sizeof "%r11") == 0 ||
-	    strncmp("r11", name, sizeof "r11") == 0 ) {
+  else if ( !strncasecmp("%r11", name, sizeof "%r11") ||
+	    !strncasecmp("r11", name, sizeof "r11") ) {
   
     return 11;
   }
-  else if ( strncmp("%r12", name, sizeof "%r12") == 0 ||
-	    strncmp("r12", name, sizeof "r12") == 0 ) {
+  else if ( !strncasecmp("%r12", name, sizeof "%r12") ||
+	    !strncasecmp("r12", name, sizeof "r12") ) {
   
     return 12;
   }
-  else if ( strncmp("%r13", name, sizeof "%r13") == 0 ||
-	    strncmp("r13", name, sizeof "r13") == 0 ) {
+  else if ( !strncasecmp("%r13", name, sizeof "%r13") ||
+	    !strncasecmp("r13", name, sizeof "r13") ) {
   
     return 13;
   }
-  else if ( strncmp("%r14", name, sizeof "%r14") == 0 ||
-	    strncmp("r14", name, sizeof "r14") == 0 ) {
+  else if ( !strncasecmp("%r14", name, sizeof "%r14") ||
+	    !strncasecmp("r14", name, sizeof "r14") ) {
   
     return 14;
   }
-  else if ( strncmp("%r15", name, sizeof "%r15") == 0 ||
-	    strncmp("r15", name, sizeof "r15") == 0 ) {
+  else if ( !strncasecmp("%r15", name, sizeof "%r15") ||
+	    !strncasecmp("r15", name, sizeof "r15") ) {
   
     return 15;
   }
@@ -195,11 +198,13 @@ int8_t reg_name_to_num(char *name)
   return -1;
 }
 
-/* Convert register number into its ASCII name
-** Ex:
-**    char reg_name[10];
-**    reg_num_to_name(0, reg_name);
-*/
+/**
+ * @brief Convert register number into its ASCII name
+ * @param number The register number (0, 1, 2, ...) associated with a 
+ * register's name like (R0, R1, R2, ...)
+ * @param name A pointer to an allocated character array to fill up with
+ * the register's ASCII name
+ */
 void reg_num_to_name(uint8_t number, char *name)
 {  
   switch (number) { 
@@ -274,14 +279,24 @@ void reg_num_to_name(uint8_t number, char *name)
   }
 }
 
-/* Display Menu for the program */
+/**
+ * @brief This function displays the help menu to the user if he (or, but in
+ * practice all too seldom, she) enters incorrect parameters or prompts the 
+ * help menu with "help" or "h"
+ */
 void display_help()
 {
-  printf("****************************************"\
-         "****************************************\n");
-
-  printf("*\t\tMSP430-Emulator\n*\n*\tUsage: ./msp430 [BINARY FILE]\n*\n");
-
-  printf("****************************************"\
-         "****************************************\n");
+  printf("**************************************************\n"\
+	 "*\t\tMSP430-Emulator\n*\n*\tUsage: ./msp430 BINARY_FIRMWARE\n*\n" \
+	 "* run\t\t\t[Run Program Until Breakpoint is Hit]\n"		\
+	 "* step\t\t\t[Step Into Instruction]\n"			\
+	 "* dis\t\t\t[Disassemble Instructions]\n"			\
+	 "* break ADDR\t\t[Set a Breakpoint]\n"				\
+	 "* set HEX_ADDR|Rn\t[Set Memory or Register]\n"		\
+	 "* bps\t\t\t[Display Breakpoints]\n"				\
+	 "* regs\t\t\t[Display Registers]\n"				\
+	 "* d(b|w|d) HEX_ADDR|Rn\t[Dump Memory direct or indirect from a register value]\n" \
+	 "* CTRL+C\t\t[Pause Execution]\n"				\
+	 "* quit\t\t\t[Exit program]\n"					\
+	 "**************************************************\n");
 }

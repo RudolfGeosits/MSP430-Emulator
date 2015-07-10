@@ -1,3 +1,9 @@
+/**
+ * @brief Test if the result of the asm instruction is zero
+ * @param result_addr The address of the operation's result
+ * @param bw_flag Byte or Word flag
+ * @return true if zero, false otherwise
+ */
 uint8_t is_zero (uint16_t *result_addr, uint8_t bw_flag)
 {
   if (bw_flag == WORD) {
@@ -14,8 +20,16 @@ uint8_t is_zero (uint16_t *result_addr, uint8_t bw_flag)
 
     return 0;
   }
+
+  return false;
 }
 
+/**
+ * @brief Test if the result of the asm instruction is negative
+ * @param result_addr The address of the operation's result
+ * @param bw_flag Byte or Word flag
+ * @return true if zero, false otherwise
+ */
 uint8_t is_negative(int16_t *result_addr, uint8_t bw_flag)
 {
   if (bw_flag == WORD) {
@@ -32,8 +46,17 @@ uint8_t is_negative(int16_t *result_addr, uint8_t bw_flag)
 
     return 0;
   }
+
+  return false;
 }
 
+/**
+ * @brief Test if the result of the asm instruction WILL carry
+ * @param original_dst_value The original value at the destination
+ * @param source_value The value at the source location
+ * @param bw_flag Byte or Word flag
+ * @return true if zero, false otherwise
+ */
 uint8_t is_carried(uint32_t original_dst_value, uint32_t source_value,
                    uint8_t bw_flag)
 {
@@ -53,8 +76,18 @@ uint8_t is_carried(uint32_t original_dst_value, uint32_t source_value,
 
     return 0;
   }
+
+  return false;
 }
 
+/**
+ * @brief Test if the result of the asm instruction is overflowed
+ * @param source_value The value at the source operand
+ * @param destination_value The value at the destination operand
+ * @param result A pointer to the result of the operation
+ * @param bw_flag Byte or Word flag
+ * @return true if zero, false otherwise
+ */
 uint8_t is_overflowed(uint16_t source_value, uint16_t destination_value,
                       uint16_t *result, uint8_t bw_flag)
 {
@@ -80,4 +113,6 @@ uint8_t is_overflowed(uint16_t source_value, uint16_t destination_value,
   else {
     printf("Error, overflowed function: invalid bw_flag\n");
   }
+
+  return false;
 }

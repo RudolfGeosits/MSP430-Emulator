@@ -28,7 +28,8 @@ bool command_loop(Cpu *cpu)
 {
   static uint16_t breakpoint_addresses[MAX_BREAKPOINTS];
   static uint8_t cur_bp_number = 0;
-  char command[512];
+  char cmd[512];
+  char *line;
 
   /* Check for breakpoints */
   int i;
@@ -47,18 +48,26 @@ bool command_loop(Cpu *cpu)
   }
 
   while (!run) {
-    memset(command, 0, sizeof(command));
-    scanf("%s", command);
-    filter_uppercase(command);
+    bzero(cmd, sizeof cmd);
+    line = readline("\n>> ");
+
+    if ( strlen(line) >= 1 ) {
+      add_history(line);
+      sscanf(line, "%s", cmd);
+      line += strlen(cmd) + 1;
+    }
+    else {
+      continue;
+    }
 
     /* s NUM_STEPS, step X instructions forward, defaults to 1 */
-    if ( !strncasecmp("s", command, sizeof "s") ||
-	 !strncasecmp("step", command, sizeof "step")) {
+    if ( !strncasecmp("s", cmd, sizeof "s") ||
+	 !strncasecmp("step", cmd, sizeof "step")) {
 
       unsigned int num_of_steps = 0;
       
-      if (command[1] == ' ') {
-	scanf("%u", &num_of_steps);
+      if (line[1] == ' ') {
+	sscanf(line, "%u", &num_of_steps);
 	printf("TODO:Stepping %u\n", num_of_steps);
       }
 
@@ -66,14 +75,14 @@ bool command_loop(Cpu *cpu)
     }                                 
 
     /* run, run the program until a breakpoint is hit */
-    else if ( !strncasecmp("quit", command, sizeof "quit") ||
-	      !strncasecmp("q", command, sizeof "q")) {
+    else if ( !strncasecmp("quit", cmd, sizeof "quit") ||
+	      !strncasecmp("q", cmd, sizeof "q")) {
       return false;
     }
 
     /* run, run the program until a breakpoint is hit */
-    else if ( !strncasecmp("run", command, sizeof "run") ||
-	      !strncasecmp("r", command, sizeof "r")) {
+    else if ( !strncasecmp("run", cmd, sizeof "run") ||
+	      !strncasecmp("r", cmd, sizeof "r")) {
       run = true;
       debug_mode = false;
       
@@ -81,22 +90,22 @@ bool command_loop(Cpu *cpu)
     }
 
     /* Display disassembly */
-    else if ( !strncasecmp("disas", command, sizeof "disas") ||
-	      !strncasecmp("dis", command, sizeof "dis") ||
-	      !strncasecmp("disassemble", command, sizeof "disassemble")) {
+    else if ( !strncasecmp("disas", cmd, sizeof "disas") ||
+	      !strncasecmp("dis", cmd, sizeof "dis") ||
+	      !strncasecmp("disassemble", cmd, sizeof "disassemble")) {
 
       disassemble(cpu, 10, false);
       continue;
     }
 
     /* Display all 16 registers */
-    else if ( !strncasecmp("regs", command, sizeof "regs")) {
+    else if ( !strncasecmp("regs", cmd, sizeof "regs")) {
       display_registers(cpu);
       continue;
     }
     
     /* Display all breakpoints */
-    else if ( !strncasecmp("bps", command, sizeof "bps" )) {
+    else if ( !strncasecmp("bps", cmd, sizeof "bps" )) {
       if (cur_bp_number > 0) {
 	int i;
 	for (i = 0;i < cur_bp_number;i++) {
@@ -112,27 +121,25 @@ bool command_loop(Cpu *cpu)
 
     /* d(b/w/d) ADDRESS, dump bytes, words, or double words at ADDRESS */
     /* d(b/w/d) REGISTER, dump from register value address */
-    else if ( command[0] == 'd' && 
-	      (command[1] == 'b' || command[1] == 'w' || command[1] == 'd') ) {
+    else if ( cmd[0] == 'd' &&
+	      (cmd[1] == 'b' || cmd[1] == 'w' || cmd[1] == 'd') ) {
 
-      char param1[20];
+      char param1[33] = {0};
       uint32_t start_addr, stride;
+      sscanf(line, "%s", param1);
       
-      memset(param1, 0, sizeof param1);
-      scanf("%s", param1);
-      filter_uppercase(param1);
-
-      if (param1[0] >= 0x30 && param1[0] <= 0x39) {   /* Runt hex ADDRESS */
+      /* Is it a direct address or a an address in a register being spec'd */
+      if (param1[0] >= '0' && param1[0] <= '9') {
 	sscanf(param1, "%X", &start_addr);
       }
       else if (param1[0] == '%' || param1[0] == 'r') {   /* got Register */
 	start_addr = (uint16_t) *get_reg_ptr(cpu, reg_name_to_num(param1));
       }
       
-      if (command[1] == 'b') {
+      if (cmd[1] == 'b') {
 	stride = BYTE_STRIDE;
       }
-      else if (command[1] == 'w') {
+      else if (cmd[1] == 'w') {
 	stride = WORD_STRIDE;
       }
       else {
@@ -143,11 +150,11 @@ bool command_loop(Cpu *cpu)
     }
 
     /* Set REG/LOC VALUE */
-    else if ( !strncasecmp("set", command, sizeof "set") ) {
+    else if ( !strncasecmp("set", cmd, sizeof "set") ) {
       int value = 0;
       char reg_name_or_addr[33];
       
-      scanf("%s %X", reg_name_or_addr, &value);
+      sscanf(line, "%s %X", reg_name_or_addr, &value);
 
       if ( reg_name_to_num(reg_name_or_addr) != -1 ) {
 	*get_reg_ptr( cpu, reg_name_to_num(reg_name_or_addr) ) = value;
@@ -163,39 +170,28 @@ bool command_loop(Cpu *cpu)
     }
 
     /* break BREAKPOINT_ADDRESS */
-    else if ( !strncasecmp("break", command, sizeof "break") ) {
+    else if ( !strncasecmp("break", cmd, sizeof "break") ) {
       if (cur_bp_number >= MAX_BREAKPOINTS) {
 	printf("Too many breakpoints.\n");
       }
       else {
-	scanf("%X", (unsigned int *) 
-	      &breakpoint_addresses[cur_bp_number]);
+	sscanf(line, "%X", (unsigned int *) 
+	       &breakpoint_addresses[cur_bp_number]);
 	printf("\n\t[Breakpoint [%d] Set]\n", cur_bp_number + 1);
-      
+	
 	++cur_bp_number;
       }
       
       continue;
     }
 
-    /* help, display a list of debugger commands */
-    else if ( !strncasecmp("help", command, sizeof "help") ||
-	      !strncasecmp("h", command, sizeof "h") ) {
-
-      printf("\n  run\t\t\t\tRun Program Until Breakpoint is Hit\n"\
-	     "  step\t\t\t\tStep Into Instruction\n"\
-	     "  disassemble\t\t\tDisassemble Instructions\n"\
-	     "  break ADDR\t\t\tSet a Breakpoint\n"\
-	     "  set HEX_ADDR|Rn\t\tSet Memory or Register\n"\
-	     "  bps\t\t\t\tDisplay Breakpoints\n"\
-	     "  regs\t\t\t\tDisplay Registers\n"\
-	     "  d(b|w|d) HEX_ADDR|Rn\t\tDump Memory or Register\n"\
-	     "  CTRL+C\t\t\tPause Execution\n"\
-	     "  quit\t\t\t\tExit program\n"\
-      );
+    /* help, display a list of debugger cmds */
+    else if ( !strncasecmp("help", cmd, sizeof "help") ||
+	      !strncasecmp("h", cmd, sizeof "h") ) {
+      display_help();
     }
 
-    /* End the command loop, next instruction */
+    /* End the line loop, next instruction */
     else {
       puts("\t[Invalid command, type \"help\".]");
       continue;

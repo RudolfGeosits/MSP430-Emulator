@@ -55,9 +55,10 @@ int main(int argc, char *argv[])
   initialize_msp_memspace();
   initialize_msp_registers(msp430);
   ports_setup();
-  
-  load_firmware(argv[1], LOAD_POS);
 
+  load_bootloader(0x0C00);
+  load_firmware(argv[1], 0xC000);
+  
   /* Fetch-Decode-Execute Cycle */
   while ( command_loop(msp430) ) {
     handle_port1();

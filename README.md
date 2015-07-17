@@ -25,3 +25,9 @@ MSP430-Emulator
   - Instructions
     - DADD (BCD math)    
     - RETI (Return from Interrupt)
+
+- Build Instructions
+  - You will need the following packages:
+
+  - readline (apt-get install libreadline-dev)
+  - gtk2.0 (apt-get install gtk2.0-examples)

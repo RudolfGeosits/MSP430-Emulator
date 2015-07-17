@@ -16,12 +16,24 @@ along with this program. If not, see <http://www.gnu.org/licenses
 */
 
 /**
+ * @brief This function loads the default TI bootloader code into virtual mem
+ * @param virt_addr The location in virtual memory to load the bootloader
+ */
+void load_bootloader(uint16_t virt_addr)
+{
+  uint16_t *real_addr = get_addr_ptr(virt_addr);
+  
+  memmove(real_addr, blc, sizeof blc);
+  printf("Loaded booloader code into address 0x%04X\n", virt_addr);
+}
+
+/**
  * @brief This function loads firmware from a binary file on disk into the
  * virtual memory of the emulated device at base virt_loc
  * @param file_name The file name of the binary to load into virtual memory
  * @param virt_loc The location in virtual memory to load the firmware
  */
-void load_firmware(char *file_name, uint8_t *virt_loc)
+void load_firmware(char *file_name, uint16_t virt_addr)
 {
   uint32_t size, result;
   printf("Loading Program: ( %s )\n", file_name);
@@ -38,7 +50,9 @@ void load_firmware(char *file_name, uint8_t *virt_loc)
   size = ftell(fd);
   rewind(fd);
 
-  result = fread(virt_loc, 1, size, fd);
+  uint16_t *real_addr = get_addr_ptr(virt_addr);
+
+  result = fread(real_addr, 1, size, fd);
   printf("Placed %d bytes into flash\n\n", result);
 
   fclose(fd);

@@ -19,9 +19,12 @@
 //##########+++ MSP430 Register initialization +++##########
 void initialize_msp_registers(Cpu *cpu)
 {
-  /* Initialize Program Counter to 0xFFFE at boot or reset */
-  cpu->pc = 0xC000;
+  /* Initialize PC to boot loader code on cold boot (COLD)*/
+  //cpu->pc = 0x0C00;
 
+  /* Initialize Program Counter to *0xFFFE at boot or reset (WARM)*/
+  cpu->pc = 0xC000;
+  
   /* Stack pointer typically begins at the top of RAM after reset */
   cpu->sp = 0x400;
 

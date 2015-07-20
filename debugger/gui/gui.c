@@ -58,8 +58,10 @@ static gboolean main_loop(GtkWidget *widget)
   return TRUE;
 }
 
-void *gui(void *x)
+void *gui(void *ctxt)
 {
+  Cpu *cpu = (Cpu *) ctxt;
+  
   /* Initialize GTK */
   gtk_init(NULL, NULL);
   

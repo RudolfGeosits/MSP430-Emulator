@@ -1,6 +1,11 @@
 msp430-gcc -mmcu=msp430g2553 blink/blink.c -o blink/blink.elf
 msp430-objcopy -O binary blink/blink.elf ../blink.bin
 
-msp430-gcc -mmcu=msp430g2452 counter/counter.c -o counter/counter.elf
+msp430-gcc -mmcu=msp430g2553 counter/counter.c -o counter/counter.elf
 
-msp430-gcc -mmcu=msp430g2452 timer/timer.c -o timer/timer.elf
+msp430-gcc -mmcu=msp430g2553 timer/timer.c -o timer/timer.elf
+
+msp430-gcc -mmcu=msp430g2553 spi/master.c -o spi/master.elf
+
+msp430-gcc -mmcu=msp430g2553 uart/main.c -o uart/main.elf
+msp430-objcopy -O binary uart/main.elf ../uart.bin

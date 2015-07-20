@@ -18,6 +18,8 @@
 #ifndef _REGISTERS_H_
 #define _REGISTERS_H_
 
+typedef struct Port Port;
+typedef struct Usci Usci;
 typedef struct Status_reg Status_reg;
 typedef struct Cpu Cpu;
 
@@ -44,6 +46,9 @@ typedef struct Cpu {
   int16_t r4, r5, r6, r7;   /* R4-R15 General Purpose Registers */
   int16_t r8, r9, r10, r11;
   int16_t r12, r13, r14, r15;
+
+  Port *p1, *p2;
+  Usci *usci;
 } Cpu;
 
 uint16_t sr_to_value(Cpu *cpu);

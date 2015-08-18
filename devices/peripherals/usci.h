@@ -59,6 +59,8 @@ typedef struct Usci {
   uint8_t *UCA0ABCTL;
   uint8_t *UCA0IRTCTL;
   uint8_t *UCA0IRRCTL;
+
+  uint8_t *IFG2;
   
   Ctl0 ctl0;
   Ctl1 ctl1;

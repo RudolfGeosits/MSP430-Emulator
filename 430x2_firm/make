@@ -7,5 +7,5 @@ msp430-gcc -mmcu=msp430g2553 timer/timer.c -o timer/timer.elf
 
 msp430-gcc -mmcu=msp430g2553 spi/master.c -o spi/master.elf
 
-msp430-gcc -mmcu=msp430g2553 uart/main.c -o uart/main.elf
+msp430-gcc -g -mmcu=msp430g2553 uart/main.c -o uart/main.elf
 msp430-objcopy -O binary uart/main.elf ../uart.bin

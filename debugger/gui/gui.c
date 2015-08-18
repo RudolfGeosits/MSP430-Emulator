@@ -23,36 +23,29 @@ GtkWidget *msp_p1_0 = NULL;
 
 static gboolean main_loop(GtkWidget *widget)
 {
-  static bool others_on = false;
+  //static bool others_on = false;
   if (widget->window == NULL) return FALSE;
 
-  if (P1DIR_0 && P1OUT_0) {
+  if (P1DIR_0 && P1OUT_0 && !P1OUT_6) {
     gtk_image_set_from_file( (GtkImage *)msp_no_power, 
     			     "debugger/gui/msp_p1.0.png");  
-
+    
     //puts("*RED ON\n");
-    others_on = true;
-  }
-  
-  if (P1DIR_6 && P1OUT_6) {
+  }  
+  else if (!P1OUT_0 && P1DIR_6 && P1OUT_6) {
     gtk_image_set_from_file( (GtkImage *)msp_no_power, 
     			     "debugger/gui/msp_p1.6.png");      
 
     //puts("*GREEN ON\n");
-    others_on = true;
   }
-
-  if (P1DIR_0 && P1OUT_0 && P1DIR_6 && P1OUT_6) {
+  else if (P1DIR_0 && P1OUT_0 && P1DIR_6 && P1OUT_6) {
     gtk_image_set_from_file( (GtkImage *)msp_no_power, 
     			     "debugger/gui/msp_p1.0_p1.6.png");      
     //puts("*BOTH ON\n");
-    others_on = true;    
-  }
-  
-  if (!others_on) {
+  }  
+  else {
     gtk_image_set_from_file((GtkImage *)msp_no_power, 
   			    "debugger/gui/msp_power_on.png");
-    others_on = false;
   }
 
   return TRUE;

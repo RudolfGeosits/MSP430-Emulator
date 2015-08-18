@@ -294,8 +294,8 @@ void reg_num_to_name(uint8_t number, char *name)
 }
 
 /**
- * @brief This function displays the help menu to the user if he (or, but in
- * practice all too seldom, she) enters incorrect parameters or prompts the 
+ * @brief This function displays the help menu to the user if he (or - but in
+ * practice all too seldom - she) enters incorrect parameters or prompts the 
  * help menu with "help" or "h"
  */
 void display_help()
@@ -304,7 +304,7 @@ void display_help()
 	 "*\t\tMSP430-Emulator\n*\n*\tUsage: ./msp430 BINARY_FIRMWARE\n*\n" \
 	 "* run\t\t\t[Run Program Until Breakpoint is Hit]\n"		\
 	 "* step\t\t\t[Step Into Instruction]\n"			\
-	 "* dis\t\t\t[Disassemble Instructions]\n"			\
+	 "* dis AMNT\t\t[Disassemble Instructions]\n"			\
 	 "* break ADDR\t\t[Set a Breakpoint]\n"				\
 	 "* set HEX_ADDR|Rn\t[Set Memory or Register]\n"		\
 	 "* bps\t\t\t[Display Breakpoints]\n"				\

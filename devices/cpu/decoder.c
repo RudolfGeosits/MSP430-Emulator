@@ -48,6 +48,12 @@ void decode(Cpu *cpu, uint16_t instruction)
     /* format I (two operand) instruction */
     decode_formatI(cpu, instruction);
   }
+  else {
+    printf("INVALID INSTRUCTION ");
+    cpu->pc -= 2;
+    run = false;
+    debug_mode = true;
+  }
 
   if (disassemble_mode) {
     if (debug_mode) {

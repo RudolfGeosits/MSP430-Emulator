@@ -21,7 +21,7 @@
 /* Dump Bytes, Dump Words, Dump Double Words */
 typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
 enum {MAX_BREAKPOINTS = 10};
-bool run = false;
+//bool run = false;
 
 /* Main command loop */
 bool command_loop(Cpu *cpu)
@@ -61,8 +61,15 @@ bool command_loop(Cpu *cpu)
     }
 
     /* s NUM_STEPS, step X instructions forward, defaults to 1 */
-    if ( !strncasecmp("s", cmd, sizeof "s") ||
-	 !strncasecmp("step", cmd, sizeof "step")) {
+    if ( !strncasecmp("reset", cmd, sizeof "reset") ||
+	 !strncasecmp("restart", cmd, sizeof "restart")) {
+      
+      cpu->pc = 0xC000;
+      break;
+    }
+    /* s NUM_STEPS, step X instructions forward, defaults to 1 */
+    else if ( !strncasecmp("s", cmd, sizeof "s") ||
+	      !strncasecmp("step", cmd, sizeof "step")) {
 
       unsigned int num_of_steps = 0;
       
@@ -94,7 +101,15 @@ bool command_loop(Cpu *cpu)
 	      !strncasecmp("dis", cmd, sizeof "dis") ||
 	      !strncasecmp("disassemble", cmd, sizeof "disassemble")) {
 
-      disassemble(cpu, 10, false);
+      uint32_t num = 0;
+
+      if (! (sscanf(line, "%u", &num) > 0) ) {
+	num = 10;
+      }
+
+      if (num > 0) 
+	disassemble(cpu, num, false);
+
       continue;
     }
 

@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <string.h>
 #include <stdint.h>
 #include <signal.h>
@@ -26,7 +27,7 @@
 #include <gtk/gtk.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-
+bool run = false;
 #include "devices/memory/memspace.h"
 #include "devices/cpu/registers.h"
 #include "devices/utilities.h"
@@ -53,22 +54,23 @@ int main(int argc, char *argv[])
     fprintf(stderr, "Error creating thread\n");
     return 1;
   }
-  
+
   register_signal(SIGINT);
   initialize_msp_memspace();
   initialize_msp_registers(msp430);  
   
   setup_port_1(msp430);
   setup_usci(msp430);
+  open_pty(msp430);
 
   load_bootloader(0x0C00);
   load_firmware(argv[1], 0xC000);
   
   /* Fetch-Decode-Execute Cycle */
   while ( command_loop(msp430) ) {
+    decode( msp430, fetch(msp430) );   /* Instruction Decoder */
     handle_port_1(msp430);
     handle_usci(msp430);
-    decode( msp430, fetch(msp430) );   /* Instruction Decoder */
   }
   
   uninitialize_msp_memspace(msp430);

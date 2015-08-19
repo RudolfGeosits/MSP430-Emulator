@@ -13,12 +13,29 @@ void *thrd (void *ctxt)
   char buf[64] = {0};
 
   while (true) {
-    usleep(1000);
+    usleep(333);
     if ( read(sp, buf, 1) > 0 ) {
       while (*usci->IFG2 & RXIFG);
-      if (*buf == '\n') *buf = '\r';
 
-      *usci->UCA0RXBUF = *(uint8_t *) buf;
+      if (*buf == '\n') {
+	*buf = '\r';
+      }
+      if (*buf == '\\') {
+	// Ah, escape sequence, what will I parse it as?
+	read(sp, buf, 1);
+	if (*buf == 'h') {
+	  read(sp, buf, 2);
+	  printf("Got hex %c%c\n", buf[0], buf[1]);
+	  buf[2] = 0;
+	  *usci->UCA0RXBUF = (uint8_t) strtoul(buf, NULL, 16);
+	  printf("Got number %d, hex 0x%04X\n", 
+		 *usci->UCA0RXBUF, *usci->UCA0RXBUF);
+	}
+      }
+      else {    
+	*usci->UCA0RXBUF = *(uint8_t *) buf;
+      }
+
       *usci->IFG2 |= RXIFG;
     }
   }  
@@ -45,18 +62,17 @@ void open_pty (Cpu *cpu)
       NULL
     };
 
-    //execlp("xterm", "xterm", buf, (char *)0);
+    setpgid(0, 0);
     execvp(args[0], args);
     exit(1);
   }
   // Parent                                                            
-  // TURN OFF ECHO
-  sp = open(slavename, O_RDWR, O_NONBLOCK);
-  
+
+  sp = open(slavename, O_RDWR, O_NONBLOCK);  
+  read(sp, buf, 100);
+
   tcgetattr(sp, &termios_p);
-  termios_p.c_iflag &= ~IGNBRK & ~BRKINT;
-  termios_p.c_lflag &= ~ECHO;
-  //termios_p.c_cc[VINTR] = 0x4;
+  termios_p.c_lflag |= ECHO;
   tcsetattr(sp, 0, &termios_p);
   
   pthread_t t;
@@ -107,5 +123,4 @@ void setup_usci (Cpu *cpu)
 
   usci->IFG2  = (uint8_t *) get_addr_ptr(IFG2_VLOC);
   *usci->IFG2 |= TXIFG;
-  //*usci->IFG2 |= RXIFG;
 }

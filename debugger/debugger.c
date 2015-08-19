@@ -134,11 +134,7 @@ bool command_loop(Cpu *cpu)
       continue;
     }
 
-    /* d(b/w/d) ADDRESS, dump bytes, words, or double words at ADDRESS */
-    /* d(b/w/d) REGISTER, dump from register value address */
-    else if ( cmd[0] == 'd' &&
-	      (cmd[1] == 'b' || cmd[1] == 'w' || cmd[1] == 'd') ) {
-
+    else if ( !strncasecmp("dump", cmd, sizeof "dump" )) {
       char param1[33] = {0};
       uint32_t start_addr, stride;
       sscanf(line, "%s", param1);
@@ -147,20 +143,11 @@ bool command_loop(Cpu *cpu)
       if (param1[0] >= '0' && param1[0] <= '9') {
 	sscanf(param1, "%X", &start_addr);
       }
-      else if (param1[0] == '%' || param1[0] == 'r') {   /* got Register */
+      else if (param1[0] == '%' || param1[0] == 'r' || param1[0] == 'R') {   
 	start_addr = (uint16_t) *get_reg_ptr(cpu, reg_name_to_num(param1));
       }
       
-      if (cmd[1] == 'b') {
-	stride = BYTE_STRIDE;
-      }
-      else if (cmd[1] == 'w') {
-	stride = WORD_STRIDE;
-      }
-      else {
-	stride = DWORD_STRIDE;
-      }
-
+      stride = BYTE_STRIDE;
       dump_memory(MEMSPACE, 0x0, start_addr, stride);	
     }
 

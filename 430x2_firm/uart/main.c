@@ -7,22 +7,23 @@ void receive ();
 
 void buzzer (unsigned char birdie)
 {
-  if ( (birdie >> 2) == 0x33 ) {
-    P1OUT ^= BIT3;
-  }
+  //if ( (birdie >> 2) == 0x33 ) {
+  P1OUT ^= BIT0;
+  //}
+  while (1) {i++;}
 }
 
 int main(void)
 {
   setup();
 
-  print(
-	"***************************************\n\r"\
+  print("***************************************\n\r"\
 	"\t[ MSP430 Micro Hacking ]\n\r"\
 	"***************************************\n\r"\
-	"\t(0) Toggle Red LED\n\r\t(1) Toggle Green LED\n\r"
+	"\t(0) Toggle Red LED\n\r\t(1) Toggle Green LED\n\r\n\r"\
+	"[Enter Escape Sequence \\h to enter base 16. Ex: \\hF1\\hF0]\n\r\n\r"
 	);
-
+  
   while (1) receive();
 }
 
@@ -32,14 +33,15 @@ void receive ()
   int x = 0; 
 
   // Print out prompt
-  print("\n\r>> ");
+  print(">> ");
 
   do {
     while  (!(IFG2 & UCA0RXIFG));
     while  (!(IFG2 & UCA0TXIFG));
     
     IFG2 &= ~UCA0RXIFG;
-    buf[x++] = UCA0TXBUF = UCA0RXBUF;
+    //buf[x++] = UCA0TXBUF = UCA0RXBUF;
+    buf[x++] = UCA0RXBUF;
   } while (UCA0RXBUF != '\r');
   
   switch (buf[0]) {

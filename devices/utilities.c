@@ -304,12 +304,12 @@ void display_help()
 	 "*\t\tMSP430-Emulator\n*\n*\tUsage: ./msp430 BINARY_FIRMWARE\n*\n" \
 	 "* run\t\t\t[Run Program Until Breakpoint is Hit]\n"		\
 	 "* step\t\t\t[Step Into Instruction]\n"			\
-	 "* dis AMNT\t\t[Disassemble Instructions]\n"			\
+	 "* dump [HEX_ADDR|Rn]\t[Dump Memory direct or at register value]\n"\
+	 "* set [HEX_ADDR|Rn]\t[Set Memory or Register]\n"\
+	 "* dis AMOUNT\t\t[Disassemble Instructions]\n"			\
 	 "* break ADDR\t\t[Set a Breakpoint]\n"				\
-	 "* set HEX_ADDR|Rn\t[Set Memory or Register]\n"		\
 	 "* bps\t\t\t[Display Breakpoints]\n"				\
 	 "* regs\t\t\t[Display Registers]\n"				\
-	 "* d(b|w|d) HEX_ADDR|Rn\t[Dump Memory direct or indirect from a register value]\n" \
 	 "* CTRL+C\t\t[Pause Execution]\n"				\
 	 "* quit\t\t\t[Exit program]\n"					\
 	 "**************************************************\n");

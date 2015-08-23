@@ -25,11 +25,8 @@ void *thrd (void *ctxt)
 	read(sp, buf, 1);
 	if (*buf == 'h') {
 	  read(sp, buf, 2);
-	  printf("Got hex %c%c\n", buf[0], buf[1]);
 	  buf[2] = 0;
 	  *usci->UCA0RXBUF = (uint8_t) strtoul(buf, NULL, 16);
-	  printf("Got number %d, hex 0x%04X\n", 
-		 *usci->UCA0RXBUF, *usci->UCA0RXBUF);
 	}
       }
       else {    

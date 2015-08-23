@@ -1,4 +1,6 @@
 *~
+*.out
+TAGS
 
 # Object files
 *.o

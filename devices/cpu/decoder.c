@@ -28,7 +28,7 @@ uint16_t fetch(Cpu *cpu)
 }
 
 /*##########+++ CPU Decode Cycle +++##########*/
-void decode(Cpu *cpu, uint16_t instruction)
+void decode(Cpu *cpu, uint16_t instruction, bool disassemble)
 {  
   int done = 0;
   uint8_t format_id;
@@ -38,15 +38,15 @@ void decode(Cpu *cpu, uint16_t instruction)
 
   if (format_id == 0x1) {
     /* format II (single operand) instruction */
-    decode_formatII(cpu, instruction);  
+    decode_formatII(cpu, instruction, disassemble);  
   }    
   else if (format_id >= 0x2 && format_id <= 3) {
     /* format III (jump) instruction */
-    decode_formatIII(cpu, instruction);
+    decode_formatIII(cpu, instruction, disassemble);
   }
   else if (format_id >= 0x4) {
     /* format I (two operand) instruction */
-    decode_formatI(cpu, instruction);
+    decode_formatI(cpu, instruction, disassemble);
   }
   else {
     printf("INVALID INSTRUCTION ");
@@ -55,11 +55,13 @@ void decode(Cpu *cpu, uint16_t instruction)
     debug_mode = true;
   }
 
+  /*
   if (disassemble_mode) {
     if (debug_mode) {
       puts(mnemonic);
     }
   }
+  */
 }
 
 int16_t run_constant_generator(uint8_t source, uint8_t as_flag) 

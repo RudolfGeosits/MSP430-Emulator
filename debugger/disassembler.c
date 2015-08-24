@@ -1,16 +1,15 @@
-void disassemble(Cpu *cpu, uint8_t times, bool info){
+void disassemble(Cpu *cpu, uint16_t start_addr, uint8_t times){
   uint16_t saved_pc = cpu->pc, opcode;
   uint32_t i;
 
   disassemble_mode = true;
-
+  cpu->pc = start_addr;
+  
   for (i = 0;i < times;i++) {    
     printf("0x%04X:\t", cpu->pc);
 
-    opcode = fetch(cpu);
-    //printf("%04X\t", opcode);
-    
-    decode(cpu, opcode);
+    opcode = fetch(cpu);    
+    decode(cpu, opcode, DISASSEMBLE);
 
     fflush(stdout);
   }

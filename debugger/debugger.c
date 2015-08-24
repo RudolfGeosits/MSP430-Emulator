@@ -21,13 +21,13 @@
 /* Dump Bytes, Dump Words, Dump Double Words */
 typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
 enum {MAX_BREAKPOINTS = 10};
-//bool run = false;
 
 /* Main command loop */
 bool command_loop(Cpu *cpu)
 {
   static uint16_t breakpoint_addresses[MAX_BREAKPOINTS];
   static uint8_t cur_bp_number = 0;
+
   char cmd[512];
   char *line;
 
@@ -44,7 +44,7 @@ bool command_loop(Cpu *cpu)
 
   if (!disassemble_mode && debug_mode) {
     display_registers(cpu);
-    disassemble(cpu, 1, false);
+    disassemble(cpu, cpu->pc, 1);
   }
 
   while (!run) {
@@ -60,7 +60,7 @@ bool command_loop(Cpu *cpu)
       continue;
     }
 
-    /* s NUM_STEPS, step X instructions forward, defaults to 1 */
+    // reset the virtual machine
     if ( !strncasecmp("reset", cmd, sizeof "reset") ||
 	 !strncasecmp("restart", cmd, sizeof "restart")) {
       
@@ -70,9 +70,9 @@ bool command_loop(Cpu *cpu)
     /* s NUM_STEPS, step X instructions forward, defaults to 1 */
     else if ( !strncasecmp("s", cmd, sizeof "s") ||
 	      !strncasecmp("step", cmd, sizeof "step")) {
-
-      unsigned int num_of_steps = 0;
       
+      unsigned int num_of_steps = 0;
+
       if (line[1] == ' ') {
 	sscanf(line, "%u", &num_of_steps);
 	printf("TODO:Stepping %u\n", num_of_steps);
@@ -101,14 +101,22 @@ bool command_loop(Cpu *cpu)
 	      !strncasecmp("dis", cmd, sizeof "dis") ||
 	      !strncasecmp("disassemble", cmd, sizeof "disassemble")) {
 
-      uint32_t num = 0;
+      uint16_t start_addr;
+      uint32_t num;
+      int res;
 
-      if (! (sscanf(line, "%u", &num) > 0) ) {
+      res = sscanf(line, "%X%u", (unsigned int *) &start_addr, &num);
+
+      if (res <= 0) {
+	start_addr = cpu->pc;
+	num = 10;
+      } 
+      else if (res == 1) {
 	num = 10;
       }
 
       if (num > 0) 
-	disassemble(cpu, num, false);
+	disassemble(cpu, start_addr, num);
 
       continue;
     }
@@ -161,7 +169,7 @@ bool command_loop(Cpu *cpu)
       if ( reg_name_to_num(reg_name_or_addr) != -1 ) {
 	*get_reg_ptr( cpu, reg_name_to_num(reg_name_or_addr) ) = value;
 	display_registers(cpu);
-	disassemble(cpu, 1, false);
+	disassemble(cpu, cpu->pc, 1);
       }
       else {
 	uint16_t virtual_addr = (uint16_t) strtol(reg_name_or_addr, NULL, 0);

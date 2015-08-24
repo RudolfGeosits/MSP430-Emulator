@@ -26,7 +26,7 @@
 //# S = S_Reg_Name, D = Destination
 //########################################################
 
-void decode_formatI(Cpu *cpu, uint16_t instruction)
+void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
 {
   uint8_t opcode = (instruction & 0xF000) >> 12;
   uint8_t source = (instruction & 0x0F00) >> 8;
@@ -80,7 +80,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction)
 
     destination_addr = d_reg;          /* Destination Register */
 
-    if (!disassemble_mode) {
+    if (!disassemble) {
       bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
     }
   }
@@ -155,7 +155,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction)
 
     destination_addr = d_reg;          /* Destination register */
     
-    if (!disassemble_mode) {
+    if (!disassemble) {
       bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
     }
   }
@@ -231,7 +231,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction)
 
     destination_addr = d_reg;          /* Destination Register */
 
-    if (!disassemble_mode) {
+    if (!disassemble) {
       bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
     }
   }
@@ -298,14 +298,14 @@ void decode_formatI(Cpu *cpu, uint16_t instruction)
 
       sprintf(asm_operands, "@%s+, %s", s_reg_name, d_reg_name);
       
-      if (!disassemble_mode) {
+      if (!disassemble) {
 	bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
       }
     }
 
     destination_addr = d_reg;           /* Destination Register */
 
-    if (!disassemble_mode) {
+    if (!disassemble) {
       bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
     }
   }
@@ -333,7 +333,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction)
 
       sprintf(asm_operands, "@%s+, ", s_reg_name);	
 
-      if (!disassemble_mode) {
+      if (!disassemble) {
 	bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
       }
     }
@@ -360,412 +360,451 @@ void decode_formatI(Cpu *cpu, uint16_t instruction)
     strncat(asm_operands, asm_op2, sizeof asm_op2);
   }
   
-  
-  switch (opcode) {
-    
-    /* MOV SOURCE, DESTINATION
-     *   Ex: MOV #4, R6
-     *
-     * SOURCE = DESTINATION
-     *
-     * The source operand is moved to the destination. The source operand is 
-     * not affected. The previous contents of the destination are lost.
-     * 
-     */
-    case 0x4: {
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "MOV", sizeof mnemonic) :
-	strncpy(mnemonic, "MOV.B", sizeof mnemonic);
 
-      if (disassemble_mode) break;
-
-      if (bw_flag == WORD) {		
-	*destination_addr = source_value;
-      }
-      else if (bw_flag == BYTE) {
-	*((uint8_t *) destination_addr) = (uint8_t) source_value;
-      }
+  if (!disassemble) {
+    switch (opcode) {
       
-      break;
-    }
+      /* MOV SOURCE, DESTINATION
+       *   Ex: MOV #4, R6
+       *
+       * SOURCE = DESTINATION
+       *
+       * The source operand is moved to the destination. The source operand is 
+       * not affected. The previous contents of the destination are lost.
+       * 
+       */
+      case 0x4: {
 
-    /* ADD SOURCE, DESTINATION 
-     *   Ex: ADD R5, R4
-     * 
-     * The source operand is added to the destination operand. The source op
-     * is not affected. The previous contents of the destination are lost.
-     *
-     * DESTINATION = SOURCE + DESTINATION
-     *   
-     * N: Set if result is negative, reset if positive
-     * Z: Set if result is zero, reset otherwise
-     * C: Set if there is a carry from the result, cleared if not
-     * V: Set if an arithmetic overflow occurs, otherwise reset  
-     *
-     */
-    case 0x5:{
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "ADD", sizeof mnemonic) :
-	strncpy(mnemonic, "ADD.B", sizeof mnemonic);
-
-      if (disassemble_mode) break;
-
-      uint16_t original_dst_value = *destination_addr;
-
-      if (bw_flag == WORD) {
-	*destination_addr += source_value;
-      }
-      else if (bw_flag == BYTE) {
-	*((uint8_t *) destination_addr) += (uint8_t) source_value;
+        if (bw_flag == WORD) {		
+          *destination_addr = source_value;
+        }
+        else if (bw_flag == BYTE) {
+          *((uint8_t *) destination_addr) = (uint8_t) source_value;
+        }
+        
+        break;
       }
 
-      cpu->sr.zero = is_zero(destination_addr, bw_flag);
-      cpu->sr.negative = is_negative(destination_addr, bw_flag);
+      /* ADD SOURCE, DESTINATION 
+       *   Ex: ADD R5, R4
+       * 
+       * The source operand is added to the destination operand. The source op
+       * is not affected. The previous contents of the destination are lost.
+       *
+       * DESTINATION = SOURCE + DESTINATION
+       *   
+       * N: Set if result is negative, reset if positive
+       * Z: Set if result is zero, reset otherwise
+       * C: Set if there is a carry from the result, cleared if not
+       * V: Set if an arithmetic overflow occurs, otherwise reset  
+       *
+       */
+      case 0x5:{
 
-      cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
+        uint16_t original_dst_value = *destination_addr;
 
-      cpu->sr.overflow = is_overflowed(source_value, original_dst_value, 
-				  destination_addr, bw_flag);
+        if (bw_flag == WORD) {
+          *destination_addr += source_value;
+        }
+        else if (bw_flag == BYTE) {
+          *((uint8_t *) destination_addr) += (uint8_t) source_value;
+        }
 
-      break;
-    }
+        cpu->sr.zero = is_zero(destination_addr, bw_flag);
+        cpu->sr.negative = is_negative(destination_addr, bw_flag);
 
-    /* ADDC SOURCE, DESTINATION 
-     *   Ex: ADDC R5, R4
-     *
-     * DESTINATION += (SOURCE + C)
-     *
-     * N: Set if result is negative, reset if positive
-     * Z: Set if result is zero, reset otherwise
-     * C: Set if there is a carry from the result, cleared if not
-     * V: Set if an arithmetic overflow occurs, otherwise reset  
-     *
-     */
-    case 0x6:{
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "ADDC", sizeof mnemonic) :
-	strncpy(mnemonic, "ADDC.B", sizeof mnemonic);
+        cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
 
-      if (disassemble_mode) break;
+        cpu->sr.overflow = is_overflowed(source_value, original_dst_value, 
+          			  destination_addr, bw_flag);
 
-      uint16_t original_dst_value = *destination_addr;
-
-      if (bw_flag == WORD) {
-	*destination_addr += source_value + cpu->sr.carry;
+        break;
       }
-      else if (bw_flag == BYTE) {
-	*((uint8_t *) destination_addr) += (uint8_t) source_value + cpu->sr.carry;
+
+      /* ADDC SOURCE, DESTINATION 
+       *   Ex: ADDC R5, R4
+       *
+       * DESTINATION += (SOURCE + C)
+       *
+       * N: Set if result is negative, reset if positive
+       * Z: Set if result is zero, reset otherwise
+       * C: Set if there is a carry from the result, cleared if not
+       * V: Set if an arithmetic overflow occurs, otherwise reset  
+       *
+       */
+      case 0x6:{
+
+        uint16_t original_dst_value = *destination_addr;
+
+        if (bw_flag == WORD) {
+          *destination_addr += source_value + cpu->sr.carry;
+        }
+        else if (bw_flag == BYTE) {
+          *((uint8_t *) destination_addr) += (uint8_t) source_value + cpu->sr.carry;
+        }
+        
+        cpu->sr.zero = is_zero(destination_addr, bw_flag);
+        cpu->sr.negative = is_negative(destination_addr, bw_flag);
+
+        cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
+
+        cpu->sr.overflow = is_overflowed(source_value, original_dst_value, 
+          			  destination_addr, bw_flag);
+        break;
       }
-      
-      cpu->sr.zero = is_zero(destination_addr, bw_flag);
-      cpu->sr.negative = is_negative(destination_addr, bw_flag);
-
-      cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
-
-      cpu->sr.overflow = is_overflowed(source_value, original_dst_value, 
-				  destination_addr, bw_flag);
-      break;
-    }
  
-    /* SUBC SOURCE, DESTINATION
-     *   Ex: SUB R4, R5
-     *
-     *   DST += ~SRC + C
-     *
-     *  N: Set if result is negative, reset if positive
-     *  Z: Set if result is zero, reset otherwise
-     *  C: Set if there is a carry from the MSB of the result, reset otherwise.
-     *     Set to 1 if no borrow, reset if borrow.
-     *  V: Set if an arithmetic overflow occurs, otherwise reset
-     *
-     *
-     */
-    case 0x7:{
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "SUBC", sizeof mnemonic) :
-	strncpy(mnemonic, "SUBC.B", sizeof mnemonic);
-      
-      if (disassemble_mode) break;
-      
-      int16_t original_dst_value = *destination_addr;
-      source_value = ~source_value; /* 1's comp */
-      
-      if (bw_flag == WORD) {
-	*(int16_t *)destination_addr += source_value + cpu->sr.carry; 
+      /* SUBC SOURCE, DESTINATION
+       *   Ex: SUB R4, R5
+       *
+       *   DST += ~SRC + C
+       *
+       *  N: Set if result is negative, reset if positive
+       *  Z: Set if result is zero, reset otherwise
+       *  C: Set if there is a carry from the MSB of the result, reset otherwise.
+       *     Set to 1 if no borrow, reset if borrow.
+       *  V: Set if an arithmetic overflow occurs, otherwise reset
+       *
+       *
+       */
+      case 0x7:{
+        
+        int16_t original_dst_value = *destination_addr;
+        source_value = ~source_value; /* 1's comp */
+        
+        if (bw_flag == WORD) {
+          *(int16_t *)destination_addr += source_value + cpu->sr.carry; 
+        }
+        else if (bw_flag == BYTE) {
+          *(int8_t *)destination_addr += (int8_t) source_value + cpu->sr.carry;
+        }
+
+        cpu->sr.zero = is_zero(destination_addr, bw_flag);
+        cpu->sr.negative = is_negative(destination_addr, bw_flag);
+
+        cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
+
+        cpu->sr.overflow = is_overflowed(source_value, original_dst_value, 
+          			  destination_addr, bw_flag);
+        break;
       }
-      else if (bw_flag == BYTE) {
-	*(int8_t *)destination_addr += (int8_t) source_value + cpu->sr.carry;
-      }
 
-      cpu->sr.zero = is_zero(destination_addr, bw_flag);
-      cpu->sr.negative = is_negative(destination_addr, bw_flag);
+      /* SUB SOURCE, DESTINATION
+       *   Ex: SUB R4, R5
+       *
+       *   DST -= SRC
+       *
+       *  N: Set if result is negative, reset if positive
+       *  Z: Set if result is zero, reset otherwise
+       *  C: Set if there is a carry from the MSB of the result, reset otherwise.
+       *     Set to 1 if no borrow, reset if borrow.
+       *  V: Set if an arithmetic overflow occurs, otherwise reset
+       *  TODO: SUBTRACTION OVERFLOW FLAG ERROR
+       */  
 
-      cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
+      case 0x8:{
 
-      cpu->sr.overflow = is_overflowed(source_value, original_dst_value, 
-				  destination_addr, bw_flag);
-      break;
-    }
-
-    /* SUB SOURCE, DESTINATION
-     *   Ex: SUB R4, R5
-     *
-     *   DST -= SRC
-     *
-     *  N: Set if result is negative, reset if positive
-     *  Z: Set if result is zero, reset otherwise
-     *  C: Set if there is a carry from the MSB of the result, reset otherwise.
-     *     Set to 1 if no borrow, reset if borrow.
-     *  V: Set if an arithmetic overflow occurs, otherwise reset
-     *  TODO: SUBTRACTION OVERFLOW FLAG ERROR
-     */  
-
-    case 0x8:{
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "SUB", sizeof mnemonic) :
-	strncpy(mnemonic, "SUB.B", sizeof mnemonic);
-
-      if (disassemble_mode) break;
-
-      int16_t original_dst_value = *destination_addr;
-      source_value = ~source_value + 1;
+        int16_t original_dst_value = *destination_addr;
+        source_value = ~source_value + 1;
  
-      if (bw_flag == WORD) {
-	*(uint16_t *)destination_addr += source_value; 
-      }
-      else if (bw_flag == BYTE) {
-	*(uint8_t *)destination_addr += (uint8_t) source_value;
+        if (bw_flag == WORD) {
+          *(uint16_t *)destination_addr += source_value; 
+        }
+        else if (bw_flag == BYTE) {
+          *(uint8_t *)destination_addr += (uint8_t) source_value;
+        }
+
+        cpu->sr.zero = is_zero(destination_addr, bw_flag);
+        cpu->sr.negative = is_negative(destination_addr, bw_flag);
+        
+        if ( is_carried(~source_value, 1, bw_flag) ||
+             is_carried(original_dst_value, source_value, bw_flag) ) {
+
+          cpu->sr.carry = true;
+        }
+
+        cpu->sr.overflow = is_overflowed(source_value, original_dst_value, 
+          			  destination_addr, bw_flag);
+        break;
       }
 
-      cpu->sr.zero = is_zero(destination_addr, bw_flag);
-      cpu->sr.negative = is_negative(destination_addr, bw_flag);
+      /* CMP SOURCE, DESTINATION
+       *
+       * N: Set if result is negative, reset if positive (src ≥ dst)
+       * Z: Set if result is zero, reset otherwise (src = dst)
+       * C: Set if there is a carry from the MSB of the result, reset otherwise
+       * V: Set if an arithmetic overflow occurs, otherwise reset   
+       * TODO: Fix overflow error
+       */
+      case 0x9:{
+        
+        int16_t original_dst_value = *destination_addr;
+        uint16_t unsigned_source_value = ((uint16_t)~source_value + 1);      
+        int16_t result;
+
+        bool early_carry = is_carried((uint16_t)~source_value, 1, bw_flag);
+
+        if (bw_flag == WORD) {
+          result = *destination_addr + (uint16_t) unsigned_source_value; 
+        }
+        else if (bw_flag == BYTE) {
+          result = *(uint8_t *)destination_addr + (uint8_t)unsigned_source_value;
+        }
+        
+        cpu->sr.negative = is_negative(&result, bw_flag);      
+        cpu->sr.zero = is_zero(&result, bw_flag);
+
+        /* Check if the carry happens durring conversion to 2's comp */
+        if (! early_carry) {
+          cpu->sr.carry = is_carried(original_dst_value, 
+          			   unsigned_source_value, bw_flag);
+        }
+        else {
+          cpu->sr.carry = true;
+        }
+
+        cpu->sr.overflow = is_overflowed(unsigned_source_value, 
+          			       original_dst_value,  &result, bw_flag);
+        break;
+      }
+
+      /* DADD SOURCE, DESTINATION
+       *
+       */
+      case 0xA:{
+
+        if (bw_flag == WORD) {
+          
+        }
+        else if (bw_flag == BYTE) {
+          
+        }
+        
+        break;
+      }
+
+      /* BIT SOURCE, DESTINATION
+       *
+       * N: Set if MSB of result is set, reset otherwise
+       * Z: Set if result is zero, reset otherwise
+       * C: Set if result is not zero, reset otherwise (.NOT. Zero)
+       * V: Reset
+      */
+      case 0xB:{
+
+        if (bw_flag == WORD) {
+          uint16_t result = ((uint16_t) source_value) & (*destination_addr);
+
+          cpu->sr.zero = (result == 0);
+          cpu->sr.negative = result >> 15;
+          cpu->sr.carry = (result != 0);
+        }
+        else if (bw_flag == BYTE) {
+          uint8_t result = 
+            ((uint8_t) source_value) & (*(uint8_t *) destination_addr);
+
+          cpu->sr.zero = (result == 0);
+          cpu->sr.negative = result >> 7;
+          cpu->sr.carry = (result != 0);
+        }
+
+        cpu->sr.overflow = false;
+
+        break;
+      }     
+
+      /* BIC SOURCE, DESTINATION
+       *
+       * No status bits affected
+       */
+      case 0xC:{
+
+        if (bw_flag == WORD) {
+          *destination_addr &= (uint16_t) ~source_value;
+        }
+        else if (bw_flag == BYTE) {
+          *(uint8_t *) destination_addr &= (uint8_t) ~source_value;	
+        }
+        
+        break;
+      }
+
+      /* BIS SOURCE, DESTINATION
+       *
+       */
+      case 0xD:{
+
+        if (bw_flag == WORD) {
+          *destination_addr |= (uint16_t) source_value;
+        }
+        else if (bw_flag == BYTE) {
+          *(uint8_t *) destination_addr |= (uint8_t) source_value;	
+        }
+        
+        break;
+      }
       
-      if ( is_carried(~source_value, 1, bw_flag) ||
-	   is_carried(original_dst_value, source_value, bw_flag) ) {
+      /* XOR SOURCE, DESTINATION
+       *
+       * N: Set if result MSB is set, reset if not set
+       * Z: Set if result is zero, reset otherwise
+       * C: Set if result is not zero, reset otherwise ( = .NOT. Zero)
+       * V: Set if both operands are negative
+       */
+      case 0xE:{
 
-	cpu->sr.carry = true;
+        if (bw_flag == WORD) {
+          cpu->sr.overflow = 
+            (*destination_addr >> 15) && ((uint16_t)source_value >> 15);
+
+          *destination_addr ^= (uint16_t)source_value;	
+
+          cpu->sr.negative = (*destination_addr) >> 15;
+          cpu->sr.zero = (*destination_addr == 0);
+          cpu->sr.carry = (*destination_addr != 0);
+        }
+        else if (bw_flag == BYTE) {
+          cpu->sr.overflow = 
+            (*(uint8_t *)destination_addr >> 7) && ((uint8_t)source_value >> 7);
+
+          *(uint8_t *) destination_addr ^= (uint8_t) source_value;	
+
+          cpu->sr.negative = (*(uint8_t *) destination_addr) >> 7;
+          cpu->sr.zero = (*(uint8_t *)destination_addr == 0);
+          cpu->sr.carry = (*(uint8_t *)destination_addr != 0);
+        }
+        
+        break;
       }
 
-      cpu->sr.overflow = is_overflowed(source_value, original_dst_value, 
-				  destination_addr, bw_flag);
-      break;
-    }
+      /* AND SOURCE, DESTINATION
+       *
+       *  N: Set if result MSB is set, reset if not set
+       *  Z: Set if result is zero, reset otherwise
+       *  C: Set if result is not zero, reset otherwise ( = .NOT. Zero)
+       *  V: Reset
+       */
+      case 0xF:{
 
-    /* CMP SOURCE, DESTINATION
-     *
-     * N: Set if result is negative, reset if positive (src ≥ dst)
-     * Z: Set if result is zero, reset otherwise (src = dst)
-     * C: Set if there is a carry from the MSB of the result, reset otherwise
-     * V: Set if an arithmetic overflow occurs, otherwise reset   
-     * TODO: Fix overflow error
-     */
-    case 0x9:{
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "CMP", sizeof mnemonic) :
-	strncpy(mnemonic, "CMP.B", sizeof mnemonic);
-      
-      if (disassemble_mode) break;
-      
-      int16_t original_dst_value = *destination_addr;
-      uint16_t unsigned_source_value = ((uint16_t)~source_value + 1);      
-      int16_t result;
+        if (bw_flag == WORD) {
+          *destination_addr &= (uint16_t)source_value;	
 
-      bool early_carry = is_carried((uint16_t)~source_value, 1, bw_flag);
+          cpu->sr.negative = (*destination_addr) >> 15;
+          cpu->sr.zero = (*destination_addr == 0);
+          cpu->sr.carry = (*destination_addr != 0);
+        }
+        else if (bw_flag == BYTE) {
+          *(uint8_t *) destination_addr &= (uint8_t) source_value;	
 
-      if (bw_flag == WORD) {
-	result = *destination_addr + (uint16_t) unsigned_source_value; 
-      }
-      else if (bw_flag == BYTE) {
-	result = *(uint8_t *)destination_addr + (uint8_t)unsigned_source_value;
-      }
-      
-      cpu->sr.negative = is_negative(&result, bw_flag);      
-      cpu->sr.zero = is_zero(&result, bw_flag);
+          cpu->sr.negative = (*(uint8_t *) destination_addr) >> 7;
+          cpu->sr.zero = (*(uint8_t *)destination_addr == 0);
+          cpu->sr.carry = (*(uint8_t *)destination_addr != 0);
+        }
 
-      /* Check if the carry happens durring conversion to 2's comp */
-      if (! early_carry) {
-	cpu->sr.carry = is_carried(original_dst_value, 
-				   unsigned_source_value, bw_flag);
-      }
-      else {
-	cpu->sr.carry = true;
+        cpu->sr.overflow = false;
+        
+        break;
       }
 
-      cpu->sr.overflow = is_overflowed(unsigned_source_value, 
-				       original_dst_value,  &result, bw_flag);
-      break;
-    }
+    } //# End of switch
 
-    /* DADD SOURCE, DESTINATION
-     *
-     */
-    case 0xA:{
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "DADD", sizeof mnemonic) :
-	strncpy(mnemonic, "DADD.B", sizeof mnemonic);
-    
-      if (disassemble_mode) break;
+  } // End of if
 
-      if (bw_flag == WORD) {
+
+
+  // DISASSEMBLY MODE
+  else {
+    switch (opcode) {      
+      case 0x4: {
+	bw_flag == WORD ? 
+          strncpy(mnemonic, "MOV", sizeof mnemonic) :
+          strncpy(mnemonic, "MOV.B", sizeof mnemonic);
+
+        break;
+      }
+      case 0x5: {
+        bw_flag == WORD ? 
+          strncpy(mnemonic, "ADD", sizeof mnemonic) :
+          strncpy(mnemonic, "ADD.B", sizeof mnemonic);
+
+        break;
+      }
+      case 0x6: {
+        bw_flag == WORD ? 
+          strncpy(mnemonic, "ADDC", sizeof mnemonic) :
+          strncpy(mnemonic, "ADDC.B", sizeof mnemonic);
 	
+        break;
       }
-      else if (bw_flag == BYTE) {
-	
+      case 0x7: {
+        bw_flag == WORD ? 
+          strncpy(mnemonic, "SUBC", sizeof mnemonic) :
+          strncpy(mnemonic, "SUBC.B", sizeof mnemonic);
+        
+        break;
       }
-      
-      break;
-    }
+      case 0x8: {
+        bw_flag == WORD ? 
+          strncpy(mnemonic, "SUB", sizeof mnemonic) :
+          strncpy(mnemonic, "SUB.B", sizeof mnemonic);
 
-    /* BIT SOURCE, DESTINATION
-     *
-     * N: Set if MSB of result is set, reset otherwise
-     * Z: Set if result is zero, reset otherwise
-     * C: Set if result is not zero, reset otherwise (.NOT. Zero)
-     * V: Reset
-    */
-    case 0xB:{
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "BIT", sizeof mnemonic) :
-	strncpy(mnemonic, "BIT.B", sizeof mnemonic);
-
-      if (disassemble_mode) break;
-
-      if (bw_flag == WORD) {
-	uint16_t result = ((uint16_t) source_value) & (*destination_addr);
-
-	cpu->sr.zero = (result == 0);
-	cpu->sr.negative = result >> 15;
-	cpu->sr.carry = (result != 0);
+        break;
       }
-      else if (bw_flag == BYTE) {
-	uint8_t result = 
-	  ((uint8_t) source_value) & (*(uint8_t *) destination_addr);
+      case 0x9: {
+        bw_flag == WORD ? 
+          strncpy(mnemonic, "CMP", sizeof mnemonic) :
+          strncpy(mnemonic, "CMP.B", sizeof mnemonic);
 
-	cpu->sr.zero = (result == 0);
-	cpu->sr.negative = result >> 7;
-	cpu->sr.carry = (result != 0);
+        break;
       }
-
-      cpu->sr.overflow = false;
-
-      break;
-    }     
-
-    /* BIC SOURCE, DESTINATION
-     *
-     * No status bits affected
-     */
-    case 0xC:{
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "BIC", sizeof mnemonic) :
-	strncpy(mnemonic, "BIC.B", sizeof mnemonic);
-      
-      if (disassemble_mode) break;
-
-      if (bw_flag == WORD) {
-	*destination_addr &= (uint16_t) ~source_value;
+      case 0xA: {
+	bw_flag == WORD ? 
+          strncpy(mnemonic, "DADD", sizeof mnemonic) :
+          strncpy(mnemonic, "DADD.B", sizeof mnemonic);
+        
+        break;
       }
-      else if (bw_flag == BYTE) {
-	*(uint8_t *) destination_addr &= (uint8_t) ~source_value;	
+      case 0xB: {
+        bw_flag == WORD ? 
+          strncpy(mnemonic, "BIT", sizeof mnemonic) :
+          strncpy(mnemonic, "BIT.B", sizeof mnemonic);
+
+        break;
+      }     
+      case 0xC: {
+        bw_flag == WORD ? 
+          strncpy(mnemonic, "BIC", sizeof mnemonic) :
+          strncpy(mnemonic, "BIC.B", sizeof mnemonic);
+                
+        break;
       }
-      
-      break;
-    }
-
-    /* BIS SOURCE, DESTINATION
-     *
-     */
-    case 0xD:{
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "BIS", sizeof mnemonic) :
-	strncpy(mnemonic, "BIS.B", sizeof mnemonic);
-      
-      if (disassemble_mode) break;
-
-      if (bw_flag == WORD) {
-	*destination_addr |= (uint16_t) source_value;
+      case 0xD: {
+        bw_flag == WORD ? 
+          strncpy(mnemonic, "BIS", sizeof mnemonic) :
+          strncpy(mnemonic, "BIS.B", sizeof mnemonic);
+                
+        break;
       }
-      else if (bw_flag == BYTE) {
-	*(uint8_t *) destination_addr |= (uint8_t) source_value;	
+      case 0xE: {
+        bw_flag == WORD ? 
+          strncpy(mnemonic, "XOR", sizeof mnemonic) :
+          strncpy(mnemonic, "XOR.B", sizeof mnemonic);
+        
+        break;
       }
-      
-      break;
-    }
-    
-    /* XOR SOURCE, DESTINATION
-     *
-     * N: Set if result MSB is set, reset if not set
-     * Z: Set if result is zero, reset otherwise
-     * C: Set if result is not zero, reset otherwise ( = .NOT. Zero)
-     * V: Set if both operands are negative
-     */
-    case 0xE:{
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "XOR", sizeof mnemonic) :
-	strncpy(mnemonic, "XOR.B", sizeof mnemonic);
-
-      if (disassemble_mode) break;
-
-      if (bw_flag == WORD) {
-	cpu->sr.overflow = 
-	  (*destination_addr >> 15) && ((uint16_t)source_value >> 15);
-
-	*destination_addr ^= (uint16_t)source_value;	
-
-	cpu->sr.negative = (*destination_addr) >> 15;
-	cpu->sr.zero = (*destination_addr == 0);
-	cpu->sr.carry = (*destination_addr != 0);
-      }
-      else if (bw_flag == BYTE) {
-	cpu->sr.overflow = 
-	  (*(uint8_t *)destination_addr >> 7) && ((uint8_t)source_value >> 7);
-
-	*(uint8_t *) destination_addr ^= (uint8_t) source_value;	
-
-	cpu->sr.negative = (*(uint8_t *) destination_addr) >> 7;
-	cpu->sr.zero = (*(uint8_t *)destination_addr == 0);
-	cpu->sr.carry = (*(uint8_t *)destination_addr != 0);
-      }
-      
-      break;
-    }
-
-    /* AND SOURCE, DESTINATION
-     *
-     *  N: Set if result MSB is set, reset if not set
-     *  Z: Set if result is zero, reset otherwise
-     *  C: Set if result is not zero, reset otherwise ( = .NOT. Zero)
-     *  V: Reset
-     */
-    case 0xF:{
-      bw_flag == WORD ? 
-	strncpy(mnemonic, "AND", sizeof mnemonic) :
-	strncpy(mnemonic, "AND.B", sizeof mnemonic);
-
-      if (disassemble_mode) break;
-
-      if (bw_flag == WORD) {
-	*destination_addr &= (uint16_t)source_value;	
-
-	cpu->sr.negative = (*destination_addr) >> 15;
-	cpu->sr.zero = (*destination_addr == 0);
-	cpu->sr.carry = (*destination_addr != 0);
-      }
-      else if (bw_flag == BYTE) {
-	*(uint8_t *) destination_addr &= (uint8_t) source_value;	
-
-	cpu->sr.negative = (*(uint8_t *) destination_addr) >> 7;
-	cpu->sr.zero = (*(uint8_t *)destination_addr == 0);
-	cpu->sr.carry = (*(uint8_t *)destination_addr != 0);
+      case 0xF: {
+        bw_flag == WORD ? 
+          strncpy(mnemonic, "AND", sizeof mnemonic) :
+          strncpy(mnemonic, "AND.B", sizeof mnemonic);
+        
+        break;
       }
 
-      cpu->sr.overflow = false;
-      
-      break;
-    }
+    } //# End of switch
 
-  } //# End of switch
+    strncat(mnemonic, "\t", sizeof mnemonic);
+    strncat(mnemonic, asm_operands, sizeof mnemonic);
 
-  strncat(mnemonic, "\t", sizeof mnemonic);
-  strncat(mnemonic, asm_operands, sizeof mnemonic);
-}
+    if (disassemble && debug_mode) 
+      puts(mnemonic);
+  }
+};

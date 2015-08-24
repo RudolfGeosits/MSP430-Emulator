@@ -23,7 +23,7 @@
 //# Where C = Condition, X = 10-bit signed offset 
 //# 
 //########################################################
-void decode_formatIII(Cpu *cpu, uint16_t instruction)
+void decode_formatIII(Cpu *cpu, uint16_t instruction, bool disassemble)
 {
   uint8_t condition = (instruction & 0x1C00) >> 10;
   int16_t signed_offset = (instruction & 0x03FF) * 2;
@@ -35,6 +35,7 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction)
     signed_offset |= 0xF800;
   }
 
+  if (!disassemble) {
   switch(condition){
   
   /* JNE/JNZ Jump if not equal/zero             
@@ -43,10 +44,6 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction)
   * If Z = 1: execute following instruction
   */
   case 0x0:{
-    sprintf(mnemonic, "JNZ"); 
-    sprintf(value, "0x%04X", cpu->pc + signed_offset);
-    if (disassemble_mode) break;
-
     if (cpu->sr.zero == false) {
       cpu->pc += signed_offset;
     }
@@ -59,10 +56,6 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction)
    * If Z = 0: execute following instruction
   */
   case 0x1:{
-    sprintf(mnemonic, "JZ");
-    sprintf(value, "0x%04X", cpu->pc + signed_offset);
-    if (disassemble_mode) break;
-
     if (cpu->sr.zero == true) {
       cpu->pc += signed_offset;
     }
@@ -76,10 +69,6 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction)
   *  if C = 1: execute following instruction
   */
   case 0x2:{
-    sprintf(mnemonic, "JNC");
-    sprintf(value, "0x%04X", cpu->pc + signed_offset);
-    if (disassemble_mode) break;
-
     if (cpu->sr.carry == false) {
       cpu->pc += signed_offset;
     }    
@@ -93,10 +82,6 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction)
   * If C = 0: execute following instruction
   */
   case 0x3:{
-    sprintf(mnemonic, "JC");
-    sprintf(value, "0x%04X", cpu->pc + signed_offset);
-    if (disassemble_mode) break;
-    
     if (cpu->sr.carry == true) {
       cpu->pc += signed_offset;
     }    
@@ -110,10 +95,6 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction)
   *  if N = 0: execute following instruction
   */
   case 0x4:{
-    sprintf(mnemonic, "JN");
-    sprintf(value, "0x%04X", cpu->pc + signed_offset);
-    if (disassemble_mode) break;
-
     if (cpu->sr.negative == true) {
       cpu->pc += signed_offset;
     }    
@@ -127,10 +108,6 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction)
   *  If (N .XOR. V) = 1 then execute the following instruction
   */
   case 0x5:{
-    sprintf(mnemonic, "JGE");    
-    sprintf(value, "0x%04X", cpu->pc + signed_offset);
-    if (disassemble_mode) break;
-
     if ((cpu->sr.negative ^ cpu->sr.overflow) == false) {
       cpu->pc += signed_offset;
     }    
@@ -144,10 +121,6 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction)
   *  If (N .XOR. V) = 0 then execute following instruction
   */
   case 0x6:{
-    sprintf(mnemonic, "JL");
-    sprintf(value, "0x%04X", cpu->pc + signed_offset);
-    if (disassemble_mode) break;
-
     if ((cpu->sr.negative ^ cpu->sr.overflow) == true) {
       cpu->pc += signed_offset;
     }    
@@ -161,10 +134,6 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction)
    *
    */
   case 0x7:{
-    sprintf(mnemonic, "JMP");
-    sprintf(value, "0x%04X", cpu->pc + signed_offset);
-    if (disassemble_mode) break;
-
     cpu->pc += signed_offset;
     break;
   }
@@ -175,7 +144,65 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction)
   }
   
   } //# End of Switch
+  } //# end if
+
+
+  else {
+    switch(condition){
+    case 0x0:{
+      sprintf(mnemonic, "JNZ"); 
+      sprintf(value, "0x%04X", cpu->pc + signed_offset);
+      break;
+    }
+  case 0x1:{
+    sprintf(mnemonic, "JZ");
+    sprintf(value, "0x%04X", cpu->pc + signed_offset);
+    break;
+  }
+  case 0x2:{
+    sprintf(mnemonic, "JNC");
+    sprintf(value, "0x%04X", cpu->pc + signed_offset);
+    break;
+  }
+  case 0x3:{
+    sprintf(mnemonic, "JC");
+    sprintf(value, "0x%04X", cpu->pc + signed_offset);
+    break;
+  }
+  case 0x4:{
+    sprintf(mnemonic, "JN");
+    sprintf(value, "0x%04X", cpu->pc + signed_offset);
+    break;
+  }
+  case 0x5:{
+    sprintf(mnemonic, "JGE");    
+    sprintf(value, "0x%04X", cpu->pc + signed_offset);
+    
+    break;
+  }
+  case 0x6:{
+    sprintf(mnemonic, "JL");
+    sprintf(value, "0x%04X", cpu->pc + signed_offset);
+    
+    break;
+  }
+  case 0x7:{
+    sprintf(mnemonic, "JMP");
+    sprintf(value, "0x%04X", cpu->pc + signed_offset);
+    break;
+  }
+  default:{
+    puts("Undefined Jump operation!\n");
+    return;
+  }
+  
+  } //# End of Switch
 
   strncat(mnemonic, "\t", sizeof(mnemonic));
   strncat(mnemonic, value, sizeof(mnemonic));
+  
+  if (disassemble && debug_mode)
+    puts(mnemonic);
+  } //# end else
+
 }

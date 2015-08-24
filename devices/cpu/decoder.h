@@ -34,16 +34,21 @@ char mnemonic[50] = {0};
 bool disassemble_mode = false;
 bool debug_mode = true;
 
-void decode_formatI(Cpu *cpu, uint16_t instruction);
-void decode_formatII(Cpu *cpu, uint16_t instruction);
-void deocde_formatIII(Cpu *cpu, uint16_t instruction);
+void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble);
+void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble);
+void deocde_formatIII(Cpu *cpu, uint16_t instruction, bool disassemble);
 
-void decode(Cpu *cpu, uint16_t instruction);
+void decode(Cpu *cpu, uint16_t instruction, bool disassemble);
 uint16_t fetch(Cpu *cpu);
 
 enum { 
   WORD, 
   BYTE 
+};
+
+enum {
+  EXECUTE = 0,
+  DISASSEMBLE,
 };
 
 #include "flag_handler.c"

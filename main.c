@@ -66,9 +66,9 @@ int main(int argc, char *argv[])
   load_bootloader(0x0C00);
   load_firmware(argv[1], 0xC000);
   
-  /* Fetch-Decode-Execute Cycle */
+  // Fetch-Decode-Execute Cycle
   while ( command_loop(msp430) ) {
-    decode( msp430, fetch(msp430) );   /* Instruction Decoder */
+    decode(msp430, fetch(msp430), EXECUTE); // Instruction Decoder
     handle_port_1(msp430);
     handle_usci(msp430);
   }

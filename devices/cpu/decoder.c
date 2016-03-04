@@ -49,7 +49,7 @@ void decode(Cpu *cpu, uint16_t instruction, bool disassemble)
     decode_formatI(cpu, instruction, disassemble);
   }
   else {
-    printf("INVALID INSTRUCTION ");
+    printf("%04X\t[INVALID INSTRUCTION]\n", instruction);
     cpu->pc -= 2;
     run = false;
     debug_mode = true;

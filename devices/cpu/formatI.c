@@ -37,6 +37,12 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
 
   char s_reg_name[10], d_reg_name[10];
 
+  /* String to show hex value of instruction */
+  char hex_str[100] = {0};
+  char hex_str_part[10] = {0};
+
+  sprintf(hex_str, "%04X", instruction);
+
   /* Source Register pointer */
   int16_t *s_reg = get_reg_ptr(cpu, source);
   
@@ -47,7 +53,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
   reg_num_to_name(destination, d_reg_name); /* Get destination register name */
 
   uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
-  int16_t immediate_constant = 0;           /* Generated Constant */
+  int16_t immediate_constant = 0;           /* Generated Constant */  
 
   /* Spot CG1 and CG2 Constant generator instructions */
   if ( (source == 2 && as_flag > 1) || source == 3 ) {
@@ -93,6 +99,10 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
   /* Constant Gen - Absolute; Ex: MOV #C, &0xD    */ /* 0 */
   else if (as_flag == 0 && ad_flag == 1) {
     destination_offset = fetch(cpu);
+    
+    sprintf(hex_str_part, "%04X", (uint16_t) destination_offset);
+    strncat(hex_str, hex_str_part, sizeof hex_str);
+
     destination_addr = get_addr_ptr(*d_reg + destination_offset);
     
     if (constant_generator_active) {   /* Source Constant */
@@ -136,11 +146,18 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
       uint16_t virtual_addr = *s_reg + source_offset - 2;
 
       source_value = *get_addr_ptr(virtual_addr);	
+
+      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
+
       sprintf(asm_operands, "0x%04X, %s", virtual_addr, d_reg_name);
     }
     else if (source == 2) {            /* Source Absolute */
       source_offset = fetch(cpu);
       source_value = *get_addr_ptr(source_offset);
+
+      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
 
       sprintf(asm_operands, "&0x%04X, %s", 
 	      (uint16_t) source_offset, d_reg_name);
@@ -148,6 +165,9 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
     else {                             /* Source Indexed */
       source_offset = fetch(cpu);
       source_value = *get_addr_ptr(*s_reg + source_offset);
+
+      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
 
       sprintf(asm_operands, "0x%04X(%s), %s", 
 	      (uint16_t) source_offset, s_reg_name, d_reg_name);  
@@ -182,22 +202,36 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
       uint16_t virtual_addr = cpu->pc + source_offset - 4;
 
       source_value = *get_addr_ptr(virtual_addr);
+
+      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
+
       sprintf(asm_operands, "0x%04X, ", virtual_addr);
     }
     else if (source == 2) {            /* Source Absolute */
       source_offset = fetch(cpu);
       source_value = *get_addr_ptr(source_offset);
+
+      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
+
       sprintf(asm_operands, "&0x%04X, ", (uint16_t) source_offset);
     }
     else {                             /* Source Indexed */
       source_offset = fetch(cpu);
       source_value = *get_addr_ptr(*s_reg + source_offset);
 
+      sprintf(hex_str_part, "%04X", (uint16_t)source_offset);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
+
       sprintf(asm_operands, "0x%04X(%s), ", 
 	      (uint16_t) source_offset, s_reg_name);
     }
       
     destination_offset = fetch(cpu);
+
+    sprintf(hex_str_part, "%04X", (uint16_t) destination_offset);
+    strncat(hex_str, hex_str_part, sizeof hex_str);
 
     if (destination == 0) {        /* Destination Symbolic */
       uint16_t virtual_addr = cpu->pc + destination_offset - 2;
@@ -245,6 +279,9 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
   else if (as_flag == 2 && ad_flag == 1) {
     destination_offset = fetch(cpu);
 
+    sprintf(hex_str_part, "%04X", (uint16_t) destination_offset);
+    strncat(hex_str, hex_str_part, sizeof hex_str);
+
     if (constant_generator_active) {   /* Source Constant */
       source_value = immediate_constant;
       sprintf(asm_operands, "#0x%04X, ", source_value);
@@ -284,6 +321,9 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
     else if (source == 0) {            /* Source Immediate */
       source_value = fetch(cpu);
 	
+      sprintf(hex_str_part, "%04X", (uint16_t) source_value);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
+
       if (bw_flag == WORD) {
 	sprintf(asm_operands, "#0x%04X, %s", 
 		(uint16_t) source_value, d_reg_name);
@@ -326,6 +366,10 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
     }
     else if (source == 0) {            /* Source Immediate */
       source_value = fetch(cpu);
+
+      sprintf(hex_str_part, "%04X", (uint16_t) source_value);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
+
       sprintf(asm_operands, "#0x%04X, ", (uint16_t)source_value);
     }
     else {                             /* Source Indirect Auto Increment */
@@ -339,6 +383,9 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
     }
 
     destination_offset = fetch(cpu);
+
+    sprintf(hex_str_part, "%04X", (uint16_t) destination_offset);
+    strncat(hex_str, hex_str_part, sizeof hex_str);
 
     if (destination == 0) {        /* Destination Symbolic */
       uint16_t virtual_addr = cpu->pc + destination_offset - 2;
@@ -804,7 +851,29 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
     strncat(mnemonic, "\t", sizeof mnemonic);
     strncat(mnemonic, asm_operands, sizeof mnemonic);
 
-    if (disassemble && debug_mode) 
-      puts(mnemonic);
+    if (disassemble && debug_mode) { 
+      int i;
+      char one = 0, two = 0;
+
+      // Make little endian big endian
+      for (i = 0;i < strlen(hex_str);i += 4) {
+	one = hex_str[i];
+	two = hex_str[i + 1];
+
+	hex_str[i] = hex_str[i + 2];
+	hex_str[i + 1] = hex_str[i + 3];
+
+	hex_str[i + 2] = one;
+	hex_str[i + 3] = two;
+      }
+
+      printf("%s", hex_str);
+      
+      for (i = strlen(hex_str);i < 12;i++)
+	printf(" ");
+
+      printf("\t%s\n", mnemonic);
+    }
+
   }
 };

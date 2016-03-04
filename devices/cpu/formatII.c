@@ -40,6 +40,12 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
   uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
   int16_t immediate_constant = 0;           /* Generated Constant */
 
+  /* String to show hex value of instruction */
+  char hex_str[100] = {0};
+  char hex_str_part[10] = {0};
+
+  sprintf(hex_str, "%04X", instruction);
+
   /*
   printf("Opcode: 0x%01X  Source bits: 0x%01X\nAS_Flag: 0x%01X  "\
 	 "BW_Flag: 0x%01X\n",
@@ -94,6 +100,9 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
       source_offset = fetch(cpu);
       uint16_t virtual_addr = cpu->pc + source_offset;
 
+      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
+
       source_address = get_addr_ptr(virtual_addr);
 
       sprintf(asm_operand, "0x%04X", virtual_addr);
@@ -103,12 +112,18 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
       source_address = get_addr_ptr(source_offset);
       source_value = *source_address;
 
+      sprintf(hex_str_part, "%04X", (uint16_t) source_value);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
+
       sprintf(asm_operand, "&0x%04X", (uint16_t) source_offset);
     }
     else {                             /* Source Indexed */
       source_offset = fetch(cpu);
       source_address = get_addr_ptr(*reg + source_offset);
       source_value = *source_address;
+
+      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
 
       sprintf(asm_operand, "0x%04X(%s)", (uint16_t) source_offset, reg_name);
     }
@@ -144,6 +159,9 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
     else if (source == 0) {            /* Source Immediate */
       source_value = bogus_reg = fetch(cpu);
       source_address = &bogus_reg;
+
+      sprintf(hex_str_part, "%04X", (uint16_t) source_value);
+      strncat(hex_str, hex_str_part, sizeof hex_str);
 
       if (bw_flag == WORD) {
         sprintf(asm_operand, "#0x%04X", (uint16_t) source_value);
@@ -367,8 +385,30 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
     strncat(mnemonic, "\t", sizeof mnemonic);
     strncat(mnemonic, asm_operand, sizeof mnemonic);
     
-    if (disassemble && debug_mode) 
-      puts(mnemonic);
+    if (disassemble && debug_mode) {
+      int i;
+      char one = 0, two = 0;
+
+      // Make little endian big endian
+      for (i = 0;i < strlen(hex_str);i += 4) {
+	one = hex_str[i];
+	two = hex_str[i + 1];
+
+	hex_str[i] = hex_str[i + 2];
+        hex_str[i + 1] = hex_str[i + 3];
+
+	hex_str[i + 2] = one;
+	hex_str[i + 3] = two;
+      }
+
+      printf("%s", hex_str);
+
+      for (i = strlen(hex_str);i < 12;i++)
+	printf(" ");
+
+      printf("\t%s\n", mnemonic);
+    }
+
   } //# end else
 
 }

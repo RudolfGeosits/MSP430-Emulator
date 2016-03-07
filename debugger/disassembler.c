@@ -18,23 +18,26 @@
 
 #include "disassembler.h"
 
-void disassemble(Cpu *cpu, uint16_t start_addr, uint8_t times)
+void disassemble(Emulator *emu, uint16_t start_addr, uint8_t times)
 {
+  Cpu *cpu = emu->cpu;
+  Debugger *debugger = emu->debugger;
+
   uint16_t saved_pc = cpu->pc, opcode;
   uint32_t i;
 
-  cpu->debugger->disassemble_mode = true;
+  debugger->disassemble_mode = true;
   cpu->pc = start_addr;
   
   for (i = 0;i < times;i++) {    
     printf("0x%04X:\t", cpu->pc);
 
-    opcode = fetch(cpu);    
-    decode(cpu, opcode, DISASSEMBLE);
+    opcode = fetch(emu);    
+    decode(emu, opcode, DISASSEMBLE);
 
     fflush(stdout);
   }
 
-  cpu->debugger->disassemble_mode = false;
+  debugger->disassemble_mode = false;
   cpu->pc = saved_pc; /* Restore PC */
 }

@@ -21,10 +21,14 @@
 /* Dump Bytes, Dump Words, Dump Double Words */
 typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
 enum {MAX_BREAKPOINTS = 10};
+Emulator *local_emu = NULL;
 
 /* Main command loop */
-bool command_loop (Cpu *cpu)
+bool command_loop (Emulator *emu)
 {
+  Cpu *cpu = emu->cpu;
+  Debugger *debugger = emu->debugger;
+
   static uint16_t breakpoint_addresses[MAX_BREAKPOINTS];
   static uint8_t cur_bp_number = 0;
 
@@ -35,19 +39,19 @@ bool command_loop (Cpu *cpu)
   int i;
   for (i = 0;i < cur_bp_number;i++) {
     if (cpu->pc == breakpoint_addresses[i]) {
-      cpu->debugger->run = 0; /* Stop fast execution */
-      cpu->debugger->debug_mode = true;
+      debugger->run = 0; /* Stop fast execution */
+      debugger->debug_mode = true;
       printf("\n\t[Breakpoint %d hit]\n\n", i + 1);
       break;
     }
   }
 
-  if (!cpu->debugger->disassemble_mode && cpu->debugger->debug_mode) {
-    display_registers(cpu);
-    disassemble(cpu, cpu->pc, 1);
+  if (!debugger->disassemble_mode && debugger->debug_mode) {
+    display_registers(emu);
+    disassemble(emu, cpu->pc, 1);
   }
 
-  while (!cpu->debugger->run) {
+  while (!debugger->run) {
     bzero(cmd, sizeof cmd);
     line = readline("\n>> ");
 
@@ -90,8 +94,8 @@ bool command_loop (Cpu *cpu)
     // run, run the program until a breakpoint is hit 
     else if ( !strncasecmp("run", cmd, sizeof "run") ||
 	      !strncasecmp("r", cmd, sizeof "r")) {
-      cpu->debugger->run = true;
-      cpu->debugger->debug_mode = false;
+      debugger->run = true;
+      debugger->debug_mode = false;
       
       break;
     }
@@ -116,14 +120,14 @@ bool command_loop (Cpu *cpu)
       }
 
       if (num > 0) 
-	disassemble(cpu, start_addr, num);
+	disassemble(emu, start_addr, num);
 
       continue;
     }
 
     // Display all 16 registers 
     else if ( !strncasecmp("regs", cmd, sizeof "regs")) {
-      display_registers(cpu);
+      display_registers(emu);
       continue;
     }
     
@@ -150,12 +154,11 @@ bool command_loop (Cpu *cpu)
       
       // Is it a direct address or a an address in a register being spec'd 
       if (param1[0] >= '0' && param1[0] <= '9') {
-	sscanf(param1, "%X", &start_addr);
+	sscanf(param1, "%X", (unsigned int *) &start_addr);
       }
       else if (param1[0] == '%' || param1[0] == 'r' || param1[0] == 'R') {   
-	uint16_t *p = get_reg_ptr(cpu, reg_name_to_num(param1));
+	uint16_t *p = get_reg_ptr(emu, reg_name_to_num(param1));
 	start_addr = *p;
-	//start_addr = (uint16_t) *(get_reg_ptr(cpu, reg_name_to_num(param1)));
       }
       
       stride = BYTE_STRIDE;
@@ -170,11 +173,11 @@ bool command_loop (Cpu *cpu)
       sscanf(line, "%s %X", reg_name_or_addr, &value);
 
       if ( reg_name_to_num(reg_name_or_addr) != -1 ) {
-	uint16_t *p = get_reg_ptr( cpu, reg_name_to_num(reg_name_or_addr) );
+	uint16_t *p = get_reg_ptr(emu, reg_name_to_num(reg_name_or_addr) );
 	*p = value;
 
-	display_registers(cpu);
-	disassemble(cpu, cpu->pc, 1);
+	display_registers(emu);
+	disassemble(emu, cpu->pc, 1);
       }
       else {
 	uint16_t virtual_addr = (uint16_t) strtol(reg_name_or_addr, NULL, 0);
@@ -254,11 +257,27 @@ void dump_memory(uint8_t *MEM, uint32_t size,
   puts("");
 }
 
+void setup_debugger(Emulator *emu)
+{
+  local_emu = emu;
+  Debugger *debugger = emu->debugger;
+
+  debugger->run = false;
+  debugger->debug_mode = true;
+  debugger->disassemble_mode = false;
+
+  debugger->web_interface = true;
+  debugger->web_server_ready = false;
+
+  debugger->console_interface = false;
+}
+
 void handle_sigint(int sig)
 {
-  puts("TODO");
-  //cpu->debugger->run = false;
-  //cpu->debugger->debug_mode = true;
+  if (local_emu == NULL) return;
+
+  local_emu->debugger->run = false;
+  local_emu->debugger->debug_mode = true;
 }
 
 void register_signal(int sig)

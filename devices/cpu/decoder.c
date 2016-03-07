@@ -19,8 +19,9 @@
 #include "decoder.h"
 
 /*##########+++ CPU Fetch Cycle  +++##########*/
-uint16_t fetch(Cpu *cpu)
+uint16_t fetch(Emulator *emu)
 {
+  Cpu *cpu = emu->cpu;
   uint16_t word, *p;
   
   p = (get_addr_ptr(cpu->pc));
@@ -32,31 +33,34 @@ uint16_t fetch(Cpu *cpu)
 }
 
 /*##########+++ CPU Decode Cycle +++##########*/
-void decode(Cpu *cpu, uint16_t instruction, bool disassemble)
+void decode(Emulator *emu, uint16_t instruction, bool disassemble)
 {  
+  Cpu *cpu = emu->cpu;
+  Debugger *debugger = emu->debugger;
+
   int done = 0;
   uint8_t format_id;
-  memset(cpu->debugger->mnemonic, 0, sizeof cpu->debugger->mnemonic);
+  memset(debugger->mnemonic, 0, sizeof debugger->mnemonic);
 
   format_id = (uint8_t)(instruction >> 12);
 
   if (format_id == 0x1) {
-    /* format II (single operand) instruction */
-    decode_formatII(cpu, instruction, disassemble);  
+    // format II (single operand) instruction //
+    decode_formatII(emu, instruction, disassemble);  
   }    
   else if (format_id >= 0x2 && format_id <= 3) {
-    /* format III (jump) instruction */
-    decode_formatIII(cpu, instruction, disassemble);
+    // format III (jump) instruction //
+    decode_formatIII(emu, instruction, disassemble);
   }
   else if (format_id >= 0x4) {
-    /* format I (two operand) instruction */
-    decode_formatI(cpu, instruction, disassemble);
+    // format I (two operand) instruction //
+    decode_formatI(emu, instruction, disassemble);
   }
   else {
     printf("%04X\t[INVALID INSTRUCTION]\n", instruction);
     cpu->pc -= 2;
-    cpu->debugger->run = false;
-    cpu->debugger->debug_mode = true;
+    debugger->run = false;
+    debugger->debug_mode = true;
   }
 }
 

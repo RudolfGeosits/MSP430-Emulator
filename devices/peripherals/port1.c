@@ -27,8 +27,9 @@
  *   IE: 0 = int not enabled, 1 = int enabled
  */
 
-void handle_port_1 (Cpu *cpu)
+void handle_port_1 (Emulator *emu)
 {
+  Cpu *cpu = emu->cpu;
   Port *p = cpu->p1;
 
   /* Handler P1.0 */
@@ -258,7 +259,8 @@ void handle_port_1 (Cpu *cpu)
 
 }
 
-void setup_port_1 (Cpu *cpu) {
+void setup_port_1 (Emulator *emu) {
+  Cpu *cpu = emu->cpu;
   Port *p = cpu->p1;
   
   static const uint16_t IN_VLOC   = 0x20;   /* Input */

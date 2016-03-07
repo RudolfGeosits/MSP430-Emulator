@@ -94,8 +94,7 @@ typedef struct Usci {
   Ctl1 ctl1;
 } Usci;
 
-void setup_usci(Cpu *cpu);
-void handle_usci(Cpu *cpu);
+void setup_usci(Emulator *emu);
+void handle_usci(Emulator *emu);
 
-//#include "usci.c"
 #endif

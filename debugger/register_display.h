@@ -16,12 +16,13 @@
   along with this program. If not, see <http://www.gnu.org/licenses
 */
 
-#ifndef _DECODE_FORMATI_H
-#define _DECODE_FORMATI_H
+#ifndef _REGISTER_DISPLAY_H_
+#define _REGISTER_DISPLAY_H_
 
-#include "flag_handler.h"
-#include "../utilities.h"
+#include <stdio.h>
 
-void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble);
+#include "../devices/cpu/registers.h"
+
+void display_registers(Emulator *emu);
 
 #endif

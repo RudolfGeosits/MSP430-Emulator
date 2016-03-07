@@ -28,8 +28,11 @@
 
 #include "formatI.h"
 
-void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
+void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
 {
+  Cpu *cpu = emu->cpu;
+  Debugger *debugger = emu->debugger;
+
   uint8_t opcode = (instruction & 0xF000) >> 12;
   uint8_t source = (instruction & 0x0F00) >> 8;
   uint8_t as_flag = (instruction & 0x0030) >> 4;
@@ -47,10 +50,10 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
   sprintf(hex_str, "%04X", instruction);
 
   /* Source Register pointer */
-  int16_t *s_reg = get_reg_ptr(cpu, source);
+  int16_t *s_reg = get_reg_ptr(emu, source);
   
   /* Destination Register pointer */
-  int16_t *d_reg = get_reg_ptr(cpu, destination);
+  int16_t *d_reg = get_reg_ptr(emu, destination);
 
   reg_num_to_name(source, s_reg_name);      /* Get source register name */
   reg_num_to_name(destination, d_reg_name); /* Get destination register name */
@@ -101,7 +104,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
   /* Constant Gen - Symbolic; Ex: MOV #C, 0xD     */ /* 0 */
   /* Constant Gen - Absolute; Ex: MOV #C, &0xD    */ /* 0 */
   else if (as_flag == 0 && ad_flag == 1) {
-    destination_offset = fetch(cpu);
+    destination_offset = fetch(emu);
     
     sprintf(hex_str_part, "%04X", (uint16_t) destination_offset);
     strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -145,7 +148,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "#0x%04X, %s", source_value, d_reg_name);
     }
     else if (source == 0) {            /* Source Symbolic */
-      source_offset = fetch(cpu);
+      source_offset = fetch(emu);
       uint16_t virtual_addr = *s_reg + source_offset - 2;
 
       source_value = *get_addr_ptr(virtual_addr);	
@@ -156,7 +159,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "0x%04X, %s", virtual_addr, d_reg_name);
     }
     else if (source == 2) {            /* Source Absolute */
-      source_offset = fetch(cpu);
+      source_offset = fetch(emu);
       source_value = *get_addr_ptr(source_offset);
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
@@ -166,7 +169,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
 	      (uint16_t) source_offset, d_reg_name);
     }
     else {                             /* Source Indexed */
-      source_offset = fetch(cpu);
+      source_offset = fetch(emu);
       source_value = *get_addr_ptr(*s_reg + source_offset);
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
@@ -201,7 +204,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "#0x%04X, ", source_value);
     }
     else if (source == 0) {            /* Source Symbolic */
-      source_offset = fetch(cpu);
+      source_offset = fetch(emu);
       uint16_t virtual_addr = cpu->pc + source_offset - 4;
 
       source_value = *get_addr_ptr(virtual_addr);
@@ -212,7 +215,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "0x%04X, ", virtual_addr);
     }
     else if (source == 2) {            /* Source Absolute */
-      source_offset = fetch(cpu);
+      source_offset = fetch(emu);
       source_value = *get_addr_ptr(source_offset);
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
@@ -221,7 +224,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "&0x%04X, ", (uint16_t) source_offset);
     }
     else {                             /* Source Indexed */
-      source_offset = fetch(cpu);
+      source_offset = fetch(emu);
       source_value = *get_addr_ptr(*s_reg + source_offset);
 
       sprintf(hex_str_part, "%04X", (uint16_t)source_offset);
@@ -231,7 +234,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
 	      (uint16_t) source_offset, s_reg_name);
     }
       
-    destination_offset = fetch(cpu);
+    destination_offset = fetch(emu);
 
     sprintf(hex_str_part, "%04X", (uint16_t) destination_offset);
     strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -280,7 +283,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
   /* Constant Gen - Symbolic; Ex: MOV #C, 0xD        */ /* 2, 4 */
   /* Constant Gen - Absolute; Ex: MOV #C, &0xD       */ /* 2, 4 */
   else if (as_flag == 2 && ad_flag == 1) {
-    destination_offset = fetch(cpu);
+    destination_offset = fetch(emu);
 
     sprintf(hex_str_part, "%04X", (uint16_t) destination_offset);
     strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -322,7 +325,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
 	      (uint16_t) source_value, d_reg_name);
     }
     else if (source == 0) {            /* Source Immediate */
-      source_value = fetch(cpu);
+      source_value = fetch(emu);
 	
       sprintf(hex_str_part, "%04X", (uint16_t) source_value);
       strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -368,7 +371,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "#0x%04X, ", (uint16_t)source_value);
     }
     else if (source == 0) {            /* Source Immediate */
-      source_value = fetch(cpu);
+      source_value = fetch(emu);
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_value);
       strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -385,7 +388,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
       }
     }
 
-    destination_offset = fetch(cpu);
+    destination_offset = fetch(emu);
 
     sprintf(hex_str_part, "%04X", (uint16_t) destination_offset);
     strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -855,7 +858,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
     strncat(mnemonic, asm_operands, sizeof mnemonic);
     strncat(mnemonic, "\n", sizeof mnemonic);
 
-    if (disassemble && cpu->debugger->debug_mode) { 
+    if (disassemble && emu->debugger->debug_mode) { 
       int i;
       char one = 0, two = 0;
 

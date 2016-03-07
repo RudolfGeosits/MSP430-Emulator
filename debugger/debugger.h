@@ -25,18 +25,32 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#include "../main.h"
 #include "../devices/cpu/registers.h"
 #include "../devices/memory/memspace.h"
-#include "../devices/utilities.h"
-#include "disassembler.h"
+
+typedef struct Debugger {
+  bool run;
+  bool disassemble_mode;
+  bool debug_mode;
+  bool web_interface;
+  bool console_interface;
+
+  pthread_t web_server_thread;
+  bool web_server_ready;
+
+  pthread_t gui_thread;
+
+  char mnemonic[50];
+} Debugger;
+
+void setup_debugger(Emulator *emu);
 
 void dump_memory(uint8_t *MEM, uint32_t size, uint32_t start_addr, 
 		 uint8_t stride);
 
 void handle_sigint(int signal);
 
-void display_registers(Cpu *cpu);
-
-bool command_loop(Cpu *cpu);
+bool command_loop(Emulator *emu);
 
 #endif

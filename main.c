@@ -20,52 +20,64 @@
 
 int main(int argc, char *argv[])
 {
-  Cpu *msp430 = (Cpu *) calloc( 1, sizeof(Cpu) );
-  msp430->p1 = (Port *) calloc ( 1, sizeof(Port) );
-  msp430->usci = (Usci *) calloc ( 1, sizeof(Usci) );
+  Emulator *emu = (Emulator *) calloc( 1, sizeof(Emulator) );
+
+  emu->cpu = (Cpu *) calloc( 1, sizeof(Cpu) );
+  emu->cpu->p1 = (Port *) calloc ( 1, sizeof(Port) );
+  emu->cpu->usci = (Usci *) calloc ( 1, sizeof(Usci) );
   
-  msp430->debugger = (Debugger *) calloc (1, sizeof(Debugger) );
-  msp430->debugger->run = false;
-  msp430->debugger->debug_mode = true;
-  msp430->debugger->disassemble_mode = false;
+  emu->debugger = (Debugger *) calloc (1, sizeof(Debugger) );
+  setup_debugger(emu);
   
+  Cpu *cpu = emu->cpu;
+  Debugger *debugger = emu->debugger;
+
   if (argv[1] == NULL) {
     display_help();
     exit(1);
   }
 
-  pthread_t web_server_thread;
-  if(pthread_create(&web_server_thread, NULL, web_server, 
-		    (void *)msp430 )) 
-    {
-      fprintf(stderr, "Error creating thread\n");
+  if (debugger->web_interface == true) {
+    pthread_t *t = &debugger->web_server_thread;
+
+    if(pthread_create( t, NULL, web_server, (void *)emu )) {
+      fprintf(stderr, "Error creating web server thread\n");
       return 1;
     }
 
+    printf("Waiting for web client to connect...\n");
+    while (!debugger->web_server_ready) usleep(1000);
+  }
+  else if (debugger->console_interface == true) {
+    puts("console mode not implemented.");
+  }
+  
   register_signal(SIGINT);
   initialize_msp_memspace();
-  initialize_msp_registers(msp430);  
-
-  setup_port_1(msp430);
-  setup_usci(msp430);
-  open_pty(msp430);
+  initialize_msp_registers(emu);  
+  setup_port_1(emu);
+  setup_usci(emu);
+  open_pty(emu);
 
   load_bootloader(0x0C00);
   load_firmware(argv[1], 0xC000);
-  
-  // Fetch-Decode-Execute Cycle
-  while ( command_loop(msp430) ) {
-    decode(msp430, fetch(msp430), EXECUTE); // Instruction Decoder
-    handle_port_1(msp430);
-    handle_usci(msp430);
 
+  // Fetch-Decode-Execute Cycle
+  while ( command_loop(emu) ) {
+    decode(emu, fetch(emu), EXECUTE); // Instruction Decoder
+    handle_port_1(emu);
+    handle_usci(emu);
+    
     usleep(1);
   }
 
-  uninitialize_msp_memspace(msp430);
-  free(msp430->p1);
-  free(msp430->usci);
-  free(msp430);
+
+  uninitialize_msp_memspace(emu->cpu);
+  free(cpu->p1);
+  free(cpu->usci);
+  free(cpu);
+  free(debugger);
+  free(emu);
 
   return 0;
 }

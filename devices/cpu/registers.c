@@ -19,8 +19,11 @@
 #include "registers.h"
 
 //##########+++ MSP430 Register initialization +++##########
-void initialize_msp_registers(Cpu *cpu)
+void initialize_msp_registers(Emulator *emu)
 {
+  Cpu *cpu = emu->cpu;
+  Debugger *debugger = emu->debugger;
+
   /* Initialize PC to boot loader code on cold boot (COLD)*/
   //cpu->pc = 0x0C00;
 
@@ -41,8 +44,9 @@ void initialize_msp_registers(Cpu *cpu)
 }
 
 //##########+++ Return value from SR struct +++##########
-uint16_t sr_to_value(Cpu *cpu)
+uint16_t sr_to_value(Emulator *emu)
 { 
+  Cpu *cpu = emu->cpu;
   uint16_t r2 = 0;
   
   if (cpu->sr.overflow) {

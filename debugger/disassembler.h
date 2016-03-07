@@ -23,6 +23,6 @@
 #include "../devices/cpu/decoder.h"
 #include "../devices/cpu/registers.h"
 
-void disassemble(Cpu *cpu, uint16_t start_addr, uint8_t times);
+void disassemble(Emulator *emu, uint16_t start_addr, uint8_t times);
 
 #endif

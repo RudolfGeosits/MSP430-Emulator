@@ -19,7 +19,7 @@
 #include "server.h"
 
 struct libwebsocket *ws = NULL;
-Cpu *cpu = NULL;
+Emulator *emu = NULL;
 
 int callback_emu (struct libwebsocket_context *this,
 			 struct libwebsocket *wsi,
@@ -29,6 +29,9 @@ int callback_emu (struct libwebsocket_context *this,
   switch (reason) {
     case LWS_CALLBACK_ESTABLISHED: {
       puts("connection established");
+      
+      // Flip ready flag for the emulator to begin
+      emu->debugger->web_server_ready = true;
       break;
     }
 
@@ -56,14 +59,14 @@ int callback_emu (struct libwebsocket_context *this,
       char *buf = (char *)in;
 
       if ( !strncmp((const char *)buf, (const char *)"PAUSE", sizeof("PAUSE")) ) {
-	cpu->debugger->run = false;
-	cpu->debugger->debug_mode = true;
+	emu->debugger->run = false;
+	emu->debugger->debug_mode = true;
 	puts("in pause");
 
       }
       else if ( !strncmp((const char *)buf, (const char *)"PLAY", sizeof("PLAY")) ) {
-	cpu->debugger->run = true;
-	cpu->debugger->debug_mode = false;
+	emu->debugger->run = true;
+	emu->debugger->debug_mode = false;
 	puts("in play");
       }
 
@@ -97,8 +100,9 @@ int callback_emu (struct libwebsocket_context *this,
 
 void *web_server (void *ctxt)
 {
-  cpu = (Cpu *) ctxt;
-  
+  emu = (Emulator *) ctxt;
+  Debugger *debugger = emu->debugger;
+
   int port = 9000;
   struct libwebsocket_context *context;
 

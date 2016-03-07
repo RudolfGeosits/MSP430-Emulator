@@ -22,7 +22,7 @@ memspace.o : devices/memory/memspace.c
 	cc -c devices/memory/memspace.c
 
 debugger.o : debugger/debugger.c
-	cc -c -w debugger/debugger.c
+	cc -c debugger/debugger.c
 
 disassembler.o : debugger/disassembler.c
 	cc -c debugger/disassembler.c

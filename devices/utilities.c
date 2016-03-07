@@ -60,7 +60,9 @@ void load_firmware(char *file_name, uint16_t virt_addr)
   fclose(fd);
 }
 
-uint16_t *get_stack_ptr(Cpu *cpu) {
+uint16_t *get_stack_ptr(Emulator *emu) {
+  Cpu *cpu = emu->cpu;
+  
   return (uint16_t *) ( ((void *)MEMSPACE + cpu->sp) );
 }
 
@@ -80,8 +82,10 @@ uint16_t *get_addr_ptr(uint16_t virt_addr) {
  * @param reg The numeric value of the register
  * @return Pointer to the register in question, NULL if register doesn't exist
  */
-int16_t *get_reg_ptr(Cpu *cpu, uint8_t reg)
+int16_t *get_reg_ptr(Emulator *emu, uint8_t reg)
 {
+  Cpu *cpu = emu->cpu;
+
   static int16_t r2 = 0;
   
   switch (reg) {  
@@ -89,7 +93,7 @@ int16_t *get_reg_ptr(Cpu *cpu, uint8_t reg)
     case 0x1: return (int16_t *) &cpu->sp;
 
     case 0x2:{
-      r2 = sr_to_value(cpu);
+      r2 = sr_to_value(emu);
       return &r2;
     }
       

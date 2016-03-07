@@ -97,8 +97,9 @@ void open_pty (Cpu *cpu)
   }
 }
 
-void handle_usci (Cpu *cpu) 
+void handle_usci (Emulator *emu) 
 {
+  Cpu *cpu = emu->cpu;
   Usci *usci = cpu->usci;
 
   if (*usci->UCA0TXBUF & 0xFF) {
@@ -107,8 +108,9 @@ void handle_usci (Cpu *cpu)
   }
 }
 
-void setup_usci (Cpu *cpu) 
+void setup_usci (Emulator *emu) 
 {
+  Cpu *cpu = emu->cpu;
   Usci *usci = cpu->usci;
 
   static const uint16_t UCA0CTL0_VLOC = 0x60; // Control Register 0

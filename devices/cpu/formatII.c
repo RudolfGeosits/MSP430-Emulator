@@ -28,8 +28,11 @@
 #include "decoder.h"
 #include "../utilities.h"
 
-void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
+void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 {
+  Cpu *cpu = emu->cpu;
+  Debugger *debugger = emu->debugger;
+
   uint8_t opcode = (instruction & 0x0380) >> 7;
   uint8_t bw_flag = (instruction & 0x0040) >> 6;
   uint8_t as_flag = (instruction & 0x0030) >> 4;
@@ -38,7 +41,7 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
   char reg_name[10];
   reg_num_to_name(source, reg_name);
   
-  uint16_t *reg = get_reg_ptr(cpu, source);
+  uint16_t *reg = get_reg_ptr(emu, source);
   uint16_t bogus_reg; /* For immediate values to be operated on */
 
   uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
@@ -102,7 +105,7 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
       sprintf(asm_operand, "#0x%04X", source_value);
     }
     else if (source == 0) {            /* Source Symbolic */
-      source_offset = fetch(cpu);
+      source_offset = fetch(emu);
       uint16_t virtual_addr = cpu->pc + source_offset;
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
@@ -113,7 +116,7 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
       sprintf(asm_operand, "0x%04X", virtual_addr);
     }
     else if (source == 2) {            /* Source Absolute */
-      source_offset = fetch(cpu);
+      source_offset = fetch(emu);
       source_address = get_addr_ptr(source_offset);
       source_value = *source_address;
 
@@ -123,7 +126,7 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
       sprintf(asm_operand, "&0x%04X", (uint16_t) source_offset);
     }
     else {                             /* Source Indexed */
-      source_offset = fetch(cpu);
+      source_offset = fetch(emu);
       source_address = get_addr_ptr(*reg + source_offset);
       source_value = *source_address;
 
@@ -162,7 +165,7 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
       sprintf(asm_operand, "#0x%04X", (uint16_t) source_value);
     }
     else if (source == 0) {            /* Source Immediate */
-      source_value = bogus_reg = fetch(cpu);
+      source_value = bogus_reg = fetch(emu);
       source_address = &bogus_reg;
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_value);
@@ -300,7 +303,7 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
     case 0x4:{
 
       cpu->sp -= 2; /* Yes, even for BYTE Instructions */
-      uint16_t *stack_address = get_stack_ptr(cpu);
+      uint16_t *stack_address = get_stack_ptr(emu);
     
       if (bw_flag == WORD) {
 	*stack_address = source_value;
@@ -322,7 +325,7 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
     case 0x5:{
     
       cpu->sp -= 2;
-      uint16_t *stack_address = get_stack_ptr(cpu);
+      uint16_t *stack_address = get_stack_ptr(emu);
       *stack_address = cpu->pc;
       cpu->pc = *source_address;
 
@@ -390,7 +393,7 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
     strncat(mnemonic, "\t", sizeof mnemonic);
     strncat(mnemonic, asm_operand, sizeof mnemonic);
     
-    if (disassemble && cpu->debugger->debug_mode) {
+    if (disassemble && emu->debugger->debug_mode) {
       int i;
       char one = 0, two = 0;
 

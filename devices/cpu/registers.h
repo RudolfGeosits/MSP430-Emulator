@@ -22,20 +22,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
-//#include "../../main.h"
-//#include "../../debugger/debugger.h"
-
-typedef struct Port Port;
-typedef struct Usci Usci;
-typedef struct Status_reg Status_reg;
-typedef struct Cpu Cpu;
-
-typedef struct {
-  bool run;
-  bool disassemble_mode;
-  bool debug_mode;
-  char mnemonic[50];
-} Debugger;
+#include "../../main.h"
 
 /* r2 or SR, the status register */
 typedef struct Status_reg {
@@ -51,7 +38,7 @@ typedef struct Status_reg {
   uint8_t carry : 1;      // Carry flag; Set when result produces a carry   
 } Status_reg;
 
-/* Main CPU structure */
+// Main CPU structure //
 typedef struct Cpu {
   uint16_t pc, sp;   /* R0 and R1 respectively */
   Status_reg sr;     /* Status register fields */
@@ -63,12 +50,9 @@ typedef struct Cpu {
 
   Port *p1, *p2;
   Usci *usci;
-
-  Debugger *debugger;
 } Cpu;
 
-uint16_t sr_to_value(Cpu *cpu);
-void initialize_msp_registers(Cpu *cpu);
+uint16_t sr_to_value(Emulator *emu);
+void initialize_msp_registers(Emulator *emu);
 
-//#include "registers.c"
 #endif

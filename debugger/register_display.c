@@ -16,8 +16,7 @@
   along with this program. If not, see <http://www.gnu.org/licenses
 */
 
-#include <stdio.h>
-#include "../devices/cpu/registers.h"
+#include "register_display.h"
 
 /*   Display all 16 registers                                                  
  *   - Toggle between Common mode and Specific mode                         
@@ -25,11 +24,13 @@
  *     (Specific: Display Register usages like PC, SR, etc.)               
  */
 
-void display_registers(Cpu *cpu)
+void display_registers(Emulator *emu)
 {
+  Cpu *cpu = emu->cpu;
+
   typedef enum {UNDEF, LINUX, WINDOWS} System_t;
   System_t this_system;
-  uint16_t r2 = sr_to_value(cpu);
+  uint16_t r2 = sr_to_value(emu);
 
 #ifdef __linux
   this_system = LINUX;

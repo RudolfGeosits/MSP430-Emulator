@@ -47,7 +47,7 @@ typedef struct Port {
   uint8_t *REN;  /* r/w     PUC reset */
 } Port;
 
-void setup_port_1(Cpu *cpu);
-void handle_port_1(Cpu *cpu);
+void setup_port_1(Emulator *emu);
+void handle_port_1(Emulator *emu);
 
 #endif

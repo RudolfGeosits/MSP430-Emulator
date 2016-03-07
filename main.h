@@ -30,6 +30,16 @@
 #include <libwebsockets.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+
+typedef struct Emulator Emulator;
+
+typedef struct Cpu Cpu;
+typedef struct Port Port;
+typedef struct Usci Usci;
+typedef struct Status_reg Status_reg;
+
+typedef struct Debugger Debugger;
+
 #include "devices/peripherals/port1.h"
 #include "devices/peripherals/usci.h"
 #include "devices/cpu/registers.h"
@@ -37,8 +47,9 @@
 #include "devices/memory/memspace.h"
 #include "debugger/server/server.h"
 #include "devices/cpu/decoder.h"
+#include "debugger/debugger.h"
 
-typedef struct {
+typedef struct Emulator {
   Cpu *cpu;
   Debugger *debugger;
 } Emulator;

@@ -210,6 +210,7 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction, bool disassemble)
 
     strncat(mnemonic, "\t", sizeof(mnemonic));
     strncat(mnemonic, value, sizeof(mnemonic));
+    strncat(mnemonic, "\n", sizeof(mnemonic));
   
     if (disassemble && cpu->debugger->debug_mode) {
       int i;
@@ -228,11 +229,17 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction, bool disassemble)
       }
 
       printf("%s", hex_str);
+      web_send(hex_str);
 
-      for (i = strlen(hex_str);i < 12;i++)
+      for (i = strlen(hex_str);i < 12;i++) {
 	printf(" ");
+	web_send(" ");
+      }
+      
+      printf("\t%s", mnemonic);
 
-      printf("\t%s\n", mnemonic);
+      web_send("\t");
+      web_send(mnemonic);
     }
 
   }

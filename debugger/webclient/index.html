@@ -22,8 +22,8 @@
 
 <html>
     <head>
-
 	<style>
+
 	 body {
 	     background-color: #CACACA;
 	 }
@@ -34,18 +34,18 @@
 	 }
 
 	 textarea {
-	     font-family: "Terminal";
+	     background-color: #000000;
+	     color: #FFFFFF;
+	     font-family: "Terminal", monospace;
 	     font-size: 14px;
-	     font-weight: normal;
+	     font-weight: bold;
 	     resize: none;
-	     overflow-y: scroll;
 	 }
+
 	</style>	
 
 	<!-- Load the Paper.js library -->
 	<script type="text/javascript" src="js/paper.js"></script>
-	<script src = "http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-	<!-- Define inlined PaperScript associate it with myCanvas -->
 	<script type="text/paperscript" canvas="myCanvas">
 
 	 var IMG_BASE = new Point(10, 10);
@@ -53,11 +53,12 @@
 	 var msp_image = new Raster('msp', IMG_BASE.x + 145.5, 
 				    IMG_BASE.y + 192);
 	 
-	 var console = document.getElementById('console');
-	 console.value = "";
+	 var txt_console = document.getElementById('console');
+	 txt_console.value = "";
 
 	 function print_console (text){
-	     console.value = console.value + text;
+	     var another = txt_console.value + text;
+	     txt_console.value = another;
 	 }
 
 	 var pause_button = document.getElementById('pause_button');
@@ -104,7 +105,7 @@
 
 	 ws.onmessage =  function (event) {
 	     var msg = event.data;
-
+	     
 	     switch (msg) {
 		 case "RED_ON": {
 		     P1_0_LED.visible = true;
@@ -140,7 +141,7 @@
     </head>
     
     <body>
-	<textarea id="console" rows="14" cols="60" readonly="readonly"></textarea>
+	<textarea id="console" rows="14" cols="80" readonly="readonly"></textarea>
 	<br>
 
 	<input type="text" id="stdin" width="80">
@@ -149,9 +150,7 @@
 	<button id="play_button" width="100" height="100">Play</button>
 	<br>
 	<br>
-	<right>
 	<canvas id="myCanvas" width="300" height="500" align="right"></canvas>
-	</right>
 	<img id="msp" src="msp.png" alt="msp" hidden="false"></img>
     </body>
 </html>

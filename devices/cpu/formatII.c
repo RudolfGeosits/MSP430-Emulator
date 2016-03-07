@@ -407,11 +407,17 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
       }
 
       printf("%s", hex_str);
+      web_send(hex_str);
 
-      for (i = strlen(hex_str);i < 12;i++)
+      for (i = strlen(hex_str);i < 12;i++) {
 	printf(" ");
+	web_send(" ");
+      }
 
       printf("\t%s\n", mnemonic);
+
+      web_send("\t");
+      web_send(mnemonic);
     }
 
   } //# end else

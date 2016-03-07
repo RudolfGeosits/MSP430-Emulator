@@ -878,7 +878,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
 	printf(" ");
 	web_send(" ");
       }
-
+      
       printf("\t%s", mnemonic);
       
       web_send("\t");

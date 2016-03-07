@@ -16,25 +16,21 @@
   along with this program. If not, see <http://www.gnu.org/licenses
 */
 
-#include "disassembler.h"
+#ifndef _FLAG_HANDLER_H_
+#define _FLAG_HANDLER_H_
 
-void disassemble(Cpu *cpu, uint16_t start_addr, uint8_t times)
-{
-  uint16_t saved_pc = cpu->pc, opcode;
-  uint32_t i;
+#include <stdint.h>
+#include <stdlib.h>
+#include "decoder.h"
 
-  cpu->debugger->disassemble_mode = true;
-  cpu->pc = start_addr;
-  
-  for (i = 0;i < times;i++) {    
-    printf("0x%04X:\t", cpu->pc);
+uint8_t is_overflowed (uint16_t source, uint16_t original_destination,
+                       uint16_t *result_addr, uint8_t bw_flag);
 
-    opcode = fetch(cpu);    
-    decode(cpu, opcode, DISASSEMBLE);
+uint8_t is_negative (int16_t *result_addr, uint8_t bw_flag);
 
-    fflush(stdout);
-  }
+uint8_t is_zero (uint16_t *result_addr, uint8_t bw_flag);
 
-  cpu->debugger->disassemble_mode = false;
-  cpu->pc = saved_pc; /* Restore PC */
-}
+uint8_t is_carried (uint32_t original_dst_value, uint32_t source_value,
+                    uint8_t bw_flag);
+
+#endif

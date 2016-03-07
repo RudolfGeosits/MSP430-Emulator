@@ -13,15 +13,19 @@
   GNU General Public License for more details.
    
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses      
+  along with this program. If not, see <http://www.gnu.org/licenses  
 */
+
+#include "decoder.h"
 
 /*##########+++ CPU Fetch Cycle  +++##########*/
 uint16_t fetch(Cpu *cpu)
 {
-  uint16_t word;
+  uint16_t word, *p;
   
-  word = *get_addr_ptr(cpu->pc);
+  p = (get_addr_ptr(cpu->pc));
+  word = *p;
+
   cpu->pc += 2;
   
   return word;
@@ -32,7 +36,7 @@ void decode(Cpu *cpu, uint16_t instruction, bool disassemble)
 {  
   int done = 0;
   uint8_t format_id;
-  memset(mnemonic, 0, sizeof mnemonic);
+  memset(cpu->debugger->mnemonic, 0, sizeof cpu->debugger->mnemonic);
 
   format_id = (uint8_t)(instruction >> 12);
 
@@ -51,17 +55,9 @@ void decode(Cpu *cpu, uint16_t instruction, bool disassemble)
   else {
     printf("%04X\t[INVALID INSTRUCTION]\n", instruction);
     cpu->pc -= 2;
-    run = false;
-    debug_mode = true;
+    cpu->debugger->run = false;
+    cpu->debugger->debug_mode = true;
   }
-
-  /*
-  if (disassemble_mode) {
-    if (debug_mode) {
-      puts(mnemonic);
-    }
-  }
-  */
 }
 
 int16_t run_constant_generator(uint8_t source, uint8_t as_flag) 

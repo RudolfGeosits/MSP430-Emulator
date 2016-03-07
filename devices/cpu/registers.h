@@ -18,10 +18,24 @@
 #ifndef _REGISTERS_H_
 #define _REGISTERS_H_
 
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdbool.h>
+//#include "../../main.h"
+//#include "../../debugger/debugger.h"
+
 typedef struct Port Port;
 typedef struct Usci Usci;
 typedef struct Status_reg Status_reg;
 typedef struct Cpu Cpu;
+
+typedef struct {
+  bool run;
+  bool disassemble_mode;
+  bool debug_mode;
+  char mnemonic[50];
+} Debugger;
 
 /* r2 or SR, the status register */
 typedef struct Status_reg {
@@ -49,10 +63,12 @@ typedef struct Cpu {
 
   Port *p1, *p2;
   Usci *usci;
+
+  Debugger *debugger;
 } Cpu;
 
 uint16_t sr_to_value(Cpu *cpu);
 void initialize_msp_registers(Cpu *cpu);
 
-#include "registers.c"
+//#include "registers.c"
 #endif

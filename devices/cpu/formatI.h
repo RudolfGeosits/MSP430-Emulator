@@ -16,25 +16,12 @@
   along with this program. If not, see <http://www.gnu.org/licenses
 */
 
-#include "disassembler.h"
+#ifndef _DECODE_FORMATI_H
+#define _DECODE_FORMATI_H
 
-void disassemble(Cpu *cpu, uint16_t start_addr, uint8_t times)
-{
-  uint16_t saved_pc = cpu->pc, opcode;
-  uint32_t i;
+#include "flag_handler.h"
+#include "../utilities.h"
 
-  cpu->debugger->disassemble_mode = true;
-  cpu->pc = start_addr;
-  
-  for (i = 0;i < times;i++) {    
-    printf("0x%04X:\t", cpu->pc);
+void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble);
 
-    opcode = fetch(cpu);    
-    decode(cpu, opcode, DISASSEMBLE);
-
-    fflush(stdout);
-  }
-
-  cpu->debugger->disassemble_mode = false;
-  cpu->pc = saved_pc; /* Restore PC */
-}
+#endif

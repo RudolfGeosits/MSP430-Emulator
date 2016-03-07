@@ -18,6 +18,14 @@
 #ifndef _UTILITIES_H_
 #define _UTILITIES_H_
 
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include "cpu/registers.h"
+#include "memory/memspace.h"
+
 void reg_num_to_name(uint8_t source_reg, char *reg_name);
 int16_t *get_reg_ptr(Cpu *cpu, uint8_t reg);
 uint16_t *get_stack_ptr(Cpu *cpu);
@@ -27,5 +35,5 @@ void load_bootloader(uint16_t virt_addr);
 void load_firmware(char *file_name, uint16_t virt_addr);
 void display_help();
 
-#include "utilities.c"
+//#include "utilities.c"
 #endif

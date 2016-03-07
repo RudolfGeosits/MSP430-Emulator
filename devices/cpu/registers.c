@@ -16,6 +16,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses/>
 */
 
+#include "registers.h"
+
 //##########+++ MSP430 Register initialization +++##########
 void initialize_msp_registers(Cpu *cpu)
 {

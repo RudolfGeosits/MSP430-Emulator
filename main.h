@@ -16,25 +16,31 @@
   along with this program. If not, see <http://www.gnu.org/licenses
 */
 
-#include "disassembler.h"
+#ifndef _MAIN_H_
+#define _MAIN_H_
 
-void disassemble(Cpu *cpu, uint16_t start_addr, uint8_t times)
-{
-  uint16_t saved_pc = cpu->pc, opcode;
-  uint32_t i;
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <string.h>
+#include <stdint.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <pthread.h>
+#include <libwebsockets.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+#include "devices/peripherals/port1.h"
+#include "devices/peripherals/usci.h"
+#include "devices/cpu/registers.h"
+#include "devices/utilities.h"
+#include "devices/memory/memspace.h"
+#include "debugger/server/server.h"
+#include "devices/cpu/decoder.h"
 
-  cpu->debugger->disassemble_mode = true;
-  cpu->pc = start_addr;
-  
-  for (i = 0;i < times;i++) {    
-    printf("0x%04X:\t", cpu->pc);
+typedef struct {
+  Cpu *cpu;
+  Debugger *debugger;
+} Emulator;
 
-    opcode = fetch(cpu);    
-    decode(cpu, opcode, DISASSEMBLE);
-
-    fflush(stdout);
-  }
-
-  cpu->debugger->disassemble_mode = false;
-  cpu->pc = saved_pc; /* Restore PC */
-}
+#endif

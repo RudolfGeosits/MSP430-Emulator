@@ -14,3 +14,9 @@
   You should have received a copy of the GNU General Public License            
   along with MSP430 Emulator.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+#ifndef _BCM_H_
+#define _BCM_H_
+
+
+#endif

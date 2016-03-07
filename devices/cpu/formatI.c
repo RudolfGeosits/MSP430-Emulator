@@ -26,6 +26,8 @@
 //# S = S_Reg_Name, D = Destination
 //########################################################
 
+#include "formatI.h"
+
 void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
 {
   uint8_t opcode = (instruction & 0xF000) >> 12;
@@ -37,6 +39,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
 
   char s_reg_name[10], d_reg_name[10];
 
+  char mnemonic[100] = {0};
   /* String to show hex value of instruction */
   char hex_str[100] = {0};
   char hex_str_part[10] = {0};
@@ -850,8 +853,9 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
 
     strncat(mnemonic, "\t", sizeof mnemonic);
     strncat(mnemonic, asm_operands, sizeof mnemonic);
+    strncat(mnemonic, "\n", sizeof mnemonic);
 
-    if (disassemble && debug_mode) { 
+    if (disassemble && cpu->debugger->debug_mode) { 
       int i;
       char one = 0, two = 0;
 
@@ -859,7 +863,7 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
       for (i = 0;i < strlen(hex_str);i += 4) {
 	one = hex_str[i];
 	two = hex_str[i + 1];
-
+	
 	hex_str[i] = hex_str[i + 2];
 	hex_str[i + 1] = hex_str[i + 3];
 
@@ -868,11 +872,17 @@ void decode_formatI(Cpu *cpu, uint16_t instruction, bool disassemble)
       }
 
       printf("%s", hex_str);
-      
-      for (i = strlen(hex_str);i < 12;i++)
-	printf(" ");
+      web_send(hex_str);
 
-      printf("\t%s\n", mnemonic);
+      for (i = strlen(hex_str);i < 12;i++) {
+	printf(" ");
+	web_send(" ");
+      }
+
+      printf("\t%s", mnemonic);
+      
+      web_send("\t");
+      web_send(mnemonic);
     }
 
   }

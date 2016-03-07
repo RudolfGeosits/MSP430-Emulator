@@ -15,6 +15,12 @@
   along with MSP430 Emulator.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifndef _MEMSPACE_H_
+#define _MEMSPACE_H_
+
+#include <stdlib.h>
+#include <stdint.h>
+
 uint8_t *MEMSPACE;   /* Memory Space */
 uint8_t *IVT;        /* Interrupt Vector Table {Within ROM} */
 uint8_t *ROM;        /* Flash/Read-Only memory */
@@ -157,4 +163,5 @@ static uint8_t blc[] = {
   0x00, 0x00, 0x02, 0x03, 0x01, 0x00, 0x26, 0x30,
 };
 
-#include "memspace.c"
+//#include "memspace.c"
+#endif

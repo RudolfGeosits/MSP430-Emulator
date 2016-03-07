@@ -1,7 +1,7 @@
 /*                                                                             
   MSP430 Emulator                                                              
-  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)              
-                                                                               
+  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)
+              
   This program is free software: you can redistribute it and/or modify         
   it under the terms of the GNU General Public License as published by         
   the Free Software Foundation, either version 3 of the License, or            
@@ -10,20 +10,20 @@
   This program is distributed in the hope that it will be useful,              
   but WITHOUT ANY WARRANTY; without even the implied warranty of               
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                 
-  GNU General Public License for more details.                                 
-                                                                               
-  You should have received a copy of the GNU General Public License            
-  along with this program. If not, see <http://www.gnu.org/licenses            
+  GNU General Public License for more details.               
+                                                                              
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <http://www.gnu.org/licenses
 */
 
-#include "register_display.c"
+#include "debugger.h"
 
 /* Dump Bytes, Dump Words, Dump Double Words */
 typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
 enum {MAX_BREAKPOINTS = 10};
 
 /* Main command loop */
-bool command_loop(Cpu *cpu)
+bool command_loop (Cpu *cpu)
 {
   static uint16_t breakpoint_addresses[MAX_BREAKPOINTS];
   static uint8_t cur_bp_number = 0;
@@ -35,19 +35,19 @@ bool command_loop(Cpu *cpu)
   int i;
   for (i = 0;i < cur_bp_number;i++) {
     if (cpu->pc == breakpoint_addresses[i]) {
-      run = 0; /* Stop fast execution */
-      debug_mode = true;
+      cpu->debugger->run = 0; /* Stop fast execution */
+      cpu->debugger->debug_mode = true;
       printf("\n\t[Breakpoint %d hit]\n\n", i + 1);
       break;
     }
   }
 
-  if (!disassemble_mode && debug_mode) {
+  if (!cpu->debugger->disassemble_mode && cpu->debugger->debug_mode) {
     display_registers(cpu);
     disassemble(cpu, cpu->pc, 1);
   }
 
-  while (!run) {
+  while (!cpu->debugger->run) {
     bzero(cmd, sizeof cmd);
     line = readline("\n>> ");
 
@@ -67,7 +67,7 @@ bool command_loop(Cpu *cpu)
       cpu->pc = 0xC000;
       break;
     }
-    /* s NUM_STEPS, step X instructions forward, defaults to 1 */
+    // s NUM_STEPS, step X instructions forward, defaults to 1 
     else if ( !strncasecmp("s", cmd, sizeof "s") ||
 	      !strncasecmp("step", cmd, sizeof "step")) {
       
@@ -81,22 +81,22 @@ bool command_loop(Cpu *cpu)
       break;
     }                                 
 
-    /* run, run the program until a breakpoint is hit */
+    // run, run the program until a breakpoint is hit 
     else if ( !strncasecmp("quit", cmd, sizeof "quit") ||
 	      !strncasecmp("q", cmd, sizeof "q")) {
       return false;
     }
 
-    /* run, run the program until a breakpoint is hit */
+    // run, run the program until a breakpoint is hit 
     else if ( !strncasecmp("run", cmd, sizeof "run") ||
 	      !strncasecmp("r", cmd, sizeof "r")) {
-      run = true;
-      debug_mode = false;
+      cpu->debugger->run = true;
+      cpu->debugger->debug_mode = false;
       
       break;
     }
 
-    /* Display disassembly */
+    // Display disassembly 
     else if ( !strncasecmp("disas", cmd, sizeof "disas") ||
 	      !strncasecmp("dis", cmd, sizeof "dis") ||
 	      !strncasecmp("disassemble", cmd, sizeof "disassemble")) {
@@ -121,13 +121,13 @@ bool command_loop(Cpu *cpu)
       continue;
     }
 
-    /* Display all 16 registers */
+    // Display all 16 registers 
     else if ( !strncasecmp("regs", cmd, sizeof "regs")) {
       display_registers(cpu);
       continue;
     }
     
-    /* Display all breakpoints */
+    // Display all breakpoints 
     else if ( !strncasecmp("bps", cmd, sizeof "bps" )) {
       if (cur_bp_number > 0) {
 	int i;
@@ -144,22 +144,25 @@ bool command_loop(Cpu *cpu)
 
     else if ( !strncasecmp("dump", cmd, sizeof "dump" )) {
       char param1[33] = {0};
-      uint32_t start_addr, stride;
+      uint16_t start_addr;
+      uint32_t stride;
       sscanf(line, "%s", param1);
       
-      /* Is it a direct address or a an address in a register being spec'd */
+      // Is it a direct address or a an address in a register being spec'd 
       if (param1[0] >= '0' && param1[0] <= '9') {
 	sscanf(param1, "%X", &start_addr);
       }
       else if (param1[0] == '%' || param1[0] == 'r' || param1[0] == 'R') {   
-	start_addr = (uint16_t) *get_reg_ptr(cpu, reg_name_to_num(param1));
+	uint16_t *p = get_reg_ptr(cpu, reg_name_to_num(param1));
+	start_addr = *p;
+	//start_addr = (uint16_t) *(get_reg_ptr(cpu, reg_name_to_num(param1)));
       }
       
       stride = BYTE_STRIDE;
       dump_memory(MEMSPACE, 0x0, start_addr, stride);	
     }
 
-    /* Set REG/LOC VALUE */
+    // Set REG/LOC VALUE 
     else if ( !strncasecmp("set", cmd, sizeof "set") ) {
       int value = 0;
       char reg_name_or_addr[33];
@@ -167,19 +170,23 @@ bool command_loop(Cpu *cpu)
       sscanf(line, "%s %X", reg_name_or_addr, &value);
 
       if ( reg_name_to_num(reg_name_or_addr) != -1 ) {
-	*get_reg_ptr( cpu, reg_name_to_num(reg_name_or_addr) ) = value;
+	uint16_t *p = get_reg_ptr( cpu, reg_name_to_num(reg_name_or_addr) );
+	*p = value;
+
 	display_registers(cpu);
 	disassemble(cpu, cpu->pc, 1);
       }
       else {
 	uint16_t virtual_addr = (uint16_t) strtol(reg_name_or_addr, NULL, 0);
-	*get_addr_ptr(virtual_addr) = value;
+
+	uint16_t *p = get_addr_ptr(virtual_addr);
+	*p = value;
       }
 
       continue;
     }
 
-    /* break BREAKPOINT_ADDRESS */
+    // break BREAKPOINT_ADDRESS 
     else if ( !strncasecmp("break", cmd, sizeof "break") ) {
       if (cur_bp_number >= MAX_BREAKPOINTS) {
 	printf("Too many breakpoints.\n");
@@ -195,13 +202,13 @@ bool command_loop(Cpu *cpu)
       continue;
     }
 
-    /* help, display a list of debugger cmds */
+    // help, display a list of debugger cmds 
     else if ( !strncasecmp("help", cmd, sizeof "help") ||
 	      !strncasecmp("h", cmd, sizeof "h") ) {
       display_help();
     }
 
-    /* End the line loop, next instruction */
+    // End the line loop, next instruction 
     else {
       puts("\t[Invalid command, type \"help\".]");
       continue;
@@ -240,17 +247,18 @@ void dump_memory(uint8_t *MEM, uint32_t size,
 	     *(MEM+5),*(MEM+6),*(MEM+7));
     }
     
-    MEM += 8;        /* Increase character by 4 */
-    msp_addr += 8;   /* Increase msp_addr by 4  */
+    MEM += 8;        // Increase character by 4
+    msp_addr += 8;   // Increase msp_addr by 4
   }
-
+  
   puts("");
 }
 
 void handle_sigint(int sig)
 {
-  run = false;
-  debug_mode = true;
+  puts("TODO");
+  //cpu->debugger->run = false;
+  //cpu->debugger->debug_mode = true;
 }
 
 void register_signal(int sig)

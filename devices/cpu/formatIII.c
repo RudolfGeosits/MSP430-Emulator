@@ -23,6 +23,9 @@
 //# Where C = Condition, X = 10-bit signed offset 
 //# 
 //########################################################
+
+#include "decoder.h"
+
 void decode_formatIII(Cpu *cpu, uint16_t instruction, bool disassemble)
 {
   uint8_t condition = (instruction & 0x1C00) >> 10;
@@ -31,9 +34,9 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction, bool disassemble)
   
   char value[20];
 
+  char mnemonic[100] = {0};
   /* String to show hex value of instruction */
   char hex_str[100] = {0};
-  //char hex_str_part[10] = {0};
 
   sprintf(hex_str, "%04X", instruction);
 
@@ -208,7 +211,7 @@ void decode_formatIII(Cpu *cpu, uint16_t instruction, bool disassemble)
     strncat(mnemonic, "\t", sizeof(mnemonic));
     strncat(mnemonic, value, sizeof(mnemonic));
   
-    if (disassemble && debug_mode) {
+    if (disassemble && cpu->debugger->debug_mode) {
       int i;
       char one = 0, two = 0;
 

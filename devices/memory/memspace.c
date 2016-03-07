@@ -16,6 +16,8 @@
   along with this program. If not, see <http://www.gnu.org/licenses            
 */
 
+#include "memspace.h"
+
 /* Initialize Address Space Locations
 ** 
 ** Allocate and set MSP430 Memory space

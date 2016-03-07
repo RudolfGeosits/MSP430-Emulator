@@ -24,6 +24,10 @@
 //#       A = Addressing mode for source
 //#       S = Source 
 //########################################################
+
+#include "decoder.h"
+#include "../utilities.h"
+
 void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
 {
   uint8_t opcode = (instruction & 0x0380) >> 7;
@@ -40,6 +44,7 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
   uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
   int16_t immediate_constant = 0;           /* Generated Constant */
 
+  char mnemonic[100] = {0};
   /* String to show hex value of instruction */
   char hex_str[100] = {0};
   char hex_str_part[10] = {0};
@@ -385,7 +390,7 @@ void decode_formatII(Cpu *cpu, uint16_t instruction, bool disassemble)
     strncat(mnemonic, "\t", sizeof mnemonic);
     strncat(mnemonic, asm_operand, sizeof mnemonic);
     
-    if (disassemble && debug_mode) {
+    if (disassemble && cpu->debugger->debug_mode) {
       int i;
       char one = 0, two = 0;
 

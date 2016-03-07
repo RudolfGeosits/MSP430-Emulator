@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses             
 */
 
+#include "utilities.h"
+
 /**
  * @brief This function loads the default TI bootloader code into virtual mem
  * @param virt_addr The location in virtual memory to load the bootloader

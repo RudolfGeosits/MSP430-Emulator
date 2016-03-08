@@ -23,8 +23,54 @@ typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;
 enum {MAX_BREAKPOINTS = 10};
 Emulator *local_emu = NULL;
 
+bool exec_cmd (Emulator *emu, char *buf, int len) {
+  Cpu *cpu = emu->cpu;
+  Debugger *debugger = emu->debugger;
+
+  // truncate newline
+  buf[len-1] = '\0'; len -= 1;
+
+  // reset the virtual machine
+  if ( !strncasecmp("reset", buf, sizeof "reset") ||
+       !strncasecmp("restart", buf, sizeof "restart")) {
+      
+    cpu->pc = 0xC000;
+  }
+  
+  // s NUM_STEPS, step X instructions forward, defaults to 1 
+  else if ( !strncasecmp("s", buf, sizeof "s") ||
+	    !strncasecmp("step", buf, sizeof "step")) {
+    
+    unsigned int num_of_steps = 0;
+    
+    decode(emu, fetch(emu), EXECUTE);
+    handle_port_1(emu);
+    handle_usci(emu);
+
+    display_registers(emu);
+    disassemble(emu, cpu->pc, 1);
+  }                                
+  
+  // Quit program
+  else if ( !strncasecmp("quit", buf, sizeof "quit") ||
+	    !strncasecmp("q", buf, sizeof "q")) {
+    
+    debugger->quit = true;
+  }
+  
+  // run the program until a breakpoint is hit 
+  else if ( !strncasecmp("run", buf, sizeof "run") ||
+	    !strncasecmp("r", buf, sizeof "r")) {
+
+    debugger->run = true;
+    debugger->debug_mode = false;
+  }
+
+  return true;
+}
+
 /* Main command loop */
-bool command_loop (Emulator *emu)
+bool command_loop (Emulator *emu, char *buf, int len)
 {
   Cpu *cpu = emu->cpu;
   Debugger *debugger = emu->debugger;
@@ -50,9 +96,9 @@ bool command_loop (Emulator *emu)
     display_registers(emu);
     disassemble(emu, cpu->pc, 1);
   }
-
+  
   while (!debugger->run) {
-    bzero(cmd, sizeof cmd);
+    bzero(cmd, sizeof cmd);    
     line = readline("\n>> ");
 
     if ( strlen(line) >= 1 ) {
@@ -63,7 +109,7 @@ bool command_loop (Emulator *emu)
     else {
       continue;
     }
-
+    
     // reset the virtual machine
     if ( !strncasecmp("reset", cmd, sizeof "reset") ||
 	 !strncasecmp("restart", cmd, sizeof "restart")) {
@@ -265,6 +311,7 @@ void setup_debugger(Emulator *emu)
   debugger->run = false;
   debugger->debug_mode = true;
   debugger->disassemble_mode = false;
+  debugger->quit = false;
 
   debugger->web_interface = true;
   debugger->web_server_ready = false;

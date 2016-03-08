@@ -62,15 +62,21 @@ int main(int argc, char *argv[])
   load_bootloader(0x0C00);
   load_firmware(argv[1], 0xC000);
 
+  // display first round of registers
+  display_registers(emu);
+  disassemble(emu, cpu->pc, 1);
+
   // Fetch-Decode-Execute Cycle
-  while ( command_loop(emu) ) {
+  while (!debugger->quit) {
+    if (!debugger->run) {usleep(1000);continue;}
+    // debugger called here or in server callback
+    //if (debugger->console_interface) command_loop(emu);
+    //command_loop(emu);
+
     decode(emu, fetch(emu), EXECUTE); // Instruction Decoder
     handle_port_1(emu);
     handle_usci(emu);
-    
-    usleep(1);
   }
-
 
   uninitialize_msp_memspace(emu->cpu);
   free(cpu->p1);

@@ -15,7 +15,7 @@
   You should have received a copy of the GNU General Public License
   along with this program. If not, see <http://www.gnu.org/licenses
 -->
-
+           
 <!DOCTYPE html>
 <html lang="en-US">
 <meta charset="utf-8"/>
@@ -25,15 +25,21 @@
 	<style>
 
 	 body {
-	     background-color: #CACACA;
+	     background-color: #AAAAAA;
 	 }
 
-	 h1 {
-	     color: orange;
-	     text-align: center;
+	 .canvas {
+	     background-color: #000000;
+
+	     position: absolute;
+	     top: 10px;
+	     right: 100px;
+	     width: 500px;
+	     height: 500px;
+	     border: 3px solid #73AD21;
 	 }
 
-	 textarea {
+	 .STDOUT {
 	     background-color: #000000;
 	     color: #FFFFFF;
 	     font-family: "Terminal", monospace;
@@ -41,7 +47,31 @@
 	     font-weight: bold;
 	     resize: none;
 	 }
-
+	 
+	 .STDIN {
+	     background: #1F2124;
+	     background: -moz-linear-gradient(#1F2124, #27292C);
+	     background: -o-linear-gradient(#1F2124, #27292C);
+	     background: -webkit-gradient(linear, 0 0, 0 100%, from(#1F2124), to(#27292C));
+	     background: -webkit-linear-gradient(#1F2124, #27292C);
+	     background: linear-gradient(#1F2124, #27292C);
+	     border: 1px solid #000;
+	     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+	     border-radius: 3px;
+	     font-size: 14px;
+	     font-weight: bold;
+	     font-family: 'Terminal', monospace;
+	     color: #FFF;
+	     width: 654px;
+	     height: 25px;
+	 }
+	     
+	 .STDIN:focus {
+	     box-shadow: inset 0 0 2px #000;
+	     background: linear-gradient(#1F2124, #27292C);
+	     border-color: #51CBEE;
+	     outline: none;
+	 }
 	</style>	
 
 	<!-- Load the Paper.js library -->
@@ -53,16 +83,26 @@
 	 var msp_image = new Raster('msp', IMG_BASE.x + 145.5, 
 				    IMG_BASE.y + 192);
 	 
-	 var txt_console = document.getElementById('console');
-	 txt_console.value = "";
+	 var stdout = document.getElementById('console');
+	 stdout.value = "";
 
 	 function print_console (text){
-	     var another = txt_console.value + text;
-	     txt_console.value = another;
+	     var another = stdout.value + text;
+	     stdout.value = another;
+
+	     stdout.scrollTop = stdout.scrollHeight;
 	 }
 
 	 var pause_button = document.getElementById('pause_button');
 	 var play_button = document.getElementById('play_button');
+	 var enter_button = document.getElementById('enter_button');
+
+	 enter_button.onclick = function(){
+	     if (stdin.value == "") return;
+	     
+	     ws.send(stdin.value + "\n");
+	     stdin.value = "";
+	 };
 
 	 pause_button.onclick = function(){
 	     ws.send("PAUSE");
@@ -137,20 +177,29 @@
 	     paper.view.update();
 	 };
 
+	 stdin.onkeydown = function auto_enter (event) {
+	     // On enter key press
+	     if (event.keyCode == 13) {
+                 enter_button.click();
+	     }
+	 };
+
 	</script>
     </head>
     
     <body>
-	<textarea id="console" rows="14" cols="80" readonly="readonly"></textarea>
+	<textarea id="console" rows="14" cols="80" readonly="readonly" class="STDOUT"></textarea>
 	<br>
 
-	<input type="text" id="stdin" width="80">
-	<button id="enter_button">enter</button> 
+	<input type="text" id="stdin" width="80" class="STDIN">
+
+	<br><br>
+
+	<button id="enter_button" hidden="true">enter</button> 
 	<button id="pause_button" width="100" height="100">Pause</button>
 	<button id="play_button" width="100" height="100">Play</button>
-	<br>
-	<br>
-	<canvas id="myCanvas" width="300" height="500" align="right"></canvas>
+
+	<canvas id="myCanvas" width="340" height="400" class="canvas"></canvas>
 	<img id="msp" src="msp.png" alt="msp" hidden="false"></img>
     </body>
 </html>

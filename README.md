@@ -32,11 +32,11 @@ NOTE: We are in the process of moving to a web interface!
   - readline (apt-get install libreadline-dev)
   - msp430*  (apt-get install msp430*)
   - navigate to the root of the source tree
-  - type 'make'
+  - type 'make' (you can also make clean after)
 
 - User Instructions
-  The following are instructions on how to use the web interface
+   The following are instructions on how to use the web interface
 
   - run the server via ./MSP430 [FIRMWARE OBJECT]
-  - load up index.html from debugger/webclient/index.html
-  - Better methods on the way
+  - load index.html from debugger/webclient/index.html to your browser
+  - You will be connected 

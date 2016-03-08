@@ -35,6 +35,7 @@ typedef struct Debugger {
   bool debug_mode;
   bool web_interface;
   bool console_interface;
+  bool quit;
 
   pthread_t web_server_thread;
   bool web_server_ready;
@@ -51,6 +52,7 @@ void dump_memory(uint8_t *MEM, uint32_t size, uint32_t start_addr,
 
 void handle_sigint(int signal);
 
-bool command_loop(Emulator *emu);
+bool command_loop(Emulator *emu, char *buf, int len);
+bool exec_cmd (Emulator *emu, char *buf, int len);
 
 #endif

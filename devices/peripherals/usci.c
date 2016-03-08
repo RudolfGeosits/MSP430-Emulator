@@ -59,8 +59,10 @@ void *thrd (void *ctxt)
   return NULL;
 }
 
-void open_pty (Cpu *cpu) 
+void open_pty (Emulator *emu) 
 {
+  Cpu *cpu = emu->cpu;
+
   char slavename[64], buf[64];
   struct termios termios_p;
   

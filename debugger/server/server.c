@@ -26,6 +26,9 @@ int callback_emu (struct libwebsocket_context *this,
 			 enum libwebsocket_callback_reasons reason,
 			 void *user, void *in, size_t len)
 {
+  Cpu *cpu = emu->cpu;
+  Debugger *debugger = emu->debugger;
+
   switch (reason) {
     case LWS_CALLBACK_ESTABLISHED: {
       puts("connection established");
@@ -56,36 +59,27 @@ int callback_emu (struct libwebsocket_context *this,
     }
 
     case LWS_CALLBACK_RECEIVE: {
-      char *buf = (char *)in;
-
+      char *buf = (char *)in;      
+      
       if ( !strncmp((const char *)buf, (const char *)"PAUSE", sizeof("PAUSE")) ) {
-	emu->debugger->run = false;
-	emu->debugger->debug_mode = true;
-	puts("in pause");
+	if (debugger->run) {
+	  debugger->run = false;
+	  debugger->debug_mode = true;
 
+	  // display first round of registers                                           
+	  display_registers(emu);
+	  disassemble(emu, cpu->pc, 1);
+	}
       }
       else if ( !strncmp((const char *)buf, (const char *)"PLAY", sizeof("PLAY")) ) {
-	emu->debugger->run = true;
-	emu->debugger->debug_mode = false;
-	puts("in play");
+	debugger->run = true;
+	debugger->debug_mode = false;
       }
-
-      /*
-      unsigned char *buf = 
-	(unsigned char*) malloc(LWS_SEND_BUFFER_PRE_PADDING + len +
-				LWS_SEND_BUFFER_POST_PADDING);
-
-      memset(buf, 0, sizeof buf);
-      memcpy(buf + LWS_SEND_BUFFER_PRE_PADDING, in, len);
-
-      printf("received data: %s, replying: %.*s\n", 
-	     (char *)in, (int)len, buf + LWS_SEND_BUFFER_PRE_PADDING);
-            
-      libwebsocket_write(wsi, &buf[LWS_SEND_BUFFER_PRE_PADDING], 
-			 len, LWS_WRITE_TEXT);      
-    
-      free(buf);
-      */
+      else {
+	if (!debugger->run && debugger->debug_mode) {
+	  exec_cmd(emu, buf, len);
+	}
+      }
 
       break;
     }

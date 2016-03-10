@@ -40,7 +40,7 @@ void disassemble(Emulator *emu, uint16_t start_addr, uint8_t times)
     opcode = fetch(emu);    
     decode(emu, opcode, DISASSEMBLE);
 
-    fflush(stdout);
+    //fflush(stdout);
   }
 
   debugger->disassemble_mode = false;

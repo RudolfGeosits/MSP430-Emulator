@@ -31,6 +31,8 @@ NOTE: We are in the process of moving to a web interface!
 - Build Instructions (You will need the following packages)
   - readline (apt-get install libreadline-dev)
   - msp430*  (apt-get install msp430*)
+  - libwebsockets-dev (apt-get install libwebsockets-dev)
+
   - navigate to the root of the source tree
   - type 'make' (you can also make clean after)
 

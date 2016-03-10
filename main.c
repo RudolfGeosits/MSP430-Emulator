@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
   Debugger *debugger = emu->debugger;
 
   if (argv[1] == NULL) {
-    display_help();
+    display_help(emu);
     exit(1);
   }
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
   initialize_msp_registers(emu);  
   setup_port_1(emu);
   setup_usci(emu);
-  open_pty(emu);
+  //open_pty(emu);
 
   load_bootloader(0x0C00);
   load_firmware(argv[1], 0xC000);

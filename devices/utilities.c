@@ -304,19 +304,32 @@ void reg_num_to_name(uint8_t number, char *name)
  * practice all too seldom - she) enters incorrect parameters or prompts the 
  * help menu with "help" or "h"
  */
-void display_help()
+void display_help(Emulator *emu)
 {
-  printf("**************************************************\n"\
-	 "*\t\tMSP430-Emulator\n*\n*\tUsage: ./msp430 BINARY_FIRMWARE\n*\n"\
-	 "* run\t\t\t[Run Program Until Breakpoint is Hit]\n"\
-	 "* step\t\t\t[Step Into Instruction]\n"\
-	 "* dump [HEX_ADDR|Rn]\t[Dump Memory direct or at register value]\n"\
-	 "* set [HEX_ADDR|Rn]\t[Set Memory or Register]\n"\
-	 "* dis [ADDR][AMOUNT]\t[Disassemble Instructions]\n"\
-	 "* break ADDR\t\t[Set a Breakpoint]\n"\
-	 "* bps\t\t\t[Display Breakpoints]\n"\
-	 "* regs\t\t\t[Display Registers]\n"\
-	 "* CTRL+C\t\t[Pause Execution]\n"\
-	 "* quit\t\t\t[Exit program]\n"\
-	 "**************************************************\n");
+  Debugger *deb = emu->debugger;
+  char *help_str = (char *) malloc(3000);
+
+  sprintf(help_str,
+	  "**************************************************\n"\
+	  "*\t\tMSP430-Emulator\n*\n*\tUsage: ./msp430 BINARY_FIRMWARE\n*\n"\
+	  "* run\t\t\t[Run Program Until Breakpoint is Hit]\n"\
+	  "* step [N]\t\t\t[Step Into Instruction]\n"\
+	  "* dump [HEX_ADDR|Rn]\t[Dump Memory direct or at register value]\n"\
+	  "* set [HEX_ADDR|Rn]\t[Set Memory or Register Location]\n"\
+	  "* dis [N][HEX_ADDR]\t[Disassemble Instructions]\n"\
+	  "* break ADDR\t\t[Set a Breakpoint]\n"\
+	  "* bps\t\t\t[Display Breakpoints]\n"\
+	  "* regs\t\t\t[Display Registers]\n"\
+	  "* CTRL+C\t\t[Pause Execution]\n"\
+	  "* quit\t\t\t[Exit program]\n"\
+	  "**************************************************\n");
+
+  if (deb->web_interface) {
+    web_send(help_str);
+  }
+  else {
+    printf("%s", help_str);
+  }
+
+  free(help_str);
 }

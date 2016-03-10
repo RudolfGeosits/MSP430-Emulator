@@ -1,50 +1,50 @@
-/*                                                                             
-  MSP430 Emulator                                                              
+/*
+  MSP430 Emulator                     
   Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)
-              
-  This program is free software: you can redistribute it and/or modify         
-  it under the terms of the GNU General Public License as published by         
-  the Free Software Foundation, either version 3 of the License, or            
-  (at your option) any later version.                                          
-                                                                               
-  This program is distributed in the hope that it will be useful,              
-  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                 
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or 
+  (at your option) any later version.   
+                           
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.               
-                                                                              
+                                                         
   You should have received a copy of the GNU General Public License
   along with this program. If not, see <http://www.gnu.org/licenses
 */
 
 #include "debugger.h"
 
-/* Dump Bytes, Dump Words, Dump Double Words */
-typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;   
-enum {MAX_BREAKPOINTS = 10};
 Emulator *local_emu = NULL;
 
 bool exec_cmd (Emulator *emu, char *line, int len) {
   Cpu *cpu = emu->cpu;
-  Debugger *debugger = emu->debugger;
+  Debugger *deb = emu->debugger;
 
   char cmd[100] = {0};
   unsigned int op1 = 0, op2 = 0, op3 = 0;
   int ops;
 
+  char bogus1[100] = {0};
+  uint32_t bogus2 = 0, bogus3 = 0;
+
   ops = sscanf(line, "%s %u %u", cmd, &op1, &op2);
   //printf("Got %s, %u, %u - ops %d\n", cmd, op1, op2, ops);
 
-  // reset the virtual machine
+  // reset the virtual machine //
   if ( !strncasecmp("reset", cmd, sizeof "reset") ||
-       !strncasecmp("restart", cmd, sizeof "restart")) {
-      
-    cpu->pc = 0xC000;
+       !strncasecmp("restart", cmd, sizeof "restart")) 
+    {      
+      cpu->pc = 0xC000;
 
-    display_registers(emu);
-    disassemble(emu, cpu->pc, 1);
-  }
+      display_registers(emu);
+      disassemble(emu, cpu->pc, 1);
+    }
   
-  // s NUM_STEPS, step X instructions forward, defaults to 1 
+  // s [NUM], step NUM instructions forward, defaults to 1 // 
   else if ( !strncasecmp("s", cmd, sizeof "s") ||
 	    !strncasecmp("step", cmd, sizeof "step")) 
     {
@@ -65,48 +65,162 @@ bool exec_cmd (Emulator *emu, char *line, int len) {
       disassemble(emu, cpu->pc, 1);
   }                                
   
-  // Quit program
+  // Quit program //
   else if ( !strncasecmp("quit", cmd, sizeof "quit") ||
-	    !strncasecmp("q", cmd, sizeof "q")) {
-    
-    debugger->quit = true;
-  }
+	    !strncasecmp("q", cmd, sizeof "q")) 
+    {    
+      deb->quit = true;
+    }
   
-  // run the program until a breakpoint is hit 
+  // run the program until a breakpoint is hit //
   else if ( !strncasecmp("run", cmd, sizeof "run") ||
-	    !strncasecmp("r", cmd, sizeof "r")) {
+	    !strncasecmp("r", cmd, sizeof "r")) 
+    {
+      deb->run = true;
+      deb->debug_mode = false;
+    }
 
-    debugger->run = true;
-    debugger->debug_mode = false;
-  }
-
-  // Display disassembly                                                                            
+  // Display disassembly of N at HEX_ADDR: dis [N] [HEX_ADDR] //
   else if ( !strncasecmp("disas", cmd, sizeof "disas") ||
 	    !strncasecmp("dis", cmd, sizeof "dis") ||
-	    !strncasecmp("disassemble", cmd, sizeof "disassemble")) {
-
-    uint16_t start_addr;
-    uint32_t num;    
-    char bogus[100] = {0};
-    
-    if (ops == 1) {
-      start_addr = cpu->pc;
-      num = 10;
+	    !strncasecmp("disassemble", cmd, sizeof "disassemble")) 
+    {
+      uint16_t start_addr = cpu->pc;
+      uint32_t num = 10; 
+      
+      ops = sscanf(line, "%s %u %X", bogus1, &bogus2, &bogus3);
+      
+      if (ops == 2) {
+	sscanf(line, "%s %u", bogus1, &num);
+      }
+      else if (ops == 3) {
+	sscanf(line, "%s %u %X", bogus1, &num, 
+		     (unsigned int *)&start_addr);
+      }
+      
+      disassemble(emu, start_addr, num);
     }
-    else if (ops == 2) {
-      sscanf(line, "%s %u %u", cmd, &op1, &op2);
-      start_addr = (uint16_t) op1;
-      num = 10;
-    }
-    
-    disassemble(emu, start_addr, num);
-  }
 
-  // Display registers                                                                       
-  else if ( !strncasecmp("regs", cmd, sizeof "regs")) {
-    display_registers(emu);
-    disassemble(emu, cpu->pc, 1);
-  }
+  else if ( !strncasecmp("dump", cmd, sizeof "dump" )) 
+    {
+      char str[100] = {0};
+      uint16_t start_addr = cpu->pc;
+      uint32_t stride;
+      
+      sscanf(line, "%s %s", bogus1, str);
+      
+      // Is it a direct address or an adress in a register being spec'd 
+      if (str[0] >= '0' && str[0] <= '9') {
+	sscanf(str, "%X", (unsigned int *) &start_addr);
+      }
+      else if (str[0] == '%' || str[0] == 'r' || str[0] == 'R'){
+	uint16_t *p = get_reg_ptr(emu, reg_name_to_num(str));
+	start_addr = *p;
+      }
+      
+      stride = BYTE_STRIDE;
+      dump_memory(MEMSPACE, 0x0, start_addr, stride);	
+    }
+
+  // Set REG/LOC VALUE 
+  else if ( !strncasecmp("set", cmd, sizeof "set") ) 
+    {
+      int value = 0;
+      char reg_name_or_addr[100];
+      
+      web_send("Not yet implemented.\n");
+
+      /*
+      sscanf(line, "%s %X", reg_name_or_addr, &value);
+
+      if ( reg_name_to_num(reg_name_or_addr) != -1 ) {
+	uint16_t *p = get_reg_ptr(emu, reg_name_to_num(reg_name_or_addr) );
+	*p = value;
+
+	display_registers(emu);
+	disassemble(emu, cpu->pc, 1);
+      }
+      else {
+	uint16_t virtual_addr = (uint16_t) strtol(reg_name_or_addr, NULL, 0);
+
+	uint16_t *p = get_addr_ptr(virtual_addr);
+	*p = value;
+      }
+      */
+    }
+
+  // break BREAKPOINT_ADDRESS - set breakpoint //
+  else if ( !strncasecmp("break", cmd, sizeof "break") ) 
+    {
+      if (deb->num_bps >= MAX_BREAKPOINTS) {
+	//printf("Breakpoints are full.\n");
+	web_send("Breakpoints are full.\n");      
+
+	return true;
+      }
+    
+      ops = sscanf(line, "%s %X", bogus1, &bogus2);
+      char entry[100] = {0};
+
+      if (ops == 2) {
+	sscanf(line, "%s %X", bogus1, (unsigned int *) 
+	       &deb->bp_addresses[deb->num_bps]);
+      
+	sprintf(entry, "\n\t[Breakpoint [%d] Set]\n", deb->num_bps + 1);
+	//printf("%s", entry);
+	web_send(entry);
+
+	++deb->num_bps;
+      }
+      else {
+	//printf("error\n");
+	web_send("error\n");
+      }
+    }
+
+  // Display all breakpoints //
+  else if ( !strncasecmp("bps", cmd, sizeof "bps" )) 
+    {
+      char entry[100] = {0};
+
+      if (deb->num_bps > 0) {
+	deb->current_bp = 0;
+
+	while (deb->current_bp < deb->num_bps) {
+	  sprintf(entry, "\t[%d] 0x%04X\n", 
+		  deb->current_bp+1, deb->bp_addresses[deb->current_bp]);
+
+	  //printf("%s", entry);
+	  web_send(entry);
+
+	  ++deb->current_bp;
+	}
+      }
+      else {
+	//printf("You have not set any breakpoints!\n");
+	web_send("You have not set any breakpoints!\n");
+      }
+    }
+
+  // Display registers //
+  else if ( !strncasecmp("regs", cmd, sizeof "regs")) 
+    {
+      display_registers(emu);
+      disassemble(emu, cpu->pc, 1);
+    }
+
+  // help, display a list of debugger cmds //
+  else if ( !strncasecmp("help", cmd, sizeof "help") ||
+	    !strncasecmp("h", cmd, sizeof "h") ) 
+    {
+      display_help(emu);
+    }
+
+  // End the line loop, next instruction
+  else 
+    {
+      web_send("\t[Invalid command, type \"help\".]\n");
+    }
 
   return true;
 }
@@ -114,6 +228,7 @@ bool exec_cmd (Emulator *emu, char *line, int len) {
 /* Main command loop */
 bool command_loop (Emulator *emu, char *buf, int len)
 {
+  /*
   Cpu *cpu = emu->cpu;
   Debugger *debugger = emu->debugger;
 
@@ -123,11 +238,11 @@ bool command_loop (Emulator *emu, char *buf, int len)
   char cmd[512];
   char *line;
 
-  /* Check for breakpoints */
+  // Check for breakpoints //
   int i;
   for (i = 0;i < cur_bp_number;i++) {
     if (cpu->pc == breakpoint_addresses[i]) {
-      debugger->run = 0; /* Stop fast execution */
+      debugger->run = 0; // Stop fast execution //
       debugger->debug_mode = true;
       printf("\n\t[Breakpoint %d hit]\n\n", i + 1);
       break;
@@ -296,7 +411,7 @@ bool command_loop (Emulator *emu, char *buf, int len)
     // help, display a list of debugger cmds 
     else if ( !strncasecmp("help", cmd, sizeof "help") ||
 	      !strncasecmp("h", cmd, sizeof "h") ) {
-      display_help();
+      display_help(emu);
     }
 
     // End the line loop, next instruction 
@@ -305,7 +420,7 @@ bool command_loop (Emulator *emu, char *buf, int len)
       continue;
     }
   }
-
+  */
   return true;
 }
 
@@ -348,17 +463,21 @@ void dump_memory(uint8_t *MEM, uint32_t size,
 void setup_debugger(Emulator *emu)
 {
   local_emu = emu;
-  Debugger *debugger = emu->debugger;
+  Debugger *deb = emu->debugger;
 
-  debugger->run = false;
-  debugger->debug_mode = true;
-  debugger->disassemble_mode = false;
-  debugger->quit = false;
+  deb->run = false;
+  deb->debug_mode = true;
+  deb->disassemble_mode = false;
+  deb->quit = false;
 
-  debugger->web_interface = true;
-  debugger->web_server_ready = false;
+  deb->web_interface = true;
+  deb->web_server_ready = false;
 
-  debugger->console_interface = false;
+  deb->console_interface = false;
+
+  memset(deb->bp_addresses, 0, sizeof(deb->bp_addresses));
+  deb->num_bps = 0;
+  deb->current_bp = 0;
 }
 
 void handle_sigint(int sig)

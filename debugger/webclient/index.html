@@ -79,7 +79,10 @@
 	<script type="text/paperscript" canvas="myCanvas">
 
 	 var IMG_BASE = new Point(10, 10);
+
 	 var ws = new WebSocket('ws://127.0.0.1:9000', 'emu-protocol');
+	 //var ws = new WebSocket('ws://45.55.37.169:9000', 'emu-protocol');
+
 	 var msp_image = new Raster('msp', IMG_BASE.x + 145.5, 
 				    IMG_BASE.y + 192);
 	 
@@ -198,7 +201,7 @@
     </head>
     
     <body>
-	<textarea id="console" rows="14" cols="80" readonly="readonly" class="STDOUT"></textarea>
+	<textarea id="console" rows="24" cols="80" readonly="readonly" class="STDOUT"></textarea>
 	<br>
 
 	<input type="text" id="stdin" width="80" class="STDIN">

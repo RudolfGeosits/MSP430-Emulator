@@ -57,7 +57,12 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
     decode_formatI(emu, instruction, disassemble);
   }
   else {
-    printf("%04X\t[INVALID INSTRUCTION]\n", instruction);
+    char inv[100] = {0};
+
+    sprintf(inv, "%04X\t[INVALID INSTRUCTION]\n", instruction);
+    web_send(inv);
+    printf("%s", inv);
+    
     cpu->pc -= 2;
     debugger->run = false;
     debugger->debug_mode = true;

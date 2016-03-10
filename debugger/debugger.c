@@ -23,47 +23,89 @@ typedef enum {BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE} Stride;
 enum {MAX_BREAKPOINTS = 10};
 Emulator *local_emu = NULL;
 
-bool exec_cmd (Emulator *emu, char *buf, int len) {
+bool exec_cmd (Emulator *emu, char *line, int len) {
   Cpu *cpu = emu->cpu;
   Debugger *debugger = emu->debugger;
 
-  // truncate newline
-  buf[len-1] = '\0'; len -= 1;
+  char cmd[100] = {0};
+  unsigned int op1 = 0, op2 = 0, op3 = 0;
+  int ops;
+
+  ops = sscanf(line, "%s %u %u", cmd, &op1, &op2);
+  //printf("Got %s, %u, %u - ops %d\n", cmd, op1, op2, ops);
 
   // reset the virtual machine
-  if ( !strncasecmp("reset", buf, sizeof "reset") ||
-       !strncasecmp("restart", buf, sizeof "restart")) {
+  if ( !strncasecmp("reset", cmd, sizeof "reset") ||
+       !strncasecmp("restart", cmd, sizeof "restart")) {
       
     cpu->pc = 0xC000;
-  }
-  
-  // s NUM_STEPS, step X instructions forward, defaults to 1 
-  else if ( !strncasecmp("s", buf, sizeof "s") ||
-	    !strncasecmp("step", buf, sizeof "step")) {
-    
-    unsigned int num_of_steps = 0;
-    
-    decode(emu, fetch(emu), EXECUTE);
-    handle_port_1(emu);
-    handle_usci(emu);
 
     display_registers(emu);
     disassemble(emu, cpu->pc, 1);
+  }
+  
+  // s NUM_STEPS, step X instructions forward, defaults to 1 
+  else if ( !strncasecmp("s", cmd, sizeof "s") ||
+	    !strncasecmp("step", cmd, sizeof "step")) 
+    {
+      int steps = 1; // 1 step by default
+      uint32_t i;
+
+      if (ops == 2) {
+	steps = (int) op1;
+      }
+
+      for (i = 0;i < steps;i++) {
+	decode(emu, fetch(emu), EXECUTE);
+	handle_port_1(emu);
+	handle_usci(emu);
+      }
+
+      display_registers(emu);
+      disassemble(emu, cpu->pc, 1);
   }                                
   
   // Quit program
-  else if ( !strncasecmp("quit", buf, sizeof "quit") ||
-	    !strncasecmp("q", buf, sizeof "q")) {
+  else if ( !strncasecmp("quit", cmd, sizeof "quit") ||
+	    !strncasecmp("q", cmd, sizeof "q")) {
     
     debugger->quit = true;
   }
   
   // run the program until a breakpoint is hit 
-  else if ( !strncasecmp("run", buf, sizeof "run") ||
-	    !strncasecmp("r", buf, sizeof "r")) {
+  else if ( !strncasecmp("run", cmd, sizeof "run") ||
+	    !strncasecmp("r", cmd, sizeof "r")) {
 
     debugger->run = true;
     debugger->debug_mode = false;
+  }
+
+  // Display disassembly                                                                            
+  else if ( !strncasecmp("disas", cmd, sizeof "disas") ||
+	    !strncasecmp("dis", cmd, sizeof "dis") ||
+	    !strncasecmp("disassemble", cmd, sizeof "disassemble")) {
+
+    uint16_t start_addr;
+    uint32_t num;    
+    char bogus[100] = {0};
+    
+    if (ops == 1) {
+      start_addr = cpu->pc;
+      num = 10;
+    }
+    else if (ops == 2) {
+      sscanf(line, "%s %u %u", cmd, &op1, &op2);
+      start_addr = (uint16_t) op1;
+      num = 10;
+    }
+    
+    disassemble(emu, start_addr, num);
+  }
+
+  // Display registers                                                                       
+  else if ( !strncasecmp("regs", cmd, sizeof "regs")) {
+    display_registers(emu);
+    disassemble(emu, cpu->pc, 1);
   }
 
   return true;

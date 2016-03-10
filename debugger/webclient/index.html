@@ -97,10 +97,20 @@
 	 var play_button = document.getElementById('play_button');
 	 var enter_button = document.getElementById('enter_button');
 
+	 var prev_cmd = "";
+
 	 enter_button.onclick = function(){
-	     if (stdin.value == "") return;
-	     
-	     ws.send(stdin.value + "\n");
+	     if (stdin.value == "") {
+		 if (prev_cmd != "")
+		     stdin.value = prev_cmd;
+		 else 
+		     return;
+	     }
+	     else {
+		 prev_cmd = stdin.value;
+	     }
+
+	     ws.send(stdin.value);
 	     stdin.value = "";
 	 };
 

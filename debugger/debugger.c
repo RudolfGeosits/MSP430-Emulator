@@ -472,6 +472,7 @@ void setup_debugger(Emulator *emu)
 
   deb->web_interface = true;
   deb->web_server_ready = false;
+  deb->web_firmware_uploaded = false;
 
   deb->console_interface = false;
 

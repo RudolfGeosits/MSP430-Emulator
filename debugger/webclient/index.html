@@ -1,6 +1,6 @@
 <!--
   MSP430 Emulator
-  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)  
+  Copyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)  
                                                                       
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -78,14 +78,19 @@
 	<script type="text/javascript" src="js/paper.js"></script>
 	<script type="text/paperscript" canvas="myCanvas">
 
-	 var IMG_BASE = new Point(10, 10);
+	 var IMG_BASE = new Point(0, 0);
 
 	 var ws = new WebSocket('ws://127.0.0.1:9000', 'emu-protocol');
-	 //var ws = new WebSocket('ws://45.55.37.169:9000', 'emu-protocol');
+	 //var ws = new WebSocket('ws://poorhackers.com:9000', 'emu-protocol');
 
-	 var msp_image = new Raster('msp', IMG_BASE.x + 145.5, 
-				    IMG_BASE.y + 192);
-	 
+	 var msp_image = new Raster('msp', IMG_BASE.x + 142.5, IMG_BASE.y + 185.5);
+
+	 var reset_button_down_image = new Raster('button_down', IMG_BASE.x + 215, IMG_BASE.y + 345);
+	 reset_button_down_image.visible = false;
+
+	 var P1_3_button_down_image = new Raster('button_down', IMG_BASE.x + 28, IMG_BASE.y + 345);
+	 P1_3_button_down_image.visible = false;
+
 	 var stdout = document.getElementById('console');
 	 stdout.value = "";
 
@@ -95,13 +100,41 @@
 
 	     stdout.scrollTop = stdout.scrollHeight;
 	 }
-
+	 
 	 var pause_button = document.getElementById('pause_button');
 	 var play_button = document.getElementById('play_button');
 	 var enter_button = document.getElementById('enter_button');
+	 var upload_button = document.getElementById('upload_button');
 
+	 //
+	 var contents;
+
+	 upload_button.onclick = function(){	     
+	     ws.send("UPLOAD", { binary: false});
+	     ws.send(contents, { binary: true });
+	     ws.send("NPLOAD", { binary: false});
+	 };
+
+	 function readSingleFile(e) {
+	     var file = e.target.files[0];
+	     if (!file) {
+		 return;
+	     }
+
+	     var reader = new FileReader();
+	     
+	     reader.onload = function(e) {
+		 contents = e.target.result;
+	     };
+
+	     //reader.readAsText(file);
+	     reader.readAsArrayBuffer(file);
+	 }
+
+	 document.getElementById('file-input').addEventListener('change', readSingleFile, false);
+	 //
+	 
 	 var prev_cmd = "";
-
 	 enter_button.onclick = function(){
 	     if (stdin.value == "") {
 		 if (prev_cmd != "")
@@ -123,11 +156,31 @@
 
 	 play_button.onclick = function(){
 	     ws.send("PLAY");
-	 };
+	 };	 
 
 	 function onMouseDown (event) {
-	     ws.send(event.point.x);
-	     ws.send(event.point.y);
+	     var x = event.point.x;
+	     var y = event.point.y;
+
+	     ws.send(x); ws.send(y);
+
+	     if (x >= (IMG_BASE.x + 15) && x <= (IMG_BASE.x + 49)) {
+		 if (y >= (IMG_BASE.y + 327) && y <= (IMG_BASE.y + 360)) {
+		     P1_3_button_down_image.visible = true;
+		 }
+	     }
+
+	     if (x >= (IMG_BASE.x + 199) && x <= (IMG_BASE.x + 232)) {
+		 if (y >= (IMG_BASE.y + 327) && y <= (IMG_BASE.y + 360)) {
+		     reset_button_down_image.visible = true;
+		 }
+	     }	     
+	     paper.view.update();
+	 }
+
+	 function onMouseUp (event) {
+	     P1_3_button_down_image.visible = false;
+	     reset_button_down_image.visible = false;
 	     
 	     paper.view.update();
 	 }
@@ -209,10 +262,14 @@
 	<br><br>
 
 	<button id="enter_button" hidden="true">enter</button> 
-	<button id="pause_button" width="100" height="100">Pause</button>
-	<button id="play_button" width="100" height="100">Play</button>
+	<button id="pause_button">Pause</button>
+	<button id="play_button">Play</button>
+
+	<input type="file" id="file-input" />
+	<button id="upload_button">Upload</button>
 
 	<canvas id="myCanvas" width="340" height="400" class="canvas"></canvas>
-	<img id="msp" src="msp.png" alt="msp" hidden="false"></img>
+	<img id="msp" src="msp.png" alt="msp" hidden="true"></img>
+	<img id="button_down" src="pushed.png" alt="button_down" hidden="true"></img>
     </body>
 </html>

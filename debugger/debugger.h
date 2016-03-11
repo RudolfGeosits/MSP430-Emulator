@@ -42,6 +42,7 @@ typedef struct Debugger {
 
   pthread_t web_server_thread;
   bool web_server_ready;
+  bool web_firmware_uploaded;
 
   pthread_t gui_thread;
 

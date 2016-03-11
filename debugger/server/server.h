@@ -57,9 +57,9 @@ static struct libwebsocket_protocols protocols[] = {
     "emu-protocol",
     callback_emu,
     0,
-    1024, // rx buffer size
-    0,    // id
-    0    // user context data
+    1024 * 4, // rx buffer size
+    0,        // id
+    0         // user context data
   },
 
   {

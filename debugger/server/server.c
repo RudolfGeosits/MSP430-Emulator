@@ -1,6 +1,6 @@
 /*
   MSP430 Emulator
-  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)  
+  Copyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)  
                                                                       
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -27,14 +27,17 @@ int callback_emu (struct libwebsocket_context *this,
 			 void *user, void *in, size_t len)
 {
   Cpu *cpu = emu->cpu;
-  Debugger *debugger = emu->debugger;
+  Debugger *deb = emu->debugger;
+
+  static FILE *fp = NULL;
+  static bool upload = false;
 
   switch (reason) {
     case LWS_CALLBACK_ESTABLISHED: {
       puts("connection established");
       
       // Flip ready flag for the emulator to begin
-      emu->debugger->web_server_ready = true;
+      deb->web_server_ready = true;
       break;
     }
 
@@ -52,7 +55,7 @@ int callback_emu (struct libwebsocket_context *this,
       puts("serv writable");
       break;
     }
-
+      
     case LWS_CALLBACK_CLIENT_WRITEABLE: {
       puts("cli writable");
       break;
@@ -62,21 +65,49 @@ int callback_emu (struct libwebsocket_context *this,
       char *buf = (char *)in;      
       
       if ( !strncmp((const char *)buf, (const char *)"PAUSE", sizeof("PAUSE")) ) {
-	if (debugger->run) {
-	  debugger->run = false;
-	  debugger->debug_mode = true;
+	if (deb->run) {
+	  deb->run = false;
+	  deb->debug_mode = true;
 
-	  // display first round of registers                                           
+	  // display first round of registers
 	  display_registers(emu);
 	  disassemble(emu, cpu->pc, 1);
 	}
       }
       else if ( !strncmp((const char *)buf, (const char *)"PLAY", sizeof("PLAY")) ) {
-	debugger->run = true;
-	debugger->debug_mode = false;
+	deb->run = true;
+	deb->debug_mode = false;
       }
+      else if ( !strncmp((const char *)buf, (const char *)"UPLOAD", sizeof("UPLOAD")) ) {
+	upload = true;
+	fp = fopen("tmp.elf", "wb");
+	puts("upload set");
+      }      
+      else if ( !strncmp((const char *)buf, (const char *)"NPLOAD", sizeof("NPLOAD")) ) {
+	upload = false;
+	fclose(fp);
+	puts("npload reset");
+	system("msp430-objcopy -O binary tmp.elf tmp.bin");
+	puts("objcopy done");
+
+	deb->web_firmware_uploaded = true;
+      }
+      else if (upload) {
+	unsigned char *str = (unsigned char *)in;	
+	fwrite(str, 1, len, fp);
+
+	/*
+	int i;
+	for (i = 0;i < len;i++) {
+	  printf("%02X", str[i]);
+	}
+	*/
+      }
+
       else {
-	if (!debugger->run && debugger->debug_mode) {
+	printf("%s\n", buf);
+
+	if (!deb->run && deb->debug_mode) {
 	  exec_cmd(emu, buf, len);
 	}
       }

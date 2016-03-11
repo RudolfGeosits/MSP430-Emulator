@@ -392,6 +392,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
     strncat(mnemonic, "\t", sizeof mnemonic);
     strncat(mnemonic, asm_operand, sizeof mnemonic);
+    strncat(mnemonic, "\n", sizeof mnemonic);
     
     if (disassemble && emu->debugger->debug_mode) {
       int i;
@@ -417,7 +418,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 	web_send(" ");
       }
 
-      printf("\t%s\n", mnemonic);
+      printf("\t%s", mnemonic);
 
       web_send("\t");
       web_send(mnemonic);

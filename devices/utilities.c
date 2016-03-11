@@ -1,6 +1,6 @@
 /*                                                                
 MSP430 Emulator                                                   
-Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)                
+Copyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)                
 This program is free software: you can redistribute it and/or modify           
 it under the terms of the GNU General Public License as published by           
 the Free Software Foundation, either version 3 of the License, or              
@@ -38,7 +38,12 @@ void load_bootloader(uint16_t virt_addr)
 void load_firmware(char *file_name, uint16_t virt_addr)
 {
   uint32_t size, result;
-  printf("Loading Program: ( %s )\n", file_name);
+  char str[100] = {0};
+
+  sprintf(str, "Loading firmware: ( %s )\n", file_name);
+  
+  printf("%s", str);
+  web_send(str);
 
   FILE *fd = fopen(file_name, "rb+");
   
@@ -55,7 +60,10 @@ void load_firmware(char *file_name, uint16_t virt_addr)
   uint16_t *real_addr = get_addr_ptr(virt_addr);
 
   result = fread(real_addr, 1, size, fd);
-  printf("Placed %d bytes into flash\n\n", result);
+
+  sprintf(str, "Placed %d bytes into flash\n\n", result);
+  printf("%s", str);
+  web_send(str);
 
   fclose(fd);
 }

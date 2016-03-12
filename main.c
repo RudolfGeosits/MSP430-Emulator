@@ -78,10 +78,15 @@ int main(int argc, char *argv[])
   // Fetch-Decode-Execute Cycle (run machine)
   while (!deb->quit) {
     if (!deb->run) {usleep(100);continue;}
+
+    handle_breakpoints(emu);
     
     decode(emu, fetch(emu), EXECUTE); // Instruction Decoder
+
     handle_port_1(emu);
     handle_usci(emu);
+
+    //usleep(10000);
   }
   
   uninitialize_msp_memspace(emu->cpu);

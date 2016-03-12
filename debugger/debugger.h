@@ -63,4 +63,6 @@ void handle_sigint(int signal);
 bool command_loop(Emulator *emu, char *buf, int len);
 bool exec_cmd (Emulator *emu, char *buf, int len);
 
+void handle_breakpoints (Emulator *emu);
+
 #endif

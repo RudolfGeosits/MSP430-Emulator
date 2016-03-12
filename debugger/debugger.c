@@ -129,9 +129,9 @@ bool exec_cmd (Emulator *emu, char *line, int len) {
       char reg_name_or_addr[100];
       
       web_send("Not yet implemented.\n");
-
+      
       /*
-      sscanf(line, "%s %X", reg_name_or_addr, &value);
+      sscanf(line, "%s %s", bogus1, reg_name_or_addr);
 
       if ( reg_name_to_num(reg_name_or_addr) != -1 ) {
 	uint16_t *p = get_reg_ptr(emu, reg_name_to_num(reg_name_or_addr) );
@@ -425,22 +425,30 @@ bool command_loop (Emulator *emu, char *buf, int len)
 }
 
 //##########+++ Dump Memory Function +++##########
-void dump_memory(uint8_t *MEM, uint32_t size, 
+void dump_memory (uint8_t *MEM, uint32_t size, 
 		 uint32_t start_addr, uint8_t stride)
 {
   uint32_t i, msp_addr = start_addr;
   MEM += start_addr;
+  char str[100] = {0};
 
   puts("");
+  web_send("\n");
 
   for (i = 0; i < 32; i += 8) {
-    printf("0x%04X:\t", msp_addr);
+    sprintf(str, "0x%04X:\t", msp_addr);
+
+    printf("%s", str);
+    web_send(str);
 
     if ( stride == BYTE_STRIDE ) {
-      printf("0x%02X  0x%02X  0x%02X  0x%02X  " \
-	     "0x%02X  0x%02X  0x%02X  0x%02X\n",
-             *(MEM+0),*(MEM+1),*(MEM+2),*(MEM+3),
-	     *(MEM+4),*(MEM+5),*(MEM+6),*(MEM+7));
+      sprintf(str, "0x%02X  0x%02X  0x%02X  0x%02X  "\
+	      "0x%02X  0x%02X  0x%02X  0x%02X\n",
+	      *(MEM+0),*(MEM+1),*(MEM+2),*(MEM+3),
+	      *(MEM+4),*(MEM+5),*(MEM+6),*(MEM+7));
+
+      printf("%s", str);
+      web_send(str);
     }
     else if ( stride == WORD_STRIDE ) {
       printf("0x%02X%02X  0x%02X%02X  0x%02X%02X  0x%02X%02X\n",
@@ -492,4 +500,30 @@ void handle_sigint(int sig)
 void register_signal(int sig)
 {
   signal(sig, handle_sigint);
+}
+
+void handle_breakpoints (Emulator *emu)
+{
+  int i;
+  Cpu *cpu = emu->cpu;
+  Debugger *deb = emu->debugger;
+  char str[100] = {0};
+
+  for (i = 0;i < deb->num_bps;i++) {
+
+    if (cpu->pc == deb->bp_addresses[i]) {
+      deb->run = false;
+      deb->debug_mode = true;
+      
+      sprintf(str, "\n\t[Breakpoint %d hit]\n\n", i + 1);
+      printf("%s", str);
+      web_send(str);
+      
+      display_registers(emu);
+      disassemble(emu, cpu->pc, 1);
+      
+      return;
+    }
+
+  }
 }

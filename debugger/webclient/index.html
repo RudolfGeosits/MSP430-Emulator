@@ -22,57 +22,7 @@
 
 <html>
     <head>
-	<style>
-
-	 body {
-	     background-color: #AAAAAA;
-	 }
-
-	 .canvas {
-	     background-color: #000000;
-
-	     position: absolute;
-	     top: 10px;
-	     right: 100px;
-	     width: 500px;
-	     height: 500px;
-	     border: 3px solid #73AD21;
-	 }
-
-	 .STDOUT {
-	     background-color: #000000;
-	     color: #FFFFFF;
-	     font-family: "Terminal", monospace;
-	     font-size: 14px;
-	     font-weight: bold;
-	     resize: none;
-	 }
-	 
-	 .STDIN {
-	     background: #1F2124;
-	     background: -moz-linear-gradient(#1F2124, #27292C);
-	     background: -o-linear-gradient(#1F2124, #27292C);
-	     background: -webkit-gradient(linear, 0 0, 0 100%, from(#1F2124), to(#27292C));
-	     background: -webkit-linear-gradient(#1F2124, #27292C);
-	     background: linear-gradient(#1F2124, #27292C);
-	     border: 1px solid #000;
-	     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
-	     border-radius: 3px;
-	     font-size: 14px;
-	     font-weight: bold;
-	     font-family: 'Terminal', monospace;
-	     color: #FFF;
-	     width: 654px;
-	     height: 25px;
-	 }
-	     
-	 .STDIN:focus {
-	     box-shadow: inset 0 0 2px #000;
-	     background: linear-gradient(#1F2124, #27292C);
-	     border-color: #51CBEE;
-	     outline: none;
-	 }
-	</style>	
+	<link rel="stylesheet" type="text/css" href="emu.css">
 
 	<!-- Load the Paper.js library -->
 	<script type="text/javascript" src="js/paper.js"></script>
@@ -91,6 +41,12 @@
 	 var P1_3_button_down_image = new Raster('button_down', IMG_BASE.x + 28, IMG_BASE.y + 345);
 	 P1_3_button_down_image.visible = false;
 
+	 var P1_0_LED_image = new Raster('P1_0_LED', IMG_BASE.x + 70, IMG_BASE.y + 361.5);
+	 P1_0_LED_image.visible = false;
+
+	 var P1_6_LED_image = new Raster('P1_6_LED', IMG_BASE.x + 84, IMG_BASE.y + 361);
+	 P1_6_LED_image.visible = false;
+
 	 var stdout = document.getElementById('console');
 	 stdout.value = "";
 
@@ -106,7 +62,7 @@
 	 var enter_button = document.getElementById('enter_button');
 	 var upload_button = document.getElementById('upload_button');
 
-	 //
+	 // upload binary file //
 	 var contents;
 
 	 upload_button.onclick = function(){	     
@@ -127,7 +83,6 @@
 		 contents = e.target.result;
 	     };
 
-	     //reader.readAsText(file);
 	     reader.readAsArrayBuffer(file);
 	 }
 
@@ -185,51 +140,27 @@
 	     paper.view.update();
 	 }
 
-	 // Launchpad red LED builtin at P1.0
-	 var P1_0_LED = new Path.Circle( new Point(IMG_BASE.x + 73, 
-						   IMG_BASE.y + 375), 
-					 6 );
-	 P1_0_LED.visible = false;
-	 P1_0_LED.style = {
-	     fillColor: 'red',
-	     strokeColor: 'red',
-	     strokeWidth: 5,
-	 };
-	 P1_0_LED.opacity = 0.7;
-	 
-	 // Launchpad green LED builtin at P1.6
-	 var P1_6_LED = new Path.Circle( new Point(IMG_BASE.x + 90, 
-						   IMG_BASE.y + 375), 
-					 6 );
-	 P1_6_LED.visible = false;
-	 P1_6_LED.style = {
-	     fillColor: 'green',
-	     strokeColor: 'green',
-	     strokeWidth: 5,
-	 };
-	 P1_6_LED.opacity = 0.7;
-
 	 ws.onmessage =  function (event) {
 	     var msg = event.data;
 	     
 	     switch (msg) {
 		 case "RED_ON": {
-		     P1_0_LED.visible = true;
+		     P1_0_LED_image.visible = true;
 		     break;
 		 }
 
 		 case "RED_OFF": {
-		     P1_0_LED.visible = false;
+		     P1_0_LED_image.visible = false;
 		     break;
 		 }
 
 		 case "GREEN_ON": {
-		     P1_6_LED.visible = true;
+		     P1_6_LED_image.visible = true;
 		     break;
 		 }
 
 		 case "GREEN_OFF": {
-		     P1_6_LED.visible = false;
+		     P1_6_LED_image.visible = false;
 		     break;
 		 }
 		     
@@ -271,5 +202,7 @@
 	<canvas id="myCanvas" width="340" height="400" class="canvas"></canvas>
 	<img id="msp" src="msp.png" alt="msp" hidden="true"></img>
 	<img id="button_down" src="pushed.png" alt="button_down" hidden="true"></img>
+	<img id="P1_0_LED" src="P1_0_LED.png" alt="P1_0_LED" hidden="true"></img>
+	<img id="P1_6_LED" src="P1_6_LED.png" alt="P1_6_LED" hidden="true"></img>
     </body>
 </html>

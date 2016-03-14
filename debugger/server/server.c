@@ -110,14 +110,14 @@ int callback_emu (struct libwebsocket_context *this,
       
       if (serial) {
 	uint8_t *data = (uint8_t *) buf;
-	int i;
+	int i, j = 0;
 
  	//printf("len is %d\nstr is %s\n", len, data);
 
 	for (i = 0;i < len;i++) {
 	  uint8_t thing = *(data + i);
-
-	  while (*cpu->usci->IFG2 & RXIFG);
+	  usleep(333);
+	  while (*cpu->usci->IFG2 & RXIFG) {j++;}
 	  
 	  if (thing == '\n') {                  
 	    thing = '\r';
@@ -181,7 +181,6 @@ int callback_emu (struct libwebsocket_context *this,
 
       else if ( !strncmp((const char *)buf, (const char *)"_SERIAL_", sizeof("_SERIAL_")) ) {
 	serial = true;
-	puts("IN SERIAL");
       }
 
       else {

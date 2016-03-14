@@ -1,6 +1,6 @@
 /*
   MSP430 Emulator
-  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)  
+  Copyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)  
                                                                       
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 
 #include "usci.h"
 
+/*
 int master;
 FILE *slave;
 int sp;
@@ -98,14 +99,27 @@ void open_pty (Emulator *emu)
     fprintf(stderr, "Error creating thread\n");
   }
 }
-
+*/
 void handle_usci (Emulator *emu) 
 {
   Cpu *cpu = emu->cpu;
+  Debugger *deb = emu->debugger;
   Usci *usci = cpu->usci;
+  
+  uint8_t c = *usci->UCA0TXBUF;
+  unsigned char str[2];
+  str[0] = c;
+  str[1] = 0;
 
-  if (*usci->UCA0TXBUF & 0xFF) {
-    write(sp, usci->UCA0TXBUF, 1);
+  if (c & 0xFF) {
+    if (deb->web_interface) {
+      web_send(str, SERIAL);
+      //write(sp, usci->UCA0TXBUF, 1);
+    }
+    else if (deb->console_interface) {
+      //write(sp, usci->UCA0TXBUF, 1);
+    }
+
     *usci->UCA0TXBUF = 0;
   }
 }
@@ -143,4 +157,6 @@ void setup_usci (Emulator *emu)
 
   usci->IFG2  = (uint8_t *) get_addr_ptr(IFG2_VLOC);
   *usci->IFG2 |= TXIFG;
+
+  //open_pty(emu);
 }

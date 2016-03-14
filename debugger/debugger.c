@@ -128,7 +128,7 @@ bool exec_cmd (Emulator *emu, char *line, int len) {
       int value = 0;
       char reg_name_or_addr[100];
       
-      web_send("Not yet implemented.\n");
+      web_send("Not yet implemented.\n", STDOUT);
       
       /*
       sscanf(line, "%s %s", bogus1, reg_name_or_addr);
@@ -154,7 +154,7 @@ bool exec_cmd (Emulator *emu, char *line, int len) {
     {
       if (deb->num_bps >= MAX_BREAKPOINTS) {
 	//printf("Breakpoints are full.\n");
-	web_send("Breakpoints are full.\n");      
+	web_send("Breakpoints are full.\n", STDOUT);      
 
 	return true;
       }
@@ -168,13 +168,13 @@ bool exec_cmd (Emulator *emu, char *line, int len) {
       
 	sprintf(entry, "\n\t[Breakpoint [%d] Set]\n", deb->num_bps + 1);
 	//printf("%s", entry);
-	web_send(entry);
+	web_send(entry, STDOUT);
 
 	++deb->num_bps;
       }
       else {
 	//printf("error\n");
-	web_send("error\n");
+	web_send("error\n", STDOUT);
       }
     }
 
@@ -191,14 +191,14 @@ bool exec_cmd (Emulator *emu, char *line, int len) {
 		  deb->current_bp+1, deb->bp_addresses[deb->current_bp]);
 
 	  //printf("%s", entry);
-	  web_send(entry);
+	  web_send(entry, STDOUT);
 
 	  ++deb->current_bp;
 	}
       }
       else {
 	//printf("You have not set any breakpoints!\n");
-	web_send("You have not set any breakpoints!\n");
+	web_send("You have not set any breakpoints!\n", STDOUT);
       }
     }
 
@@ -219,7 +219,7 @@ bool exec_cmd (Emulator *emu, char *line, int len) {
   // End the line loop, next instruction
   else 
     {
-      web_send("\t[Invalid command, type \"help\".]\n");
+      web_send("\t[Invalid command, type \"help\".]\n", STDOUT);
     }
 
   return true;
@@ -433,13 +433,13 @@ void dump_memory (uint8_t *MEM, uint32_t size,
   char str[100] = {0};
 
   puts("");
-  web_send("\n");
+  web_send("\n", STDOUT);
 
   for (i = 0; i < 32; i += 8) {
     sprintf(str, "0x%04X:\t", msp_addr);
 
     printf("%s", str);
-    web_send(str);
+    web_send(str, STDOUT);
 
     if ( stride == BYTE_STRIDE ) {
       sprintf(str, "0x%02X  0x%02X  0x%02X  0x%02X  "\
@@ -448,7 +448,7 @@ void dump_memory (uint8_t *MEM, uint32_t size,
 	      *(MEM+4),*(MEM+5),*(MEM+6),*(MEM+7));
 
       printf("%s", str);
-      web_send(str);
+      web_send(str, STDOUT);
     }
     else if ( stride == WORD_STRIDE ) {
       printf("0x%02X%02X  0x%02X%02X  0x%02X%02X  0x%02X%02X\n",
@@ -517,7 +517,7 @@ void handle_breakpoints (Emulator *emu)
       
       sprintf(str, "\n\t[Breakpoint %d hit]\n\n", i + 1);
       printf("%s", str);
-      web_send(str);
+      web_send(str, STDOUT);
       
       display_registers(emu);
       disassemble(emu, cpu->pc, 1);

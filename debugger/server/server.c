@@ -18,6 +18,9 @@
 
 #include "server.h"
 
+#define TXIFG 0x02
+#define RXIFG 0x01
+
 struct libwebsocket *ws = NULL;
 Emulator *emu = NULL;
 
@@ -38,6 +41,51 @@ int callback_emu (struct libwebsocket_context *this,
       
       // Flip ready flag for the emulator to begin
       deb->web_server_ready = true;
+
+      // get the ball rolling
+      libwebsocket_callback_on_writable(this, wsi);
+
+      break;
+    }
+
+    case LWS_CALLBACK_SERVER_WRITEABLE: {
+      static bool red_led = false;
+      static bool green_led = false;
+      static bool serial = false;
+
+      // 1.0 ON (launchpad red LED)
+      if (P1DIR_0 && P1OUT_0) {
+	if (red_led == false) {
+	  web_send("RED_ON", CONTROL);
+	  red_led = true;
+	}
+      }
+
+      // 1.0 OFF (launchpad red LED)
+      else if (P1DIR_0 && !P1OUT_0) {
+	if (red_led == true) {
+	  web_send("RED_OFF", CONTROL);
+	  red_led = false;
+	}
+      }
+
+      // 1.6 ON (launchpad green LED)
+      if (P1DIR_6 && P1OUT_6) {
+	if (green_led == false) {
+	  web_send("GREEN_ON", CONTROL);
+	  green_led = true;
+	}
+      }
+    
+      // 1.6 OFF (launchpad green LED) 
+      else if (P1DIR_6 && !P1OUT_6) {
+	if (green_led == true) {
+	  web_send("GREEN_OFF", CONTROL);
+	  green_led = false;
+	}
+      }
+      
+      libwebsocket_callback_on_writable(this, wsi);
       break;
     }
 
@@ -51,20 +99,54 @@ int callback_emu (struct libwebsocket_context *this,
       break;
     }
 
-    case LWS_CALLBACK_SERVER_WRITEABLE: {
-      puts("serv writable");
-      break;
-    }
-      
     case LWS_CALLBACK_CLIENT_WRITEABLE: {
       puts("cli writable");
       break;
     }
 
     case LWS_CALLBACK_RECEIVE: {
+      static bool serial = false;
       char *buf = (char *)in;      
       
-      if ( !strncmp((const char *)buf, (const char *)"PAUSE", sizeof("PAUSE")) ) {
+      if (serial) {
+	uint8_t *data = (uint8_t *) buf;
+	int i;
+
+ 	//printf("len is %d\nstr is %s\n", len, data);
+
+	for (i = 0;i < len;i++) {
+	  uint8_t thing = *(data + i);
+
+	  while (*cpu->usci->IFG2 & RXIFG);
+	  
+	  if (thing == '\n') {                  
+	    thing = '\r';
+	  }                          
+
+	  //printf("Got 0x%02X (%c)\n", thing, thing);
+	  /*
+	    if (*data == '\\') { 
+	    //read(sp, data, 1);
+	    data += 1;
+
+	    if (*data == 'h') {
+	    //read(sp, data, 2);                                    
+
+	    //data[2] = 0;                         
+	    //*cpu->usci->UCA0RXBUF = (uint8_t) strtoul(data, NULL, 16);  
+	    }                                                     
+	    } 
+	  */
+	  //else {                                                                                  
+	  *cpu->usci->UCA0RXBUF = thing;
+	  //}                 
+	    
+	  *cpu->usci->IFG2 |= RXIFG;
+	}
+
+	serial = false;
+      }
+      else if ( !strncmp((const char *)buf, (const char *)"PAUSE", sizeof("PAUSE")) ) {
 	if (deb->run) {
 	  deb->run = false;
 	  deb->debug_mode = true;
@@ -95,13 +177,11 @@ int callback_emu (struct libwebsocket_context *this,
       else if (upload) {
 	unsigned char *str = (unsigned char *)in;	
 	fwrite(str, 1, len, fp);
+      }
 
-	/*
-	int i;
-	for (i = 0;i < len;i++) {
-	  printf("%02X", str[i]);
-	}
-	*/
+      else if ( !strncmp((const char *)buf, (const char *)"_SERIAL_", sizeof("_SERIAL_")) ) {
+	serial = true;
+	puts("IN SERIAL");
       }
 
       else {
@@ -114,11 +194,11 @@ int callback_emu (struct libwebsocket_context *this,
 
       break;
     }
-
-    default: {
-      break;
-    }
+  
+  default: {
+    break;
   }
+}
     
   return 0;
 }
@@ -157,68 +237,57 @@ void *web_server (void *ctxt)
   }
     
   printf("starting server...\n");
-  static bool red_led = false;
-  static bool green_led = false;
     
   while (true) {
     libwebsocket_service(context, 10); // ms
-    if (!ws) continue;
-
-    // 1.0 ON (launchpad red LED)
-    if (P1DIR_0 && P1OUT_0) {
-      if (red_led == false) {
-	web_send("RED_ON");
-	red_led = true;
-      }
-    }
-
-    // 1.0 OFF (launchpad red LED)
-    else if (P1DIR_0 && !P1OUT_0) {
-      if (red_led == true) {
-	web_send("RED_OFF");
-	red_led = false;
-      }
-    }
-
-    // 1.6 ON (launchpad green LED)
-    if (P1DIR_6 && P1OUT_6) {
-      if (green_led == false) {
-	web_send("GREEN_ON");
-	green_led = true;
-      }
-    }
-    
-    // 1.6 OFF (launchpad green LED) 
-    else if (P1DIR_6 && !P1OUT_6) {
-      if (green_led == true) {
-	web_send("GREEN_OFF");
-	green_led = false;
-      }
-    }
-
+    usleep(1000);
   }
-    
+
   libwebsocket_context_destroy(context);
   return NULL;
 }
 
-void web_send (char *buf)
+void web_send (char *buf, uint8_t type)
 {
+  int len;
+  char *msg, *begin;
+  char *intro;// = "_STDOUT_";
+
+  if (type != CONTROL) {
+    if (type == STDOUT) {
+      intro = "_STDOUT_";      
+    }
+    else if (type == SERIAL) {
+      intro = "_SERIAL_";      
+    }
+
+    // Send intro
+    len = strlen(intro);
+    msg = (char *) malloc(len + LWS_SEND_BUFFER_PRE_PADDING 
+			  + LWS_SEND_BUFFER_POST_PADDING);
+
+    begin = msg + LWS_SEND_BUFFER_PRE_PADDING;
+
+    strncpy(begin, intro, len);
+    libwebsocket_write(ws, begin, len, LWS_WRITE_TEXT);    
+  }
+
   if (ws == NULL) {
     printf("fail.\n");
     return;
   }
 
-  int len = strlen(buf);
-  char *sendbuf = (char *) malloc(len + LWS_SEND_BUFFER_PRE_PADDING 
-				  + LWS_SEND_BUFFER_POST_PADDING);
+  // send message
+  len = strlen(buf);
+  msg = (char *) malloc(len + LWS_SEND_BUFFER_PRE_PADDING 
+			+ LWS_SEND_BUFFER_POST_PADDING);
 
-  char *begin = sendbuf + LWS_SEND_BUFFER_PRE_PADDING;
+  begin = msg + LWS_SEND_BUFFER_PRE_PADDING;
 
   strncpy(begin, buf, len);
   libwebsocket_write(ws, begin, len, LWS_WRITE_TEXT);
 
-  free(sendbuf);
+  free(msg);
 }
 
 int callback_http (struct libwebsocket_context *this, 

@@ -1,6 +1,6 @@
 /*
   MSP430 Emulator
-  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)  
+  Copyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)  
                                                                       
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
 #define _MAIN_H_
 
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <string.h>

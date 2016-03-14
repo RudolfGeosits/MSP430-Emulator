@@ -60,7 +60,7 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
     char inv[100] = {0};
 
     sprintf(inv, "%04X\t[INVALID INSTRUCTION]\n", instruction);
-    web_send(inv);
+    web_send(inv, STDOUT);
     printf("%s", inv);
     
     cpu->pc -= 2;

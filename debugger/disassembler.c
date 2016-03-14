@@ -35,14 +35,12 @@ void disassemble(Emulator *emu, uint16_t start_addr, uint8_t times)
     sprintf(addr_str, "0x%04X:\t", cpu->pc);
 
     printf("%s", addr_str);
-    if (debugger->web_interface) web_send(addr_str);
+    if (debugger->web_interface) web_send(addr_str, STDOUT);
 
     opcode = fetch(emu);    
     decode(emu, opcode, DISASSEMBLE);
-
-    //fflush(stdout);
   }
 
   debugger->disassemble_mode = false;
-  cpu->pc = saved_pc; /* Restore PC */
+  cpu->pc = saved_pc; // Restore PC
 }

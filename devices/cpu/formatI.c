@@ -875,17 +875,17 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       }
 
       printf("%s", hex_str);
-      web_send(hex_str);
+      web_send(hex_str, STDOUT);
 
       for (i = strlen(hex_str);i < 12;i++) {
 	printf(" ");
-	web_send(" ");
+	web_send(" ", STDOUT);
       }
       
       printf("\t%s", mnemonic);
       
-      web_send("\t");
-      web_send(mnemonic);
+      web_send("\t", STDOUT);
+      web_send(mnemonic, STDOUT);
     }
 
   }

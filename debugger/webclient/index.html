@@ -50,16 +50,27 @@
 	 var stdout = document.getElementById('console');
 	 stdout.value = "";
 
+	 var serial = document.getElementById('serial_out');
+	 serial.value = "";
+
 	 function print_console (text){
 	     var another = stdout.value + text;
 	     stdout.value = another;
 
 	     stdout.scrollTop = stdout.scrollHeight;
 	 }
+
+	 function print_serial (text){
+	     var another = serial.value + text;
+	     serial.value = another;
+
+	     serial.scrollTop = serial.scrollHeight;
+	 }
 	 
 	 var pause_button = document.getElementById('pause_button');
 	 var play_button = document.getElementById('play_button');
 	 var enter_button = document.getElementById('enter_button');
+	 var serial_enter_button = document.getElementById('serial_enter_button');
 	 var upload_button = document.getElementById('upload_button');
 
 	 // upload binary file //
@@ -104,6 +115,16 @@
 	     ws.send(stdin.value);
 	     stdin.value = "";
 	 };
+	 
+	 serial_enter_button.onclick = function(){
+	     if (serial_in.value == "") {
+		 return;
+	     }
+	     
+	     ws.send("_SERIAL_");
+	     ws.send(serial_in.value + "\n");
+	     serial_in.value = "";
+	 };
 
 	 pause_button.onclick = function(){
 	     ws.send("PAUSE");
@@ -140,34 +161,57 @@
 	     paper.view.update();
 	 }
 
+	 var stdout_mode = false;
+	 var serial_mode = false;
 	 ws.onmessage =  function (event) {
 	     var msg = event.data;
+
+	     if (stdout_mode) {
+		 print_console(msg);		 
+		 stdout_mode = false;
+	     }
 	     
-	     switch (msg) {
-		 case "RED_ON": {
-		     P1_0_LED_image.visible = true;
-		     break;
-		 }
+	     else if (serial_mode) {
+		 print_serial(msg);
+		 serial_mode = false;
+	     }
+	     else {
+		 switch (msg) {
+		     case "RED_ON": {
+			 P1_0_LED_image.visible = true;
+			 break;
+		     }
 
-		 case "RED_OFF": {
-		     P1_0_LED_image.visible = false;
-		     break;
-		 }
+		     case "RED_OFF": {
+			 P1_0_LED_image.visible = false;
+			 break;
+		     }
 
-		 case "GREEN_ON": {
-		     P1_6_LED_image.visible = true;
-		     break;
-		 }
+		     case "GREEN_ON": {
+			 P1_6_LED_image.visible = true;
+			 break;
+		     }
 
-		 case "GREEN_OFF": {
-		     P1_6_LED_image.visible = false;
-		     break;
-		 }
-		     
-		 // Line of text for the console
-		 default: {
-		     print_console(msg);
-		     break;
+		     case "GREEN_OFF": {
+			 P1_6_LED_image.visible = false;
+			 break;
+		     }
+			 
+		     case "_STDOUT_": {
+			 stdout_mode = true;
+			 break;
+		     }
+
+		     case "_SERIAL_": {
+			 serial_mode = true;
+			 break;
+		     }
+
+			 // Line of text for the console
+		     default: {
+			 //print_console(msg);
+			 break;
+		     }
 		 }
 	     }
 
@@ -181,18 +225,25 @@
 	     }
 	 };
 
+	 serial_in.onkeydown = function auto_enter (event) {
+	     // On enter key press
+	     if (event.keyCode == 13) {
+                 serial_enter_button.click();
+	     }
+	 };
+
 	</script>
     </head>
     
     <body>
 	<textarea id="console" rows="24" cols="80" readonly="readonly" class="STDOUT"></textarea>
 	<br>
-
 	<input type="text" id="stdin" width="80" class="STDIN">
-
 	<br><br>
 
 	<button id="enter_button" hidden="true">enter</button> 
+	<button id="serial_enter_button" hidden="true">enter</button> 
+
 	<button id="pause_button">Pause</button>
 	<button id="play_button">Play</button>
 
@@ -200,6 +251,12 @@
 	<button id="upload_button">Upload</button>
 
 	<canvas id="myCanvas" width="340" height="400" class="canvas"></canvas>
+	
+	<br><br>
+	<textarea id="serial_out" rows="24" cols="80" readonly="readonly" class="SERIALOUT"></textarea>
+	<br>
+	<input type="text" id="serial_in" width="80" class="SERIALIN">
+	
 	<img id="msp" src="msp.png" alt="msp" hidden="true"></img>
 	<img id="button_down" src="pushed.png" alt="button_down" hidden="true"></img>
 	<img id="P1_0_LED" src="P1_0_LED.png" alt="P1_0_LED" hidden="true"></img>

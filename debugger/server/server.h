@@ -1,6 +1,6 @@
 /*
   MSP430 Emulator
-  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)  
+  Copyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)  
                                                                       
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -35,6 +35,8 @@
 #include "../../devices/peripherals/port1.h"
 #include "../../devices/peripherals/usci.h"
 
+enum {CONTROL, STDOUT, SERIAL};
+
 int callback_http (struct libwebsocket_context *this,
                           struct libwebsocket *wsi,
                           enum libwebsocket_callback_reasons reason,
@@ -67,7 +69,7 @@ static struct libwebsocket_protocols protocols[] = {
   }
 };
 
-void web_send (char *buf);
+void web_send (char *buf, uint8_t type);
 void *web_server (void *ctxt);
 
 #endif

@@ -18,6 +18,12 @@
 
 #include "main.h"
 
+int64_t timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)
+{
+  return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) -
+    ((timeB_p->tv_sec * 1000000000) + timeB_p->tv_nsec);
+}
+
 int main(int argc, char *argv[])
 {
   Emulator *emu = (Emulator *) calloc( 1, sizeof(Emulator) );
@@ -46,11 +52,13 @@ int main(int argc, char *argv[])
     while (!deb->web_server_ready) usleep(100);
     
     printf("SERVER: Waiting for web client to upload firmware...\n");
-    web_send("MSP430 Emulator\nCopyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)\n\n");
-    web_send("[!] Please upload your firmware (waiting)\n");
-    while (!deb->web_firmware_uploaded) usleep(100);
+    web_send("MSP430 Emulator\nCopyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)\n\n", 
+	     STDOUT);
+
+    web_send("[!] Please upload your firmware (waiting)\n", STDOUT);
+    while (!deb->web_firmware_uploaded) usleep(1000);
   }
-  else if (deb->console_interface == true) {
+  else if (deb->console_interface) {
     puts("console mode not implemented.");
 
     if (argv[1] == NULL) {
@@ -65,11 +73,16 @@ int main(int argc, char *argv[])
   initialize_msp_registers(emu);  
   setup_port_1(emu);
   setup_usci(emu);
-  //open_pty(emu);
 
+  // Open Pseudo terminal in console mode for Serial
+  //if (deb->console_interface) open_pty(emu);
+  
   load_bootloader(0x0C00);
-  //load_firmware(argv[1], 0xC000);
-  load_firmware("tmp.bin", 0xC000);
+
+  if (deb->console_interface)
+    load_firmware(argv[1], 0xC000);
+  else if (deb->web_interface)
+    load_firmware("tmp.bin", 0xC000);
 
   // display first round of registers
   display_registers(emu);
@@ -77,16 +90,28 @@ int main(int argc, char *argv[])
 
   // Fetch-Decode-Execute Cycle (run machine)
   while (!deb->quit) {
-    if (!deb->run) {usleep(100);continue;}
+    struct timespec start, end;
 
+    // Handle debugger
+    if (!deb->run) {usleep(1000);continue;}
     handle_breakpoints(emu);
-    
-    decode(emu, fetch(emu), EXECUTE); // Instruction Decoder
 
+    // Instruction Decoder
+    decode(emu, fetch(emu), EXECUTE); 
+
+    // Handle Peripherals
     handle_port_1(emu);
     handle_usci(emu);
 
-    //usleep(10000);
+    // Get close to 1.1 MHZ
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
+    while (true) {
+      clock_gettime(CLOCK_MONOTONIC, &end);
+      uint64_t timeElapsed = timespecDiff(&end, &start);
+      
+      if (timeElapsed >= 900) break;
+    }
   }
   
   uninitialize_msp_memspace(emu->cpu);

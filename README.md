@@ -7,7 +7,7 @@ NOTE: We are in the process of moving to a web interface!
 - An interactive debugger for advanced development and in depth firmware/hardware analysis
 - Peripherals include:
   - UART Serial Communication (via USCI Module) 
-  - Port 1 (LEDs and other pins)
+  - GPIO Ports (LEDs and other pins)
 
   The project goal is to emulate all peripherals and devices on the TIMSP430 Launchpad starter kit, 
   to be able to run all firmware that would run on the physical device and test hardware inputs like UART or some of the other digital ports via programmable means. 
@@ -21,7 +21,6 @@ NOTE: We are in the process of moving to a web interface!
 
 - TODO
   - Support for ELF binary format
-  - Disassembly Coloring and structure
   - Basic Clock Module
   
   - Instructions
@@ -39,6 +38,6 @@ NOTE: We are in the process of moving to a web interface!
 - User Instructions
    The following are instructions on how to use the web interface
 
-  - run the server via ./MSP430 [FIRMWARE OBJECT]
+  - run the server via ./MSP430
   - load index.html from debugger/webclient/index.html to your browser
-  - You will be connected 
+  - You will be connected

@@ -72,6 +72,23 @@
 	 var enter_button = document.getElementById('enter_button');
 	 var serial_enter_button = document.getElementById('serial_enter_button');
 	 var upload_button = document.getElementById('upload_button');
+	 var show_serial_button = document.getElementById('show_serial_button');
+
+	 var serial_state = "visible";
+	 show_serial_button.onclick = function(){
+
+	     if (serial_state == "visible") {
+		 serial.style.display = "none";
+		 serial_in.style.display = "none";
+		 serial_state = "hidden";
+	     }
+	     else if (serial_state == "hidden") {
+		 serial.style.display = "block";
+		 serial_in.style.display = "block";
+		 serial_state = "visible";
+	     }
+
+	 };
 
 	 // upload binary file //
 	 var contents;
@@ -256,6 +273,7 @@
 	<textarea id="serial_out" rows="24" cols="80" readonly="readonly" class="SERIALOUT"></textarea>
 	<br>
 	<input type="text" id="serial_in" width="80" class="SERIALIN">
+	<button id="show_serial_button">Show Serial Console</button>
 	
 	<img id="msp" src="msp.png" alt="msp" hidden="true"></img>
 	<img id="button_down" src="pushed.png" alt="button_down" hidden="true"></img>

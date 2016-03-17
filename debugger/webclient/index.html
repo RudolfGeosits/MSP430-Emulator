@@ -28,7 +28,7 @@
 	<script type="text/javascript" src="js/paper.js"></script>
 	<script type="text/paperscript" canvas="myCanvas">
 
-	 var IMG_BASE = new Point(0, 0);
+	 var IMG_BASE = new Point(100, 0);
 
 	 var ws = new WebSocket('ws://127.0.0.1:9000', 'emu-protocol');
 	 //var ws = new WebSocket('ws://poorhackers.com:9000', 'emu-protocol');
@@ -46,6 +46,24 @@
 
 	 var P1_6_LED_image = new Raster('P1_6_LED', IMG_BASE.x + 84, IMG_BASE.y + 361);
 	 P1_6_LED_image.visible = false;
+
+	 // Pinouts
+	 var line = new Path.Line(new Point(IMG_BASE.x + 16, 
+					    IMG_BASE.y + 183),
+				  new Point(IMG_BASE.x + 0, 
+					    IMG_BASE.y + 183)
+	 );
+
+	 line.strokeColor = 'grey';
+
+	 var P1_text = new PointText({
+	     content: '0',
+	     fontSize: 17
+	 });
+	 P1_text.fontFamily = 'Terminal';
+	 P1_text.position = new Point(IMG_BASE.x - 10, 
+				      IMG_BASE.y + 183);
+
 
 	 var stdout = document.getElementById('console');
 	 stdout.value = "";
@@ -194,22 +212,47 @@
 	     }
 	     else {
 		 switch (msg) {
-		     case "RED_ON": {
+		     case "P1.0 1": {
 			 P1_0_LED_image.visible = true;
+			 
+			 P1_text.content = '1';
 			 break;
 		     }
-
-		     case "RED_OFF": {
+			 
+		     case "P1.0 0": {
 			 P1_0_LED_image.visible = false;
+
+			 P1_text.content = '0';
+			 break;
+		     }
+			 
+	             // P1.1 OUTPUT
+		     case "P1.1 1": {
+			 console.log("P1.1: HIGH");
+			 break;
+		     }
+		     case "P1.1 0": {
+			 console.log("P1.1: LOW");
 			 break;
 		     }
 
-		     case "GREEN_ON": {
+	             // P1.2 OUTPUT
+		     case "P1.2 1": {
+			 console.log("P1.2: HIGH");
+			 break;
+		     }
+		     case "P1.2 0": {
+			 console.log("P1.2: LOW");
+			 break;
+		     }
+
+		     // P1.6 OUTPUT
+		     case "P1.6 1": {
 			 P1_6_LED_image.visible = true;
 			 break;
 		     }
 
-		     case "GREEN_OFF": {
+		     case "P1.6 0": {
 			 P1_6_LED_image.visible = false;
 			 break;
 		     }

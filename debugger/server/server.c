@@ -53,26 +53,43 @@ int callback_emu (struct libwebsocket_context *this,
       static bool green_led = false;
       static bool serial = false;
 
-      // 1.0 ON (launchpad red LED)
+      // P1.0 ON (launchpad red LED)
       if (P1DIR_0 && P1OUT_0) {
 	if (red_led == false) {
-	  web_send("RED_ON", CONTROL);
+	  web_send("P1.0 1", CONTROL);
 	  red_led = true;
 	}
       }
-
-      // 1.0 OFF (launchpad red LED)
+      // P1.0 OFF (launchpad red LED)
       else if (P1DIR_0 && !P1OUT_0) {
 	if (red_led == true) {
-	  web_send("RED_OFF", CONTROL);
+	  web_send("P1.0 0", CONTROL);
 	  red_led = false;
 	}
+      }
+
+      // P1.1 ON
+      if (P1DIR_1 && P1OUT_1) {
+	web_send("P1.1 1", CONTROL);
+      }
+      // P1.1 OFF
+      else if (P1DIR_1 && !P1OUT_1) {
+	web_send("P1.1 0", CONTROL);
+      }
+
+      // P1.2 ON
+      if (P1DIR_2 && P1OUT_2) {
+	web_send("P1.2 1", CONTROL);
+      }
+      // P1.2 OFF
+      else if (P1DIR_2 && !P1OUT_2) {
+	web_send("P1.2 0", CONTROL);
       }
 
       // 1.6 ON (launchpad green LED)
       if (P1DIR_6 && P1OUT_6) {
 	if (green_led == false) {
-	  web_send("GREEN_ON", CONTROL);
+	  web_send("P1.6 1", CONTROL);
 	  green_led = true;
 	}
       }
@@ -80,7 +97,7 @@ int callback_emu (struct libwebsocket_context *this,
       // 1.6 OFF (launchpad green LED) 
       else if (P1DIR_6 && !P1OUT_6) {
 	if (green_led == true) {
-	  web_send("GREEN_OFF", CONTROL);
+	  web_send("P1.6 0", CONTROL);
 	  green_led = false;
 	}
       }

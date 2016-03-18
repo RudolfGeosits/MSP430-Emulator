@@ -29,12 +29,13 @@
 #include "../utilities.h"
 
 // USCI_Ax Control Register 0
-typedef struct Ctl0 {
-  bool UCPEN;        // Parity Enable: Disabled (0) Enabled (1)
-  bool UCPAR;        // Parity Select: Odd (0) Even (1)
-  bool UCMSB;        // MSB first: LSB first (0) MSB first (1)
-  bool UC7BIT;       // Char Len: 8-bit (0) 7-bit (1)
-  bool UCSPB;        // Stop bit select: One STP bits (0) Two STP bits (1)
+typedef struct Ctl0 
+{
+  bool UCPEN;   // Parity Enable: Disabled (0) Enabled (1)
+  bool UCPAR;   // Parity Select: Odd (0) Even (1)
+  bool UCMSB;   // MSB first: LSB first (0) MSB first (1)
+  bool UC7BIT;  // Char Len: 8-bit (0) 7-bit (1)
+  bool UCSPB;   // Stop bit select: One STP bits (0) Two STP bits (1)
  
   // USCI Mode - When UCSYNC = 0, its asynchronous mode
   // UART Mode (00)  
@@ -57,7 +58,7 @@ typedef struct Ctl1 {
 
   // dormant. Puts SCI into sleep mode: 
   // 0 - Not dormant. All received chars will set UCAxRXIFG
-  // 1 - Dormant. Only chars that are preceded by an idle line or addr bit 
+  // 1 - Dormant. Only chars that are preceded by an idle line or addr bit
   bool UCDORM : 1;
 
   // Transmit address, Next frame to be transmitted will be marked as address
@@ -74,7 +75,8 @@ typedef struct Ctl1 {
   bool UCSWRST : 1;  
 } Ctl1;
 
-typedef struct Usci {
+typedef struct Usci 
+{
   // USCI_A0 Module Register Pointers
   uint8_t *UCA0CTL0;
   uint8_t *UCA0CTL1;

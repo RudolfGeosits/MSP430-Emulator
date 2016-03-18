@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
   Debugger *deb = NULL;
 
   emu->cpu = (Cpu *) calloc( 1, sizeof(Cpu) );
-  emu->cpu->p1 = (Port *) calloc ( 1, sizeof(Port) );
+  emu->cpu->p1 = (Port_1 *) calloc ( 1, sizeof(Port_1) );
   emu->cpu->usci = (Usci *) calloc ( 1, sizeof(Usci) );  
 
   emu->debugger = (Debugger *) calloc (1, sizeof(Debugger) );

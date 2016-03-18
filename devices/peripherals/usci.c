@@ -105,7 +105,7 @@ void handle_usci (Emulator *emu)
   Cpu *cpu = emu->cpu;
   Debugger *deb = emu->debugger;
   Usci *usci = cpu->usci;
-  
+
   uint8_t c = *usci->UCA0TXBUF;
   unsigned char str[2];
   str[0] = c;
@@ -157,6 +157,4 @@ void setup_usci (Emulator *emu)
 
   usci->IFG2  = (uint8_t *) get_addr_ptr(IFG2_VLOC);
   *usci->IFG2 |= TXIFG;
-
-  //open_pty(emu);
 }

@@ -35,7 +35,7 @@
 typedef struct Emulator Emulator;
 
 typedef struct Cpu Cpu;
-typedef struct Port Port;
+typedef struct Port_1 Port_1;
 typedef struct Usci Usci;
 typedef struct Status_reg Status_reg;
 

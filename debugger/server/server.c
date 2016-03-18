@@ -30,6 +30,7 @@ int callback_emu (struct libwebsocket_context *this,
 			 void *user, void *in, size_t len)
 {
   Cpu *cpu = emu->cpu;
+  Port_1 *p1 = emu->cpu->p1;
   Debugger *deb = emu->debugger;
 
   static FILE *fp = NULL;
@@ -54,14 +55,14 @@ int callback_emu (struct libwebsocket_context *this,
       static bool serial = false;
 
       // P1.0 ON (launchpad red LED)
-      if (P1DIR_0 && P1OUT_0) {
+      if (p1->DIR_0 && p1->OUT_0) {
 	if (red_led == false) {
 	  web_send("P1.0 1", CONTROL);
 	  red_led = true;
 	}
       }
       // P1.0 OFF (launchpad red LED)
-      else if (P1DIR_0 && !P1OUT_0) {
+      else if (p1->DIR_0 && !p1->OUT_0) {
 	if (red_led == true) {
 	  web_send("P1.0 0", CONTROL);
 	  red_led = false;
@@ -69,25 +70,25 @@ int callback_emu (struct libwebsocket_context *this,
       }
 
       // P1.1 ON
-      if (P1DIR_1 && P1OUT_1) {
+      if (p1->DIR_1 && p1->OUT_1) {
 	web_send("P1.1 1", CONTROL);
       }
       // P1.1 OFF
-      else if (P1DIR_1 && !P1OUT_1) {
+      else if (p1->DIR_1 && !p1->OUT_1) {
 	web_send("P1.1 0", CONTROL);
       }
 
       // P1.2 ON
-      if (P1DIR_2 && P1OUT_2) {
+      if (p1->DIR_2 && p1->OUT_2) {
 	web_send("P1.2 1", CONTROL);
       }
       // P1.2 OFF
-      else if (P1DIR_2 && !P1OUT_2) {
+      else if (p1->DIR_2 && !p1->OUT_2) {
 	web_send("P1.2 0", CONTROL);
       }
 
       // 1.6 ON (launchpad green LED)
-      if (P1DIR_6 && P1OUT_6) {
+      if (p1->DIR_6 && p1->OUT_6) {
 	if (green_led == false) {
 	  web_send("P1.6 1", CONTROL);
 	  green_led = true;
@@ -95,7 +96,7 @@ int callback_emu (struct libwebsocket_context *this,
       }
     
       // 1.6 OFF (launchpad green LED) 
-      else if (P1DIR_6 && !P1OUT_6) {
+      else if (p1->DIR_6 && !p1->OUT_6) {
 	if (green_led == true) {
 	  web_send("P1.6 0", CONTROL);
 	  green_led = false;

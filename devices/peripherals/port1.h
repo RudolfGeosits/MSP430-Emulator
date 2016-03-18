@@ -22,19 +22,9 @@
 #include "../cpu/registers.h"
 #include "../utilities.h"
 
-/* Peripherals activation flags */
-bool P1DIR_0, P1OUT_0, P1IFG_0, P1IE_0;
-bool P1DIR_1, P1OUT_1, P1IFG_1, P1IE_1;
-bool P1DIR_2, P1OUT_2, P1IFG_2, P1IE_2;
-bool P1DIR_3, P1OUT_3, P1IFG_3, P1IE_3;
-bool P1DIR_4, P1OUT_4, P1IFG_4, P1IE_4;
-bool P1DIR_5, P1OUT_5, P1IFG_5, P1IE_5;
-bool P1DIR_6, P1OUT_6, P1IFG_6, P1IE_6;
-bool P1DIR_7, P1OUT_7, P1IFG_7, P1IE_7;
-
-typedef struct Port {
+typedef struct Port_1 {
   // Peripheral register pointers
-
+  
   // Port 1        = r/w =   = reset? =
   uint8_t *IN;   /* r          -      */
   uint8_t *OUT;  /* r/w     unchanged */
@@ -45,7 +35,18 @@ typedef struct Port {
   uint8_t *SEL;  /* r/w     PUC reset */
   uint8_t *SEL2; /* r/w     PUC reset */
   uint8_t *REN;  /* r/w     PUC reset */
-} Port;
+
+  // Peripherals activation flags
+  bool DIR_0, OUT_0, IFG_0, IE_0, SEL_0, SEL2_0;
+  bool DIR_1, OUT_1, IFG_1, IE_1, SEL_1, SEL2_1;
+  bool DIR_2, OUT_2, IFG_2, IE_2, SEL_2, SEL2_2;
+  bool DIR_3, OUT_3, IFG_3, IE_3, SEL_3, SEL2_3;
+  bool DIR_4, OUT_4, IFG_4, IE_4, SEL_4, SEL2_4;
+  bool DIR_5, OUT_5, IFG_5, IE_5, SEL_5, SEL2_5;
+  bool DIR_6, OUT_6, IFG_6, IE_6, SEL_6, SEL2_6;
+  bool DIR_7, OUT_7, IFG_7, IE_7, SEL_7, SEL2_7;
+
+} Port_1;
 
 void setup_port_1(Emulator *emu);
 void handle_port_1(Emulator *emu);

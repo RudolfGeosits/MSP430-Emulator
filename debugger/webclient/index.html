@@ -47,23 +47,60 @@
 	 var P1_6_LED_image = new Raster('P1_6_LED', IMG_BASE.x + 84, IMG_BASE.y + 361);
 	 P1_6_LED_image.visible = false;
 
-	 // Pinouts
-	 var line = new Path.Line(new Point(IMG_BASE.x + 16, 
-					    IMG_BASE.y + 183),
-				  new Point(IMG_BASE.x + 0, 
-					    IMG_BASE.y + 183)
-	 );
-
-	 line.strokeColor = 'grey';
-
-	 var P1_text = new PointText({
+	 // Pin Output values
+	 var P1_0_value_text = new PointText({
+	     point: [IMG_BASE.x + 100, IMG_BASE.y + 190],
 	     content: '0',
-	     fontSize: 17
+	     fontSize: 14,
+	     fontWeight: 'bold',
+	     fillColor: 'white',
+	     fontFamily: 'Terminal',
 	 });
-	 P1_text.fontFamily = 'Terminal';
-	 P1_text.position = new Point(IMG_BASE.x - 10, 
-				      IMG_BASE.y + 183);
 
+	 var P1_1_value_text = new PointText({
+	     point: [IMG_BASE.x + 100, IMG_BASE.y + 205],
+	     content: '0',
+	     fontSize: 14,
+	     fontWeight: 'bold',
+	     fillColor: 'white',
+	     fontFamily: 'Terminal',
+	 });
+
+	 var P1_2_value_text = new PointText({
+	     point: [IMG_BASE.x + 100, IMG_BASE.y + 220],
+	     content: '0',
+	     fontSize: 14,
+	     fontWeight: 'bold',
+	     fillColor: 'white',
+	     fontFamily: 'Terminal',
+	 });
+
+	 var P1_3_value_text = new PointText({
+	     point: [IMG_BASE.x + 100, IMG_BASE.y + 235],
+	     content: '0',
+	     fontSize: 14,
+	     fontWeight: 'bold',
+	     fillColor: 'white',
+	     fontFamily: 'Terminal',
+	 });
+
+	 var P1_4_value_text = new PointText({
+	     point: [IMG_BASE.x + 100, IMG_BASE.y + 250],
+	     content: '0',
+	     fontSize: 14,
+	     fontWeight: 'bold',
+	     fillColor: 'white',
+	     fontFamily: 'Terminal',
+	 });
+
+	 var P1_5_value_text = new PointText({
+	     point: [IMG_BASE.x + 100, IMG_BASE.y + 265],
+	     content: '0',
+	     fontSize: 14,
+	     fontWeight: 'bold',
+	     fillColor: 'white',
+	     fontFamily: 'Terminal',
+	 });
 
 	 var stdout = document.getElementById('console');
 	 stdout.value = "";
@@ -213,16 +250,16 @@
 	     else {
 		 switch (msg) {
 		     case "P1.0 1": {
-			 P1_0_LED_image.visible = true;
-			 
-			 P1_text.content = '1';
+			 P1_0_LED_image.visible = true;			 
+			 P1_0_value_text.content = '1';
+
 			 break;
 		     }
 			 
 		     case "P1.0 0": {
 			 P1_0_LED_image.visible = false;
+			 P1_0_value_text.content = '0';
 
-			 P1_text.content = '0';
 			 break;
 		     }
 			 
@@ -249,11 +286,15 @@
 		     // P1.6 OUTPUT
 		     case "P1.6 1": {
 			 P1_6_LED_image.visible = true;
+			 //P1_6_value_text.content = '1';
+
 			 break;
 		     }
 
 		     case "P1.6 0": {
 			 P1_6_LED_image.visible = false;
+			 //P1_6_value_text.content = '0';
+
 			 break;
 		     }
 			 
@@ -318,7 +359,7 @@
 	<input type="text" id="serial_in" width="80" class="SERIALIN">
 	<button id="show_serial_button">Show Serial Console</button>
 	
-	<img id="msp" src="msp.png" alt="msp" hidden="true"></img>
+	<img id="msp" src="newmsp.png" alt="msp" hidden="true"></img>
 	<img id="button_down" src="pushed.png" alt="button_down" hidden="true"></img>
 	<img id="P1_0_LED" src="P1_0_LED.png" alt="P1_0_LED" hidden="true"></img>
 	<img id="P1_6_LED" src="P1_6_LED.png" alt="P1_6_LED" hidden="true"></img>

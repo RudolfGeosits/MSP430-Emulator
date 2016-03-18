@@ -52,5 +52,5 @@ port1.o : devices/peripherals/port1.c
 	cc -c devices/peripherals/port1.c
 
 clean :
-	rm main.o server.o utilities.o registers.o memspace.o debugger.o disassembler.o register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o tmp.* *~
+	rm main.o server.o utilities.o registers.o memspace.o debugger.o disassembler.o register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o tmp.* *~ devices/*~ debugger/*~ \
 

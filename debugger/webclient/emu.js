@@ -252,13 +252,14 @@ ws.onmessage =  function (event) {
     }
     else {
 	switch (msg) {
+
+	// P1.0 OUTPUT
 	case "P1.0 1": {
 	    P1_0_LED_image.visible = true;			 
 	    P1_0_value_text.content = '1';
 
 	    break;
-	}
-	    
+	}	    
 	case "P1.0 0": {
 	    P1_0_LED_image.visible = false;
 	    P1_0_value_text.content = '0';
@@ -266,34 +267,73 @@ ws.onmessage =  function (event) {
 	    break;
 	}
 	    
-	    // P1.1 OUTPUT
+	// P1.1 OUTPUT
 	case "P1.1 1": {
-	    console.log("P1.1: HIGH");
+	    P1_1_value_text.content = '1';
+
 	    break;
 	}
 	case "P1.1 0": {
-	    console.log("P1.1: LOW");
+	    P1_1_value_text.content = '0';
+
 	    break;
 	}
 
-	    // P1.2 OUTPUT
+	// P1.2 OUTPUT
 	case "P1.2 1": {
-	    console.log("P1.2: HIGH");
+	    P1_2_value_text.content = '1';
+
 	    break;
 	}
 	case "P1.2 0": {
-	    console.log("P1.2: LOW");
+	    P1_2_value_text.content = '0';
+
 	    break;
 	}
 
-	    // P1.6 OUTPUT
+	// P1.3 OUTPUT
+	case "P1.3 1": {
+	    P1_3_value_text.content = '1';
+
+	    break;
+	}
+	case "P1.3 0": {
+	    P1_3_value_text.content = '0';
+
+	    break;
+	}
+
+	// P1.4 OUTPUT
+	case "P1.4 1": {
+	    P1_4_value_text.content = '1';
+
+	    break;
+	}
+	case "P1.4 0": {
+	    P1_4_value_text.content = '0';
+
+	    break;
+	}
+
+	// P1.5 OUTPUT
+	case "P1.5 1": {
+	    P1_5_value_text.content = '1';
+
+	    break;
+	}
+	case "P1.5 0": {
+	    P1_5_value_text.content = '0';
+
+	    break;
+	}
+
+	// P1.6 OUTPUT
 	case "P1.6 1": {
 	    P1_6_LED_image.visible = true;
 	    P1_6_value_text.content = '1';
 
 	    break;
 	}
-
 	case "P1.6 0": {
 	    P1_6_LED_image.visible = false;
 	    P1_6_value_text.content = '0';
@@ -301,6 +341,18 @@ ws.onmessage =  function (event) {
 	    break;
 	}
 	    
+	// P1.7 OUTPUT
+	case "P1.7 1": {
+	    P1_7_value_text.content = '1';
+
+	    break;
+	}
+	case "P1.7 0": {
+	    P1_7_value_text.content = '0';
+
+	    break;
+	}
+
 	case "_STDOUT_": {
 	    stdout_mode = true;
 	    break;

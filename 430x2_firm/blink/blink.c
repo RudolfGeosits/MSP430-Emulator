@@ -129,7 +129,7 @@ void main(void){
   
   while(1){
     P1OUT ^= BIT0 | BIT6;
-    for(i = 0;i < 10;i++);
+    for(i = 0;i < 33000;i++);
   }
  
 }

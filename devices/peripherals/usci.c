@@ -105,23 +105,35 @@ void handle_usci (Emulator *emu)
   Cpu *cpu = emu->cpu;
   Debugger *deb = emu->debugger;
   Usci *usci = cpu->usci;
-
-  uint8_t c = *usci->UCA0TXBUF;
-  unsigned char str[2];
-  str[0] = c;
-  str[1] = 0;
-
-  if (c & 0xFF) {
-    if (deb->web_interface) {
-      web_send(str, SERIAL);
-      //write(sp, usci->UCA0TXBUF, 1);
+  Port_1 *p1 = cpu->p1;
+  
+  static bool uart_active = false;
+  
+  // Handle sending from TX pin (P1.2) 
+  if (p1->SEL_2 && p1->SEL2_2) {
+    if (uart_active == false) {
+      puts("UART TX pin activated on P1.2");
+      uart_active = true;
     }
-    else if (deb->console_interface) {
-      //write(sp, usci->UCA0TXBUF, 1);
-    }
+    
+    uint8_t c = *usci->UCA0TXBUF;
+    unsigned char str[2];
+    str[0] = c;
+    str[1] = 0;
 
-    *usci->UCA0TXBUF = 0;
+    if (c & 0xFF) {
+      if (deb->web_interface) {
+	web_send(str, SERIAL);
+	//write(sp, usci->UCA0TXBUF, 1);
+      }
+      else if (deb->console_interface) {
+	//write(sp, usci->UCA0TXBUF, 1);
+      }
+
+      *usci->UCA0TXBUF = 0;
+    }
   }
+
 }
 
 void setup_usci (Emulator *emu) 

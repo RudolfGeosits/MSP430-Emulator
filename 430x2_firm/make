@@ -9,3 +9,5 @@ msp430-gcc -mmcu=msp430g2553 spi/master.c -o spi/master.elf
 
 msp430-gcc -g -mmcu=msp430g2553 servo/main.c -o servo/main.elf
 msp430-objcopy -O binary servo/main.elf ../servo.bin
+
+msp430-gcc -g -mmcu=msp430g2553 port1/main.c -o port1/main.elf

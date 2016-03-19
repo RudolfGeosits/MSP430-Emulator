@@ -41,9 +41,8 @@ void handle_port_1 (Emulator *emu)
   Cpu *cpu = emu->cpu;
   Port_1 *p = cpu->p1;
 
-  ///
-
-  // Handler P1.0 
+  //////////////////// P1.0 ////////////////////////
+ 
   if (*p->DIR & 0x01) {    // Check Direction
     p->DIR_0 = true;       // Set P1DIR.0 flag
     if (*p->OUT & 0x01) {  // Check OUTPUT 
@@ -57,11 +56,14 @@ void handle_port_1 (Emulator *emu)
     p->DIR_0 = false;
   }
   
-  if (*p->IE & 0x01) {     // Check if Interrupt Enabled for pin 
+  /// Check if Interrupt Enabled for pin 
+  if (*p->IE & 0x01) {     
     p->IE_0 = true;
 
-    if (*p->IFG & 0x01) {  // Check For Interrupt Pending 
-      p->IFG_0 = true;     // Set p->IFG.0 flag indicating INT 
+    // Check For Interrupt Pending 
+    if (*p->IFG & 0x01) {  
+      // Set p->IFG.0 flag indicating INT 
+      p->IFG_0 = true;
     }
     else {
       p->IFG_0 = false;
@@ -70,30 +72,41 @@ void handle_port_1 (Emulator *emu)
   else {
     p->IE_0 = false;
   }  
-
+  
   // Check primary select
   if (*p->SEL & 0x01) {
+    if (p->SEL_0 == false) {
+      puts("P1_SEL_0 = 1");
+    }
+    
     p->SEL_0 = true;
-    //puts("P1_SEL_0 = 1");
   }
   else {
+    if (p->SEL_0 == true) {
+      puts("P1_SEL_0 = 0");
+    }
+
     p->SEL_0 = false;
-    //puts("P1_SEL_0 = 0");
   }
 
   // Check secondary select
   if (*p->SEL2 & 0x01) {
+    if (p->SEL2_0 == false) {
+      puts("P1_SEL2_0 = 1");
+    }
+    
     p->SEL2_0 = true;
-    //puts("P1_SEL2_0 = 1");
   }
   else {
-    p->SEL2_0 = false;    
-    //puts("P1_SEL2_0 = 0");
-  }
-  ///
+    if (p->SEL2_0 == true) {
+      puts("P1_SEL2_0 = 0");
+    }
 
-  ///
-  // Handler P1.1 
+    p->SEL2_0 = false;    
+  }
+
+  //////////////////// P1.1 ////////////////////////
+
   if (*p->DIR & 0x02) {
     p->DIR_1 = true;
     if (*p->OUT & 0x02) {
@@ -124,15 +137,17 @@ void handle_port_1 (Emulator *emu)
   // Check primary select
   if (*p->SEL & 0x02) {
     if (p->SEL_1 == false) {
-      p->SEL_1 = true;
       puts("P1_SEL_1 = 1");
     }
+
+    p->SEL_1 = true;
   }
   else {
     if (p->SEL_1 == true) {
-      p->SEL_1 = false;
       puts("P1_SEL_1 = 0");
     }
+
+    p->SEL_1 = false;
   }
 
   // Check secondary select
@@ -149,9 +164,8 @@ void handle_port_1 (Emulator *emu)
     }
   }
 
-  ///
+  //////////////////// P1.2 ////////////////////////
 
-  // Handler P1.2 
   if (*p->DIR & 0x04) {
     p->DIR_2 = true;
     if (*p->OUT & 0x04) {
@@ -178,6 +192,40 @@ void handle_port_1 (Emulator *emu)
   else {
     p->IE_2 = false;
   }
+
+  // Check primary select
+  if (*p->SEL & 0x04) {
+    if (p->SEL_2 == false) {
+      puts("P1_SEL_2 = 1");
+    }
+    
+    p->SEL_2 = true;
+  }
+  else {
+    if (p->SEL_2 == true) {
+      puts("P1_SEL_2 = 0");
+    }
+
+    p->SEL_2 = false;
+  }
+
+  // Check secondary select
+  if (*p->SEL2 & 0x04) {
+    if (p->SEL2_2 == false) {
+      puts("P1_SEL2_2 = 1");
+    }
+    
+    p->SEL2_2 = true;
+  }
+  else {
+    if (p->SEL2_2 == true) {
+      puts("P1_SEL2_2 = 0");
+    }
+
+    p->SEL2_2 = false;    
+  }
+
+  ////////////////////////////////////////////////
 
   // Handler P1.3 
   if (*p->DIR & 0x08) {
@@ -207,6 +255,8 @@ void handle_port_1 (Emulator *emu)
     p->IE_3 = false;
   }
 
+  ///////////////////////////////////////////////////////////////
+
   // Handler P1.4 
   if (*p->DIR & 0x10) {
     p->DIR_4 = true;
@@ -235,6 +285,7 @@ void handle_port_1 (Emulator *emu)
     p->IE_4 = false;
   }
 
+  /////////////////////////////////////////////////
 
   // Handler P1.5 
   if (*p->DIR & 0x20) {
@@ -264,6 +315,8 @@ void handle_port_1 (Emulator *emu)
     p->IE_5 = false;
   }
 
+  ////////////////////////////////////////////////////
+
   // Handler P1.6 
   if (*p->DIR & 0x40) {
     p->DIR_6 = true;
@@ -291,6 +344,8 @@ void handle_port_1 (Emulator *emu)
   else {
     p->IE_6 = false;
   }
+
+  ////////////////////////////////////////////////////
 
   // Handler P1.7 
   if (*p->DIR & 0x80) {
@@ -346,6 +401,31 @@ void setup_port_1 (Emulator *emu)
   *(p->SEL  = (uint8_t *) get_addr_ptr(SEL_VLOC))  = 0;
   *(p->SEL2 = (uint8_t *) get_addr_ptr(SEL2_VLOC)) = 0;
   *(p->REN  = (uint8_t *) get_addr_ptr(REN_VLOC))  = 0;
+
+  
+  p->DIR_0 = false; p->OUT_0 = false; p->IFG_0 = false; 
+  p->IE_0 = false; p->SEL_0 = false; p->SEL2_0 = false;
+  
+  p->DIR_1 = false; p->OUT_1 = false; p->IFG_1 = false; 
+  p->IE_1 = false; p->SEL_1 = false; p->SEL2_1 = false;
+  
+  p->DIR_2 = false; p->OUT_2 = false; p->IFG_2 = false; 
+  p->IE_2 = false; p->SEL_2 = false; p->SEL2_2 = false;
+  
+  p->DIR_3 = false; p->OUT_3 = false; p->IFG_3 = false; 
+  p->IE_3 = false; p->SEL_3 = false; p->SEL2_3 = false;
+  
+  p->DIR_4 = false; p->OUT_4 = false; p->IFG_4 = false; 
+  p->IE_4 = false; p->SEL_4 = false; p->SEL2_4 = false;
+  
+  p->DIR_5 = false; p->OUT_5 = false; p->IFG_5 = false; 
+  p->IE_5 = false; p->SEL_5 = false; p->SEL2_5 = false;
+  
+  p->DIR_6 = false; p->OUT_6 = false; p->IFG_6 = false; 
+  p->IE_6 = false; p->SEL_6 = false; p->SEL2_6 = false;
+  
+  p->DIR_7 = false; p->OUT_7 = false; p->IFG_7 = false; 
+  p->IE_7 = false; p->SEL_7 = false; p->SEL2_7 = false;
 }
 
 /* POWER UP CLEAR (PUC)      

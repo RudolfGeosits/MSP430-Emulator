@@ -20,6 +20,10 @@
 
 #define TXIFG 0x02
 #define RXIFG 0x01
+#define HIGH  1
+#define LOW   0
+#define OUT   1
+#define IN    0
 
 struct libwebsocket *ws = NULL;
 Emulator *emu = NULL;
@@ -50,58 +54,144 @@ int callback_emu (struct libwebsocket_context *this,
     }
 
     case LWS_CALLBACK_SERVER_WRITEABLE: {
-      static bool red_led = false;
-      static bool green_led = false;
+      static bool p1_0_on = false;
+      static bool p1_1_on = false;
+      static bool p1_2_on = false;
+      static bool p1_3_on = false;
+      static bool p1_4_on = false;
+      static bool p1_5_on = false;
+      static bool p1_6_on = false;
+      static bool p1_7_on = false;
+
       static bool serial = false;
 
-      // P1.0 ON (launchpad red LED)
-      if (p1->DIR_0 && p1->OUT_0) {
-	if (red_led == false) {
-	  web_send("P1.0 1", CONTROL);
-	  red_led = true;
+      // P1.0 ON/OFF
+      if (p1->DIR_0 == OUT) {
+	if (p1->OUT_0 == HIGH) {
+	  if (p1_0_on == false) {
+	    web_send("P1.0 1", CONTROL);
+	    p1_0_on = true;
+	  }
 	}
-      }
-      // P1.0 OFF (launchpad red LED)
-      else if (p1->DIR_0 && !p1->OUT_0) {
-	if (red_led == true) {
-	  web_send("P1.0 0", CONTROL);
-	  red_led = false;
+	else if (p1->OUT_0 == LOW) {
+	  if (p1_0_on == true) {
+	    web_send("P1.0 0", CONTROL);
+	    p1_0_on = false;
+	  }
 	}
       }
 
-      // P1.1 ON
-      if (p1->DIR_1 && p1->OUT_1) {
-	web_send("P1.1 1", CONTROL);
-      }
-      // P1.1 OFF
-      else if (p1->DIR_1 && !p1->OUT_1) {
-	web_send("P1.1 0", CONTROL);
-      }
-
-      // P1.2 ON
-      if (p1->DIR_2 && p1->OUT_2) {
-	web_send("P1.2 1", CONTROL);
-      }
-      // P1.2 OFF
-      else if (p1->DIR_2 && !p1->OUT_2) {
-	web_send("P1.2 0", CONTROL);
-      }
-
-      // 1.6 ON (launchpad green LED)
-      if (p1->DIR_6 && p1->OUT_6) {
-	if (green_led == false) {
-	  web_send("P1.6 1", CONTROL);
-	  green_led = true;
+      // P1.1 ON/OFF
+      if (p1->DIR_1 == OUT) {
+	if (p1->OUT_1 == HIGH) {	  
+	  if (p1_1_on == false) {
+	    web_send("P1.1 1", CONTROL);
+	    p1_1_on = true;
+	  }
+	}
+	else if (p1->OUT_1 == LOW) {
+	  if (p1_1_on == true) {
+	    web_send("P1.1 0", CONTROL);
+	    p1_1_on = false;
+	  }
 	}
       }
-    
-      // 1.6 OFF (launchpad green LED) 
-      else if (p1->DIR_6 && !p1->OUT_6) {
-	if (green_led == true) {
-	  web_send("P1.6 0", CONTROL);
-	  green_led = false;
+
+      // P1.2 ON/OFF
+      if (p1->DIR_2 == OUT) {
+	if (p1->OUT_2 == HIGH) {	  
+	  if (p1_2_on == false) {
+	    web_send("P1.2 1", CONTROL);
+	    p1_2_on = true;
+	  }
+	}
+	else if (p1->OUT_2 == LOW) {
+	  if (p1_2_on == true) {
+	    web_send("P1.2 0", CONTROL);
+	    p1_2_on = false;
+	  }
 	}
       }
+
+      // P1.3 ON/OFF
+      if (p1->DIR_3 == OUT) {
+	if (p1->OUT_3 == HIGH) {	  
+	  if (p1_3_on == false) {
+	    web_send("P1.3 1", CONTROL);
+	    p1_3_on = true;
+	  }
+	}
+	else if (p1->OUT_3 == LOW) {
+	  if (p1_3_on == true) {
+	    web_send("P1.3 0", CONTROL);
+	    p1_3_on = false;
+	  }
+	}
+      }
+
+      // P1.4 ON/OFF
+      if (p1->DIR_4 == OUT) {
+	if (p1->OUT_4 == HIGH) {	  
+	  if (p1_4_on == false) {
+	    web_send("P1.4 1", CONTROL);
+	    p1_4_on = true;
+	  }
+	}
+	else if (p1->OUT_4 == LOW) {
+	  if (p1_4_on == true) {
+	    web_send("P1.4 0", CONTROL);
+	    p1_4_on = false;
+	  }
+	}
+      }
+
+      // P1.5 ON/OFF
+      if (p1->DIR_5 == OUT) {
+	if (p1->OUT_5 == HIGH) {	  
+	  if (p1_5_on == false) {
+	    web_send("P1.5 1", CONTROL);
+	    p1_5_on = true;
+	  }
+	}
+	else if (p1->OUT_5 == LOW) {
+	  if (p1_5_on == true) {
+	    web_send("P1.5 0", CONTROL);
+	    p1_5_on = false;
+	  }
+	}
+      }
+      
+      // P1.6 ON/OFF
+      if (p1->DIR_6 == OUT) {
+	if (p1->OUT_6 == HIGH) {	  
+	  if (p1_6_on == false) {
+	    web_send("P1.6 1", CONTROL);
+	    p1_6_on = true;
+	  }
+	}
+	else if (p1->OUT_6 == LOW) {
+	  if (p1_6_on == true) {
+	    web_send("P1.6 0", CONTROL);
+	    p1_6_on = false;
+	  }
+	}
+      }
+
+      // P1.7 ON/OFF
+      if (p1->DIR_7 == OUT) {
+	if (p1->OUT_7 == HIGH) {	  
+	  if (p1_7_on == false) {
+	    web_send("P1.7 1", CONTROL);
+	    p1_7_on = true;
+	  }
+	}
+	else if (p1->OUT_7 == LOW) {
+	  if (p1_7_on == true) {
+	    web_send("P1.7 0", CONTROL);
+	    p1_7_on = false;
+	  }
+	}
+      }      
       
       libwebsocket_callback_on_writable(this, wsi);
       break;

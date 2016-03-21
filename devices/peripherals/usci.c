@@ -115,25 +115,34 @@ void handle_usci (Emulator *emu)
       puts("UART TX pin activated on P1.2");
       uart_active = true;
     }
-    
-    uint8_t c = *usci->UCA0TXBUF;
-    unsigned char str[2];
-    str[0] = c;
-    str[1] = 0;
 
-    if (c & 0xFF) {
-      if (deb->web_interface) {
-	web_send(str, SERIAL);
-	//write(sp, usci->UCA0TXBUF, 1);
-      }
-      else if (deb->console_interface) {
-	//write(sp, usci->UCA0TXBUF, 1);
+    // UCAxTXIFG
+    if (*usci->IFG2 & TXIFG) {
+      uint8_t c = *usci->UCA0TXBUF;
+      unsigned char str[2];
+      str[0] = c;
+      str[1] = 0;
+
+      *usci->IFG2 &= ~TXIFG;
+
+      if (c & 0xFF) {
+	if (deb->web_interface) {
+	  web_send(str, SERIAL);
+	  //write(sp, usci->UCA0TXBUF, 1);
+	}
+	else if (deb->console_interface) {
+	  //write(sp, usci->UCA0TXBUF, 1);
+	}
+
+	*usci->UCA0TXBUF = 0;
       }
 
-      *usci->UCA0TXBUF = 0;
+      //*usci->IFG2 &= TXIFG;
+      *usci->IFG2 |= TXIFG;
     }
   }
 
+  return;
 }
 
 void setup_usci (Emulator *emu) 
@@ -169,4 +178,5 @@ void setup_usci (Emulator *emu)
 
   usci->IFG2  = (uint8_t *) get_addr_ptr(IFG2_VLOC);
   *usci->IFG2 |= TXIFG;
+  *usci->IFG2 &= ~RXIFG;
 }

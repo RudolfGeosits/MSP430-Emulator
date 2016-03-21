@@ -107,6 +107,7 @@ void handle_port_1 (Emulator *emu)
 
   //////////////////// P1.1 ////////////////////////
 
+  // Check Direction and IN/OUT
   if (*p->DIR & 0x02) {
     p->DIR_1 = true;
     if (*p->OUT & 0x02) {
@@ -120,6 +121,7 @@ void handle_port_1 (Emulator *emu)
     p->DIR_1 = false;
   }
 
+  // Check Interrupts
   if (*p->IE & 0x02) {
     p->IE_1 = true;
 

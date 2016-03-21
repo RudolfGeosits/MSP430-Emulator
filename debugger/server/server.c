@@ -28,6 +28,60 @@
 struct libwebsocket *ws = NULL;
 Emulator *emu = NULL;
 
+uint8_t *data;
+int lent;
+
+void *thrd (void *ctxt) 
+{
+  Usci *usci = (Usci *)ctxt;
+  int i, j = 0;
+  int len = lent;
+  uint8_t *bytes = data;
+
+  //printf("len is %d\nstr is %s\n", len, bytes);
+
+  while (true) {
+    usleep(333);
+    while (*usci->IFG2 & RXIFG);
+    uint8_t thing = *(bytes);
+
+    if (thing == '\n') {                  
+      thing = '\r';
+    }                          
+    
+    //printf("Got 0x%02X '%c'\n", thing, thing);
+    
+    if (*bytes == '\\') {
+      ++bytes;
+      if (*bytes == 'h' || *bytes == 'H') {
+	++bytes;
+	
+	char buf[3] = {*bytes, *(bytes+1), 0};
+
+	//printf("%s - %s\n", buf, bytes);
+	thing = (uint8_t) strtoul(buf, NULL, 16);
+
+	++bytes;
+      }  
+    }	  
+
+    *usci->UCA0RXBUF = thing;    
+    *usci->IFG2 |= RXIFG;
+	    
+    //printf("\n0x%04X in UCA0RXBUF\n", (uint8_t)*usci->UCA0RXBUF);
+
+    //puts("waiting..");
+    while (*usci->IFG2 & RXIFG);
+    //puts("done");
+    //*usci->IFG2 |= RXIFG;
+    
+    if (*usci->UCA0RXBUF == '\r') break;
+    ++bytes;
+  }
+
+  return NULL;
+}
+
 int callback_emu (struct libwebsocket_context *this,
 			 struct libwebsocket *wsi,
 			 enum libwebsocket_callback_reasons reason,
@@ -39,6 +93,7 @@ int callback_emu (struct libwebsocket_context *this,
 
   static FILE *fp = NULL;
   static bool upload = false;
+  static bool serial = false;
 
   switch (reason) {
     case LWS_CALLBACK_ESTABLISHED: {
@@ -62,8 +117,6 @@ int callback_emu (struct libwebsocket_context *this,
       static bool p1_5_on = false;
       static bool p1_6_on = false;
       static bool p1_7_on = false;
-
-      static bool serial = false;
 
       // P1.0 ON/OFF
       if (p1->DIR_0 == OUT) {
@@ -213,43 +266,16 @@ int callback_emu (struct libwebsocket_context *this,
     }
 
     case LWS_CALLBACK_RECEIVE: {
-      static bool serial = false;
       char *buf = (char *)in;      
       
       if (serial) {
-	uint8_t *data = (uint8_t *) buf;
-	int i, j = 0;
+	lent = len;
+	data = (uint8_t *) in;
 
- 	//printf("len is %d\nstr is %s\n", len, data);
+	pthread_t t;                      	
 
-	for (i = 0;i < len;i++) {
-	  uint8_t thing = *(data + i);
-	  usleep(333);
-	  while (*cpu->usci->IFG2 & RXIFG) {j++;}
-	  
-	  if (thing == '\n') {                  
-	    thing = '\r';
-	  }                          
-
-	  //printf("Got 0x%02X (%c)\n", thing, thing);
-	  /*
-	    if (*data == '\\') { 
-	    //read(sp, data, 1);
-	    data += 1;
-
-	    if (*data == 'h') {
-	    //read(sp, data, 2);                                    
-
-	    //data[2] = 0;                         
-	    //*cpu->usci->UCA0RXBUF = (uint8_t) strtoul(data, NULL, 16);  
-	    }                                                     
-	    } 
-	  */
-	  //else {                                                                                  
-	  *cpu->usci->UCA0RXBUF = thing;
-	  //}                 
-	    
-	  *cpu->usci->IFG2 |= RXIFG;
+	if( pthread_create(&t, NULL, thrd, (void *)cpu->usci ) ) {
+	  fprintf(stderr, "Error creating thread\n");                    
 	}
 
 	serial = false;
@@ -288,6 +314,7 @@ int callback_emu (struct libwebsocket_context *this,
       }
 
       else if ( !strncmp((const char *)buf, (const char *)"_SERIAL_", sizeof("_SERIAL_")) ) {
+   	//puts("serial");
 	serial = true;
       }
 
@@ -347,7 +374,7 @@ void *web_server (void *ctxt)
     
   while (true) {
     libwebsocket_service(context, 10); // ms
-    usleep(1000);
+    //usleep(1000);
   }
 
   libwebsocket_context_destroy(context);

@@ -374,7 +374,7 @@ void *web_server (void *ctxt)
     
   while (true) {
     libwebsocket_service(context, 10); // ms
-    //usleep(1000);
+    usleep(1000);
   }
 
   libwebsocket_context_destroy(context);

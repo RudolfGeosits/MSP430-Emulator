@@ -4,7 +4,7 @@ MSP430 : main.o utilities.o server.o registers.o memspace.o debugger.o disassemb
 
 	cc -o MSP430 main.o server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o \
-	-lreadline -lwebsockets -lpthread
+	-lreadline -lwebsockets -lpthread -lrt
 
 main.o : main.c
 	cc -c main.c

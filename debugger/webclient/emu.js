@@ -1,5 +1,10 @@
+function sleep(delay) {
+    var start = new Date().getTime();
+    while (new Date().getTime() < start + delay);
+}
+
 // Websock Declarations
-var ws = new WebSocket('ws://127.0.0.1:9000', 'emu-protocol');
+var ws = new WebSocket("ws://127.0.0.1:9000", 'emu-protocol');
 //var ws = new WebSocket('ws://poorhackers.com:9000', 'emu-protocol');
 
 

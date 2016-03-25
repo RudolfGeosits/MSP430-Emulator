@@ -1,12 +1,11 @@
+var waiting = true;
+var ws;
+var listener;
+
 function sleep(delay) {
     var start = new Date().getTime();
     while (new Date().getTime() < start + delay);
 }
-
-// Websock Declarations
-var ws = new WebSocket("ws://127.0.0.1:9000", 'emu-protocol');
-//var ws = new WebSocket('ws://poorhackers.com:9000', 'emu-protocol');
-
 
 // Image Declarations
 var IMG_BASE = new Point(100, 10);
@@ -243,141 +242,154 @@ function onMouseUp (event) {
 
 var stdout_mode = false;
 var serial_mode = false;
-ws.onmessage =  function (event) {
+
+// Websock Declarations
+var listener = new WebSocket("ws://127.0.0.1:9000", 'emu-protocol');
+//var ws = new WebSocket('ws://poorhackers.com:9000', 'emu-protocol');
+
+listener.onmessage = function (event) {
     var msg = event.data;
+    console.log("Here got " + msg);
+    ws = new WebSocket("ws://127.0.0.1:9001", 'emu-protocol');
+    waiting = false;
 
-    if (stdout_mode) {
-	print_console(msg);		 
-	stdout_mode = false;
-    }
-    
-    else if (serial_mode) {
-	print_serial(msg);
-	serial_mode = false;
-    }
-    else {
-	switch (msg) {
+    ws.onmessage =  function (event) {
+	var msg = event.data;
 
-	// P1.0 OUTPUT
-	case "P1.0 1": {
-	    P1_0_LED_image.visible = true;			 
-	    P1_0_value_text.content = '1';
-
-	    break;
-	}	    
-	case "P1.0 0": {
-	    P1_0_LED_image.visible = false;
-	    P1_0_value_text.content = '0';
-
-	    break;
+	if (stdout_mode) {
+	    print_console(msg);		 
+	    stdout_mode = false;
 	}
-	    
-	// P1.1 OUTPUT
-	case "P1.1 1": {
-	    P1_1_value_text.content = '1';
-
-	    break;
+	
+	else if (serial_mode) {
+	    print_serial(msg);
+	    serial_mode = false;
 	}
-	case "P1.1 0": {
-	    P1_1_value_text.content = '0';
+	else {
+	    switch (msg) {
 
-	    break;
+		// P1.0 OUTPUT
+	    case "P1.0 1": {
+		P1_0_LED_image.visible = true;			 
+		P1_0_value_text.content = '1';
+
+		break;
+	    }	    
+	    case "P1.0 0": {
+		P1_0_LED_image.visible = false;
+		P1_0_value_text.content = '0';
+
+		break;
+	    }
+		
+		// P1.1 OUTPUT
+	    case "P1.1 1": {
+		P1_1_value_text.content = '1';
+
+		break;
+	    }
+	    case "P1.1 0": {
+		P1_1_value_text.content = '0';
+
+		break;
+	    }
+
+		// P1.2 OUTPUT
+	    case "P1.2 1": {
+		P1_2_value_text.content = '1';
+
+		break;
+	    }
+	    case "P1.2 0": {
+		P1_2_value_text.content = '0';
+
+		break;
+	    }
+
+		// P1.3 OUTPUT
+	    case "P1.3 1": {
+		P1_3_value_text.content = '1';
+
+		break;
+	    }
+	    case "P1.3 0": {
+		P1_3_value_text.content = '0';
+
+		break;
+	    }
+
+		// P1.4 OUTPUT
+	    case "P1.4 1": {
+		P1_4_value_text.content = '1';
+
+		break;
+	    }
+	    case "P1.4 0": {
+		P1_4_value_text.content = '0';
+
+		break;
+	    }
+
+		// P1.5 OUTPUT
+	    case "P1.5 1": {
+		P1_5_value_text.content = '1';
+
+		break;
+	    }
+	    case "P1.5 0": {
+		P1_5_value_text.content = '0';
+
+		break;
+	    }
+
+		// P1.6 OUTPUT
+	    case "P1.6 1": {
+		P1_6_LED_image.visible = true;
+		P1_6_value_text.content = '1';
+
+		break;
+	    }
+	    case "P1.6 0": {
+		P1_6_LED_image.visible = false;
+		P1_6_value_text.content = '0';
+
+		break;
+	    }
+		
+		// P1.7 OUTPUT
+	    case "P1.7 1": {
+		P1_7_value_text.content = '1';
+
+		break;
+	    }
+	    case "P1.7 0": {
+		P1_7_value_text.content = '0';
+
+		break;
+	    }
+
+	    case "_STDOUT_": {
+		stdout_mode = true;
+		break;
+	    }
+
+	    case "_SERIAL_": {
+		serial_mode = true;
+		break;
+	    }
+
+		// Line of text for the console
+	    default: {
+		//print_console(msg);
+		break;
+	    }
+	    }
 	}
 
-	// P1.2 OUTPUT
-	case "P1.2 1": {
-	    P1_2_value_text.content = '1';
+	paper.view.update();
+    };
 
-	    break;
-	}
-	case "P1.2 0": {
-	    P1_2_value_text.content = '0';
-
-	    break;
-	}
-
-	// P1.3 OUTPUT
-	case "P1.3 1": {
-	    P1_3_value_text.content = '1';
-
-	    break;
-	}
-	case "P1.3 0": {
-	    P1_3_value_text.content = '0';
-
-	    break;
-	}
-
-	// P1.4 OUTPUT
-	case "P1.4 1": {
-	    P1_4_value_text.content = '1';
-
-	    break;
-	}
-	case "P1.4 0": {
-	    P1_4_value_text.content = '0';
-
-	    break;
-	}
-
-	// P1.5 OUTPUT
-	case "P1.5 1": {
-	    P1_5_value_text.content = '1';
-
-	    break;
-	}
-	case "P1.5 0": {
-	    P1_5_value_text.content = '0';
-
-	    break;
-	}
-
-	// P1.6 OUTPUT
-	case "P1.6 1": {
-	    P1_6_LED_image.visible = true;
-	    P1_6_value_text.content = '1';
-
-	    break;
-	}
-	case "P1.6 0": {
-	    P1_6_LED_image.visible = false;
-	    P1_6_value_text.content = '0';
-
-	    break;
-	}
-	    
-	// P1.7 OUTPUT
-	case "P1.7 1": {
-	    P1_7_value_text.content = '1';
-
-	    break;
-	}
-	case "P1.7 0": {
-	    P1_7_value_text.content = '0';
-
-	    break;
-	}
-
-	case "_STDOUT_": {
-	    stdout_mode = true;
-	    break;
-	}
-
-	case "_SERIAL_": {
-	    serial_mode = true;
-	    break;
-	}
-
-	    // Line of text for the console
-	default: {
-	    //print_console(msg);
-	    break;
-	}
-	}
-    }
-
-    paper.view.update();
-};
+}
 
 stdin.onkeydown = function auto_enter (event) {
     // On enter key press

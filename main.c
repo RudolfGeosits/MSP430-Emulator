@@ -41,6 +41,13 @@ int main(int argc, char *argv[])
   deb = emu->debugger;
 
   if (deb->web_interface == true) {
+    if (argv[1] == NULL) {
+      puts("Need port argument");
+      return(1);
+    }
+    
+    deb->ws_port = strtoul(argv[1], NULL, 10);
+
     pthread_t *t = &deb->web_server_thread;
 
     if(pthread_create( t, NULL, web_server, (void *)emu )) {

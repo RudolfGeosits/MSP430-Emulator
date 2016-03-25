@@ -340,13 +340,13 @@ int callback_emu (struct libwebsocket_context *this,
 void *web_server (void *ctxt)
 {
   emu = (Emulator *) ctxt;
-  Debugger *debugger = emu->debugger;
+  Debugger *deb = emu->debugger;
 
-  int port = 9000;
+  int port = 9001;
   struct libwebsocket_context *context;
 
   struct lws_context_creation_info context_info = {
-    .port = port, 
+    .port = deb->ws_port, //port, 
     .iface = NULL, 
     .protocols = protocols, 
     .extensions = NULL,

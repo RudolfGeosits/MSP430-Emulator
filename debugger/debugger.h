@@ -40,6 +40,8 @@ typedef struct Debugger {
   bool console_interface;
   bool quit;
 
+  unsigned int ws_port;
+
   pthread_t web_server_thread;
   bool web_server_ready;
   bool web_firmware_uploaded;

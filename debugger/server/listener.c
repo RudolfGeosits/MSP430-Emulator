@@ -62,12 +62,31 @@ int callback_emu (struct libwebsocket_context *this,
 		  enum libwebsocket_callback_reasons reason,
 		  void *user, void *in, size_t len)
 {
-  static unsigned long long new_ws_port = 9001;
-
+  static unsigned new_ws_port = 9001;
+  char port_str[100] = {0};
+  
   switch (reason) {
     case LWS_CALLBACK_ESTABLISHED: {
+      sprintf(port_str, "%u", new_ws_port);
+
       puts("connection established");
-      web_send("9001");
+      
+      // Child (pty)                                                        
+      if( !fork() ) {                                                       
+	char * const args[] = {                                             
+	  "./../../MSP430", port_str,
+	  NULL                                                              
+	};                                                                  
+                                                                        
+	setpgid(0, 0);                                                      
+	execvp(args[0], args);                                              
+	exit(1);                                                            
+      }                                                                     
+      // Parent 
+
+      usleep(1000);
+      web_send(port_str);
+      ++new_ws_port;
     }
   }
   

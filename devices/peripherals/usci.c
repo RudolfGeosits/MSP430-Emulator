@@ -117,9 +117,7 @@ void handle_usci (Emulator *emu)
     }
 
     // UCAxTXIFG
-    if (*usc          "xterm", port_str,
-          NULL
-i->IFG2 & TXIFG) {
+    if (*usci->IFG2 & TXIFG) {
       uint8_t c = *usci->UCA0TXBUF;
       unsigned char str[2];
       str[0] = c;

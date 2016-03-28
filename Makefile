@@ -1,3 +1,5 @@
+all: MSP430 SERVER
+
 MSP430 : main.o utilities.o server.o registers.o memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o \
 	usci.o port1.o
@@ -51,6 +53,15 @@ usci.o : devices/peripherals/usci.c
 port1.o : devices/peripherals/port1.c
 	cc -c devices/peripherals/port1.c
 
-clean :
-	rm main.o server.o utilities.o registers.o memspace.o debugger.o disassembler.o register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o tmp.* *~ devices/*~ debugger/*~ \
+# Server Program
 
+SERVER : listener.o
+
+	cc -o SERVER listener.o -lwebsockets -lrt -lpthread
+
+listener.o : debugger/server/listener.c
+	cc -c debugger/server/listener.c
+
+
+clean :
+	rm *.o tmp.* *~ devices/*~ debugger/*~

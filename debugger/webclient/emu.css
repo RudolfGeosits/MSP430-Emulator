@@ -2,31 +2,56 @@
              background-color: #AAAAAA;
          }
 
-         .canvas {
-             background-color: #FFFFFF;
+	 #console_window { 
+	     position: absolute;
+	     left: 0%;
+	     top: 0%;
+	     z-index: 10;
 
-	     width: 49%;
-	     height: 100%;
-	     float: right;
-         }
-
-	 canvas[resize] {
-	     width: 100%;
-	     height: 100%;
+	     width: 33%;
+	     height: 33%;
+	     background: rgba(255,255,255,0.66); 
+	     border: 2px  solid rgba(0,0,0,0.5); 
+	     border-radius: 4px; padding: 8px;
 	 }
 
-         .STDOUT {
+	 #serial_window { 
+	     position: absolute;
+	     left: 0%;
+	     bottom: 0%;
+	     z-index: 10;
+
+	     width: 33%;
+	     height: 33%;
+	     background: rgba(255,255,200,0.50); 
+	     border: 2px  solid rgba(0,0,0,0.5); 
+	     border-radius: 4px; padding: 8px;
+	 }
+
+         #myCanvas {
+             background-color: #FFFFFF;	
+	     position: absolute;
+	     left: 0;
+	     top: 0;
+	     z-index: 0;
+     
+	     width: 100%;
+	     height: 100%;
+         }
+
+         #console {
              background-color: #000000;
              color: #FFFFFF;
              font-family: "Terminal", monospace;
              font-size: 14px;
              font-weight: bold;
              resize: none;
-	     width: 49%;
-	     height: 100%;
+	     width: 97%;
+	     height: 86%;
 	     float: left;
          }
-         .STDIN {
+
+         #stdin {
              background: #1F2124;
              background: -moz-linear-gradient(#1F2124, #27292C);
              background: linear-gradient(#1F2124, #27292C);
@@ -37,25 +62,30 @@
              font-weight: bold;
              font-family: 'Terminal', monospace;
              color: #FFF;
-	     width: 49%;
-	     height: 100%;
+
+	     width: 97.5%;
+	     height: 6%;
+	     z-index: 20;
          }
-         .STDIN:focus {
-             box-shadow: inset 0 0 2px #000;
-             background: linear-gradient(#1F2124, #27292C);
+
+         #stdin:focus {
              border-color: #51CBEE;
              outline: none;
          }
 
-         .SERIALOUT {
+         #serial_out {
              background-color: #000000;
              color: #00FF00;
              font-family: "Terminal", monospace;
              font-size: 12px;
              font-weight: bold;
-             resize: none;
+             resize: none;	     
+
+	     width: 97%;
+	     height: 86%;
          }
-         .SERIALIN {
+
+         #serial_in {
              background: #1F2124;
              background: -moz-linear-gradient(#1F2124, #27292C);
              background: linear-gradient(#1F2124, #27292C);
@@ -66,10 +96,12 @@
              font-weight: bold;
              font-family: 'Terminal', monospace;
              color: #FFF;
-             width: 580px;
-             height: 25px;
+
+             width: 97.5%;
+             height: 6%;
          }
-         .SERIALIN:focus {
+
+         #serial_in:focus {
              box-shadow: inset 0 0 2px #000;
              background: linear-gradient(#1F2124, #27292C);
              border-color: #51CBEE;

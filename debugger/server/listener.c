@@ -74,7 +74,7 @@ int callback_emu (struct libwebsocket_context *this,
       // Child (pty)                                                        
       if( !fork() ) {                                                       
 	char * const args[] = {                                             
-	  "./../../MSP430", port_str,
+	  "nice", "-20", "./MSP430", port_str,
 	  NULL                                                              
 	};                                                                  
                                                                         

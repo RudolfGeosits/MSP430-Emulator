@@ -17,13 +17,13 @@
 -->
            
 <!DOCTYPE html>
-<html lang="en-US">
 <meta charset="utf-8"/>
 
-<html>
+<html lang="en-US">
     <head>
+	<title>MSP430-Emulator</title>
 	<link rel="stylesheet" type="text/css" href="emu.css">
-
+	
 	<!-- Load the Paper.js library -->
 	<script type="text/javascript" src="js/paper.js"></script>
 
@@ -33,32 +33,42 @@
 	</script>
     </head>
     
-    <body>
-	<textarea id="console" rows="24" cols="80" readonly="readonly" class="STDOUT"></textarea>
-	<canvas id="myCanvas" height="400" class="canvas"></canvas>
+    <body>	
+
+	<canvas id="myCanvas"></canvas>
+
+	<div draggable="true" id="console_window">
+
+	    <button id="pause_button">Pause</button>
+	    <button id="play_button">Play</button>
+	    <input type="file" id="file-input" />
+	    <button id="upload_button">Upload</button>
+
+	    <textarea id="console" rows="24" cols="80" 
+		      readonly="readonly"></textarea>
+
+	    <input type="text" id="stdin" draggable="false">
+	</div>
 	
-	<br><br>
-	<input type="text" id="stdin" width="80" class="STDIN">
-	<br><br>
-
-	<button id="enter_button" hidden="true">enter</button> 
-	<button id="serial_enter_button" hidden="true">enter</button> 
-
-	<button id="pause_button">Pause</button>
-	<button id="play_button">Play</button>
-
-	<input type="file" id="file-input" />
-	<button id="upload_button">Upload</button>
-	
-	<br><br>
-	<textarea id="serial_out" rows="24" cols="80" readonly="readonly" class="SERIALOUT"></textarea>
-	<br>
-	<input type="text" id="serial_in" width="80" class="SERIALIN">
+	<!-- SERIAL WINDOW -->
+	<div draggable="true" id="serial_window">
+	    
+	    <button id="show_serial_window_button">(x)</button>
+	    <textarea id="serial_out" rows="24" cols="80" 
+		      readonly="readonly"></textarea>
+	    
+	    <input type="text" id="serial_in">
+	    
+	</div>
 	<button id="show_serial_button">Show Serial Console</button>
 	
 	<img id="msp" src="newmsp.png" alt="msp" hidden="true"></img>
 	<img id="button_down" src="pushed.png" alt="button_down" hidden="true"></img>
 	<img id="P1_0_LED" src="P1_0_LED.png" alt="P1_0_LED" hidden="true"></img>
 	<img id="P1_6_LED" src="P1_6_LED.png" alt="P1_6_LED" hidden="true"></img>
+
+	<button id="enter_button" hidden="true">enter</button> 
+	<button id="serial_enter_button" hidden="true">enter</button> 
+
     </body>
 </html>

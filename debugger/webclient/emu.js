@@ -1,14 +1,11 @@
-var waiting = true;
+//var waiting = true;
 var ws;
 var listener;
 
-function sleep(delay) {
-    var start = new Date().getTime();
-    while (new Date().getTime() < start + delay);
-}
-
 // Image Declarations
-var IMG_BASE = new Point(100, 10);
+var IMG_BASE = view.center;
+IMG_BASE.y = 10;
+//new Point(500, 10);
 
 var msp_image = new Raster('msp', IMG_BASE.x + 142.5, 
 			   IMG_BASE.y + 185.5);
@@ -112,7 +109,6 @@ stdout.value = "";
 var serial = document.getElementById('serial_out');
 serial.value = "";
 
-
 // Button declarations
 var pause_button = document.getElementById('pause_button');
 var play_button = document.getElementById('play_button');
@@ -156,9 +152,9 @@ show_serial_button.onclick = function(){
 var contents;
 
 upload_button.onclick = function(){	     
-    ws.send("UPLOAD", { binary: false});
-    ws.send(contents, { binary: true });
-    ws.send("NPLOAD", { binary: false});
+    ws.send("UPLOAD");
+    ws.send(contents);
+    ws.send("NPLOAD");
 };
 
 function readSingleFile(e) {
@@ -250,8 +246,8 @@ var listener = new WebSocket("ws://127.0.0.1:9000", 'emu-protocol');
 listener.onmessage = function (event) {
     var msg = event.data;
     console.log("Here got " + msg);
-    ws = new WebSocket("ws://127.0.0.1:9001", 'emu-protocol');
-    waiting = false;
+    ws = new WebSocket("ws://127.0.0.1:" + msg, 'emu-protocol');
+    //waiting = false;
 
     ws.onmessage =  function (event) {
 	var msg = event.data;
@@ -404,3 +400,124 @@ serial_in.onkeydown = function auto_enter (event) {
         serial_enter_button.click();
     }
 };
+
+
+/// Dragable TextArea console_window
+var selected = null, // Object of the element to be moved
+    x_pos = 0, y_pos = 0, // Stores x & y coordinates of the mouse pointer
+    x_elem = 0, y_elem = 0; // Stores top, left values (edge) of the element
+
+// Will be called when user starts dragging an element
+function _drag_init(elem) {
+    // Store the object of the element which needs to be moved
+    selected = elem;
+    x_elem = x_pos - selected.offsetLeft;
+    y_elem = y_pos - selected.offsetTop;
+}
+
+// Will be called when user dragging an element
+function _move_elem(e) {
+    x_pos = document.all ? window.event.clientX : e.pageX;
+    y_pos = document.all ? window.event.clientY : e.pageY;
+    if (selected !== null) {
+        selected.style.left = (x_pos - x_elem) + 'px';
+        selected.style.top = (y_pos - y_elem) + 'px';
+    }
+}
+
+// Destroy the object when we are done
+function _destroy() {
+    selected = null;
+}
+
+// Bind the functions...
+///*
+document.getElementById('console_window').onmousedown = function () {
+    _drag_init(this);
+    stdin.focus();
+
+    return false;
+};
+//*/
+
+document.getElementById('serial_window').onmousedown = function () {
+    _drag_init(this);
+    serial_in.focus();
+
+    return false;
+};
+
+document.onmousemove = _move_elem;
+document.onmouseup = _destroy;
+
+/*
+
+var console_window_on = false;
+var serial_window_on = false;
+var dm;
+
+function drag_start_console_window (event) {
+    var style = window.getComputedStyle(event.target, null);
+    event.dataTransfer.setData("text/plain",
+    (parseInt(style.getPropertyValue("left"),10) - event.clientX) + ',' + (parseInt(style.getPropertyValue("top"),10) - event.clientY));
+} 
+
+function drag_over_console_window (event) { 
+    event.preventDefault(); 
+    return false; 
+} 
+
+function drop_console_window (event) { 
+    var offset = event.dataTransfer.getData("text/plain").split(',');
+    var dm = document.getElementById('console_window');
+    dm.style.left = (event.clientX + parseInt(offset[0],10)) + 'px';
+    dm.style.top = (event.clientY + parseInt(offset[1],10)) + 'px';
+    event.preventDefault();
+    
+    return false;
+} 
+
+dm = document.getElementById('console_window'); 
+
+dm.addEventListener('dragstart', drag_start_console_window, false); 
+
+document.body.addEventListener('dragover', drag_over_console_window,
+			       false);
+ 
+document.body.addEventListener('drop', drop_console_window, false);
+///
+
+/*
+/// Dragable serial window
+function drag_start_serial_window (event) {
+    var style = window.getComputedStyle(event.target, null);
+    event.dataTransfer.setData("text/plain",
+    (parseInt(style.getPropertyValue("left"),10) - event.clientX) + ',' + (parseInt(style.getPropertyValue("top"),10) - event.clientY));
+} 
+
+/*
+function drag_over_serial_window (event) { 
+    event.preventDefault(); 
+    return false; 
+} 
+function drop_serial_window (event) { 
+    var offset = event.dataTransfer.getData("text/plain").split(',');
+    var serial_window = document.getElementById('serial_window');
+    serial_window.style.left = (event.clientX + parseInt(offset[0],10)) + 'px';
+    serial_window.style.top = (event.clientY + parseInt(offset[1],10)) + 'px';
+    event.preventDefault();
+    return false;
+} 
+var serial_window = document.getElementById('serial_window'); 
+
+*/
+
+//serial_window.addEventListener('dragstart', drag_start_serial_window, false); 
+
+/*
+document.body.addEventListener('dragover', drag_over_serial_window,
+			       false);
+ 
+document.body.addEventListener('drop', drop_serial_window, false);
+///
+*/

@@ -1,6 +1,5 @@
-//var waiting = true;
-var ws;
-var listener;
+// Socket Declarations
+var listener, ws;
 
 // Image Declarations
 var IMG_BASE = view.center;
@@ -134,16 +133,19 @@ function print_serial (text){
 
 var serial_state = "visible";
 show_serial_button.onclick = function(){
+    var serial_win = document.getElementById('serial_window');    
 
     if (serial_state == "visible") {
 	serial.style.display = "none";
 	serial_in.style.display = "none";
 	serial_state = "hidden";
+	serial_win.visible = false;
     }
     else if (serial_state == "hidden") {
 	serial.style.display = "block";
 	serial_in.style.display = "block";
 	serial_state = "visible";
+	serial_win.visible = true;
     }
 
 };
@@ -151,7 +153,8 @@ show_serial_button.onclick = function(){
 // upload binary file //
 var contents;
 
-upload_button.onclick = function(){	     
+//upload_button.onclick = function(){	     
+upload_button.onclick = function() {	     
     ws.send("UPLOAD");
     ws.send(contents);
     ws.send("NPLOAD");
@@ -213,7 +216,7 @@ function onMouseDown (event) {
     var x = event.point.x;
     var y = event.point.y;
 
-    ws.send(x); ws.send(y);
+    //ws.send(x); ws.send(y);
 
     if (x >= (IMG_BASE.x + 15) && x <= (IMG_BASE.x + 49)) {
 	if (y >= (IMG_BASE.y + 327) && y <= (IMG_BASE.y + 360)) {
@@ -241,13 +244,13 @@ var serial_mode = false;
 
 // Websock Declarations
 var listener = new WebSocket("ws://127.0.0.1:9000", 'emu-protocol');
-//var ws = new WebSocket('ws://poorhackers.com:9000', 'emu-protocol');
+//var listener = new WebSocket('ws://poorhackers.com:9000', 'emu-protocol');
 
 listener.onmessage = function (event) {
     var msg = event.data;
     console.log("Here got " + msg);
     ws = new WebSocket("ws://127.0.0.1:" + msg, 'emu-protocol');
-    //waiting = false;
+    //ws = new WebSocket("ws://poorhackers.com:" + msg, 'emu-protocol');
 
     ws.onmessage =  function (event) {
 	var msg = event.data;
@@ -431,14 +434,12 @@ function _destroy() {
 }
 
 // Bind the functions...
-///*
 document.getElementById('console_window').onmousedown = function () {
     _drag_init(this);
     stdin.focus();
 
     return false;
 };
-//*/
 
 document.getElementById('serial_window').onmousedown = function () {
     _drag_init(this);
@@ -450,74 +451,6 @@ document.getElementById('serial_window').onmousedown = function () {
 document.onmousemove = _move_elem;
 document.onmouseup = _destroy;
 
-/*
-
-var console_window_on = false;
-var serial_window_on = false;
-var dm;
-
-function drag_start_console_window (event) {
-    var style = window.getComputedStyle(event.target, null);
-    event.dataTransfer.setData("text/plain",
-    (parseInt(style.getPropertyValue("left"),10) - event.clientX) + ',' + (parseInt(style.getPropertyValue("top"),10) - event.clientY));
-} 
-
-function drag_over_console_window (event) { 
-    event.preventDefault(); 
-    return false; 
-} 
-
-function drop_console_window (event) { 
-    var offset = event.dataTransfer.getData("text/plain").split(',');
-    var dm = document.getElementById('console_window');
-    dm.style.left = (event.clientX + parseInt(offset[0],10)) + 'px';
-    dm.style.top = (event.clientY + parseInt(offset[1],10)) + 'px';
-    event.preventDefault();
-    
-    return false;
-} 
-
-dm = document.getElementById('console_window'); 
-
-dm.addEventListener('dragstart', drag_start_console_window, false); 
-
-document.body.addEventListener('dragover', drag_over_console_window,
-			       false);
- 
-document.body.addEventListener('drop', drop_console_window, false);
-///
-
-/*
-/// Dragable serial window
-function drag_start_serial_window (event) {
-    var style = window.getComputedStyle(event.target, null);
-    event.dataTransfer.setData("text/plain",
-    (parseInt(style.getPropertyValue("left"),10) - event.clientX) + ',' + (parseInt(style.getPropertyValue("top"),10) - event.clientY));
-} 
-
-/*
-function drag_over_serial_window (event) { 
-    event.preventDefault(); 
-    return false; 
-} 
-function drop_serial_window (event) { 
-    var offset = event.dataTransfer.getData("text/plain").split(',');
-    var serial_window = document.getElementById('serial_window');
-    serial_window.style.left = (event.clientX + parseInt(offset[0],10)) + 'px';
-    serial_window.style.top = (event.clientY + parseInt(offset[1],10)) + 'px';
-    event.preventDefault();
-    return false;
-} 
-var serial_window = document.getElementById('serial_window'); 
-
-*/
-
-//serial_window.addEventListener('dragstart', drag_start_serial_window, false); 
-
-/*
-document.body.addEventListener('dragover', drag_over_serial_window,
-			       false);
- 
-document.body.addEventListener('drop', drop_serial_window, false);
-///
-*/
+$('#myCanvas').on('mousewheel', function(event) {
+    console.log(event.deltaX, event.deltaY, event.deltaFactor);
+});

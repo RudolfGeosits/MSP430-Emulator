@@ -23,6 +23,11 @@
     <head>
 	<title>MSP430-Emulator</title>
 	<link rel="stylesheet" type="text/css" href="emu.css">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+
+	<script type="text/javascript" src="jquery.mousewheel.min.js"></script>
 	
 	<!-- Load the Paper.js library -->
 	<script type="text/javascript" src="js/paper.js"></script>
@@ -33,34 +38,56 @@
 	</script>
     </head>
     
-    <body>	
+    <body>		
+	<div id="banner">
+            <a href="index.html"><button class="button button1">
+		<h1>Poor Hackers</h1>
+	    </button></a>
 
+	    <a href="emu.html"<button class="button button2">
+		<h1>MSP430 Emulator</h1>
+	    </button></a>
+	</div>
+
+	<hr/>
+	
+	<div id="toolbar">
+	    <button id="play_button">
+		<img src="play.svg" height="32"/>
+	    </button>
+
+	    <button id="pause_button">
+		<img src="pause.svg" height="32"/>
+	    </button>	    
+	    
+	    <input type="file" id="file-input"/>
+	    <button id="upload_button">
+		<img src="upload.svg" height="32"/>
+	    </button>
+
+	    <button id="show_serial_button">
+		<img src="show_serial.svg" height="32"/>
+	    </button>
+	</div>
+	
+	<hr/>
+	
 	<canvas id="myCanvas"></canvas>
 
 	<div draggable="true" id="console_window">
-
-	    <button id="pause_button">Pause</button>
-	    <button id="play_button">Play</button>
-	    <input type="file" id="file-input" />
-	    <button id="upload_button">Upload</button>
-
 	    <textarea id="console" rows="24" cols="80" 
 		      readonly="readonly"></textarea>
 
-	    <input type="text" id="stdin" draggable="false">
+	    <input type="text" id="stdin">
 	</div>
 	
 	<!-- SERIAL WINDOW -->
-	<div draggable="true" id="serial_window">
-	    
-	    <button id="show_serial_window_button">(x)</button>
+	<div draggable="true" id="serial_window">	    
 	    <textarea id="serial_out" rows="24" cols="80" 
 		      readonly="readonly"></textarea>
 	    
 	    <input type="text" id="serial_in">
-	    
 	</div>
-	<button id="show_serial_button">Show Serial Console</button>
 	
 	<img id="msp" src="newmsp.png" alt="msp" hidden="true"></img>
 	<img id="button_down" src="pushed.png" alt="button_down" hidden="true"></img>

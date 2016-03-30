@@ -1,111 +1,125 @@
-         body {
-             background-color: #AAAAAA;
-         }
+body {
+    background-color: #FFFFFF;
+}
 
-	 #console_window { 
-	     position: absolute;
-	     left: 0%;
-	     top: 0%;
-	     z-index: 10;
+#console_window { 
+    position: absolute;
+    left: 0%;
+    top: 30%;
+    z-index: 10;
 
-	     cursor:move;
-	     width: 33%;
-	     height: 33%;
-	     background: rgba(255,255,255,0.66); 
-	     border: 2px  solid rgba(0,0,0,0.5); 
-	     border-radius: 4px; padding: 8px;
-	 }
+    cursor:move;
+    width: 33%;
+    height: 33%;
+    background: rgba(255,255,255,0.66); 
+    border: 2px  solid rgba(0,0,0,0.5); 
+    border-radius: 4px; padding: 8px;
+}
 
-	 #serial_window { 
-	     position: absolute;
-	     left: 0%;
-	     bottom: 0%;
-	     z-index: 10;
+#serial_window { 
+    position: absolute;
+    left: 0%;
+    bottom: 0%;
+    z-index: 10;
 
-	     cursor:move;
-	     width: 33%;
-	     height: 33%;
-	     background: rgba(255,255,200,0.50); 
-	     border: 2px  solid rgba(0,0,0,0.5); 
-	     border-radius: 4px; padding: 8px;
-	 }
+    cursor:move;
+    width: 33%;
+    height: 33%;
+    background: rgba(255,255,200,0.50); 
+    border: 2px  solid rgba(0,0,0,0.5); 
+    border-radius: 4px; padding: 8px;
+}
 
-         #myCanvas {
-             background-color: #FFFFFF;	
-	     position: absolute;
-	     left: 0;
-	     top: 0;
-	     z-index: 0;
-     
-	     width: 100%;
-	     height: 100%;
-         }
+#myCanvas {
+    background-color: #F0F0F0;
+    position: absolute;
+    left: 0%;
+    top: 30%;
+    z-index: 0;
+    
+    width: 100%;
+    height: 100%;
+}
 
-         #console {
-             background-color: #000000;
-             color: #FFFFFF;
-             font-family: "Terminal", monospace;
-             font-size: 14px;
-             font-weight: bold;
-             resize: none;
-	     width: 97%;
-	     height: 86%;
-	     float: left;
-         }
+#console {
+    background-color: #000000;
+    color: #FFFFFF;
+    font-family: "Terminal", monospace;
+    font-size: 14px;
+    font-weight: bold;
+    resize: none;
+    width: 97%;
+    height: 86%;
+    float: left;
+}
 
-         #stdin {
-             background: #1F2124;
-             background: -moz-linear-gradient(#1F2124, #27292C);
-             background: linear-gradient(#1F2124, #27292C);
-             border: 1px solid #000;
-             box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
-             border-radius: 3px;
-             font-size: 14px;
-             font-weight: bold;
-             font-family: 'Terminal', monospace;
-             color: #FFF;
+#stdin {
+    background: #1F2124;
+    background: -moz-linear-gradient(#1F2124, #27292C);
+    background: linear-gradient(#1F2124, #27292C);
+    border: 1px solid #000;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: 'Terminal', monospace;
+    color: #FFF;
 
-	     width: 97.5%;
-	     height: 6%;
-	     z-index: 20;
-         }
+    width: 97.5%;
+    height: 6%;
+    z-index: 20;
+}
 
-         #stdin:focus {
-             border-color: #51CBEE;
-             outline: none;
-         }
+#stdin:focus {
+    border-color: #51CBEE;
+    outline: none;
+}
 
-         #serial_out {
-             background-color: #000000;
-             color: #00FF00;
-             font-family: "Terminal", monospace;
-             font-size: 12px;
-             font-weight: bold;
-             resize: none;	     
+#serial_out {
+    background-color: #000000;
+    color: #00FF00;
+    font-family: "Terminal", monospace;
+    font-size: 12px;
+    font-weight: bold;
+    resize: none;	     
 
-	     width: 97%;
-	     height: 86%;
-         }
+    width: 97%;
+    height: 86%;
+}
 
-         #serial_in {
-             background: #1F2124;
-             background: -moz-linear-gradient(#1F2124, #27292C);
-             background: linear-gradient(#1F2124, #27292C);
-             border: 1px solid #000;
-             box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
-             border-radius: 3px;
-             font-size: 14px;
-             font-weight: bold;
-             font-family: 'Terminal', monospace;
-             color: #FFF;
+#serial_in {
+    background: #1F2124;
+    background: -moz-linear-gradient(#1F2124, #27292C);
+    background: linear-gradient(#1F2124, #27292C);
+    border: 1px solid #000;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: 'Terminal', monospace;
+    color: #FFF;
 
-             width: 97.5%;
-             height: 6%;
-         }
+    width: 97.5%;
+    height: 6%;
+}
 
-         #serial_in:focus {
-             box-shadow: inset 0 0 2px #000;
-             background: linear-gradient(#1F2124, #27292C);
-             border-color: #51CBEE;
-             outline: none;
-         }
+#serial_in:focus {
+    box-shadow: inset 0 0 2px #000;
+    background: linear-gradient(#1F2124, #27292C);
+    border-color: #51CBEE;
+    outline: none;
+}
+
+#file-input {
+    position: relative;
+    overflow: hidden;
+    margin: 10px;
+    border: 1px solid rgba(0,0,0,1); 
+
+    vertical-align: bottom;
+    float: right;
+}
+
+#upload_button {
+    float: right;
+}

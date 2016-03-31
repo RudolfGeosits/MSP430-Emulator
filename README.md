@@ -1,5 +1,7 @@
-MSP430-Emulator
+MSP430 Emulator
 ===============
+
+You can use this emulator at: http://www.poorhackers.com/emu.html
 
 NOTE: We are in the process of moving to a web interface!
 
@@ -9,7 +11,7 @@ NOTE: We are in the process of moving to a web interface!
   - UART Serial Communication (via USCI Module) 
   - GPIO Ports (LEDs and other pins)
 
-  The project goal is to emulate all peripherals and devices on the TIMSP430 Launchpad starter kit, 
+  The project goal is to emulate all peripherals and devices on the TI MSP430 Launchpad starter kit, 
   to be able to run all firmware that would run on the physical device and test hardware inputs like UART or some of the other digital ports via programmable means. 
   Then moving on to a more device agnostic end game. The C program is basically a server while the user interface is accessed through the browser. This will be put online soon.
   
@@ -36,8 +38,9 @@ NOTE: We are in the process of moving to a web interface!
   - type 'make' (you can also make clean after)
 
 - User Instructions
-   The following are instructions on how to use the web interface
+  - Log onto www.poorhackers.com/emu.html to use the ONLINE web interface
 
-  - run the server via ./MSP430
-  - load index.html from debugger/webclient/index.html to your browser
-  - You will be connected
+  - The following are instructions on how to use a LOCAL web interface
+    - run the server via ./SERVER
+    - load index.html from debugger/webclient/index.html to your browser
+    - You will be connected

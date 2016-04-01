@@ -26,6 +26,11 @@ var P1_6_LED_image = new Raster('P1_6_LED', IMG_BASE.x + 84,
 				IMG_BASE.y + 361);
 P1_6_LED_image.visible = false;
 
+// windows
+var serial_window = document.getElementById('serial_window');    
+var console_window = document.getElementById('console_window');    
+var canvas = document.getElementById('myCanvas');
+
 
 // Text declarations
 var P1_0_value_text = new PointText({
@@ -131,23 +136,15 @@ function print_serial (text){
     serial.scrollTop = serial.scrollHeight;
 }
 
-var serial_state = "visible";
-show_serial_button.onclick = function(){
-    var serial_win = document.getElementById('serial_window');    
-
-    if (serial_state == "visible") {
-	serial.style.display = "none";
-	serial_in.style.display = "none";
-	serial_state = "hidden";
-	serial_win.visible = false;
+//var serial_state = "visible";
+show_serial_button.onclick = function()
+{
+    if (serial_window.style.display == "none") {
+	serial_window.style.display = "block";
     }
-    else if (serial_state == "hidden") {
-	serial.style.display = "block";
-	serial_in.style.display = "block";
-	serial_state = "visible";
-	serial_win.visible = true;
+    else {
+	serial_window.style.display = "none";
     }
-
 };
 
 // upload binary file //
@@ -422,9 +419,21 @@ function _drag_init(elem) {
 function _move_elem(e) {
     x_pos = document.all ? window.event.clientX : e.pageX;
     y_pos = document.all ? window.event.clientY : e.pageY;
+
+    var canvas_left = canvas.offsetLeft;
+    var canvas_top = canvas.offsetTop;
+    var canvas_right = canvas.offsetRight;
+    var canvas_bottom = canvas.offsetBottom;
+
     if (selected !== null) {
-        selected.style.left = (x_pos - x_elem) + 'px';
-        selected.style.top = (y_pos - y_elem) + 'px';
+	if (selected == console_window) {
+            selected.style.left = (x_pos - x_elem - canvas_left) + 'px';
+            selected.style.top =  (y_pos - y_elem - canvas_top) + 'px';
+	}
+	else if (selected == serial_window) {
+            selected.style.left   =  (x_pos - x_elem - canvas_left) + 'px';
+            selected.style.top    =  (y_pos - y_elem - canvas_top) + 'px';
+	}
     }
 }
 

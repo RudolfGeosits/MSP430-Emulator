@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     
     printf("SERVER: Waiting for web client to connect...\n");
     while (!deb->web_server_ready) usleep(100);
-    
+
     printf("SERVER: Waiting for web client to upload firmware...\n");
     web_send("MSP430 Emulator\nCopyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)\n\n", 
 	     STDOUT);

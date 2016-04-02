@@ -4,6 +4,8 @@
 <html lang="en-US">
     <head>
 	<title>MSP430-Emulator</title>
+
+	<link rel="stylesheet" type="text/css" href="reset.css">
 	<link rel="stylesheet" type="text/css" href="emu.css">
 	<link rel="stylesheet" type="text/css" href="style.css">
 	
@@ -23,7 +25,7 @@
     <body>		
 	<div id="banner">
             <a href="index.html"><button class="button button1">
-		<h1>Poor Hackers</h1>
+		<h1 id="logo">Poor Hackers</h1>
 	    </button></a>
 
 	    <a href="emu.html"><button class="button button2">
@@ -86,7 +88,57 @@
 		
 		<input type="text" id="serial_in">
 	    </div>
-	
+
+	    <!-- REGISTERS WINDOW -->
+	    <div id="register_window" draggable="true">
+		<table id="register_table">
+
+		    <tr>
+			<th>PC</th>
+			<td>0000</td>
+			<th>SP</th>
+			<td>0000</td>
+			<th>SR</th>
+			<td>0000</td>
+			<th>CG2</th>
+			<td>0000</td>
+		    </tr>
+
+		    <tr>
+			<th>%R4</th>
+			<td>0000</td>
+			<th>%R5</th>
+			<td>0000</td>
+			<th>%R6</th>
+			<td>0000</td>
+			<th>%R7</th>
+			<td>0000</td>
+		    </tr>
+
+		    <tr>
+			<th>%R8</th>
+			<td>0000</td>
+			<th>%R9</th>
+			<td>0000</td>
+			<th>%R10</th>
+			<td>0000</td>
+			<th>%R11</th>
+			<td>0000</td>
+		    </tr>
+
+		    <tr>
+			<th>%R12</th>
+			<td>0000</td>
+			<th>%R13</th>
+			<td>0000</td>
+			<th>%R14</th>
+			<td>0000</td>
+			<th>%R15</th>
+			<td>0000</td>
+		    </tr>
+
+		</table>
+	    </div>
 	</div>
 	
 	<img id="msp" src="newmsp.png" alt="msp" hidden="true"></img>

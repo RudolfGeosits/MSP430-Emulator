@@ -1,3 +1,15 @@
+html {
+    font-family: "Terminal", monospace;
+}
+
+h1 {
+    font-family: "Terminal", monospace;
+    font-weight: bold;
+    font-size: 16px;    /* fallback */
+    font-size: 2vh;     /* auto-resize text */
+    font-size: 1.2vw;   /* auto-resize text */
+}
+
 #toolbar {
    background-color: #F0F0F0;
    width: 100%;
@@ -29,11 +41,11 @@
 }
 
 .button1 {
-    padding: 2px 2px;
     background-color: black; 
     color: red;
     border: 4px solid red;
     font-size: 10px;
+    margin-right: 20px;
 }
 
 .button1:hover {
@@ -44,11 +56,11 @@
 
 .button2 {
     vertical-align: bottom;
-    padding: 2px 2px;
+    padding: 5px 5px;
     background-color: #F0F0F0;
     color: black; 
-    border: 2px solid blue;
-    font-size: 8px;
+    border: 4px solid blue;
+    /*font-size: 8px;*/
 }
 
 .button2:hover {

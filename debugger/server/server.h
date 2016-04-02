@@ -29,11 +29,7 @@
 #include <pthread.h>
 #include <libwebsockets.h>
 
-#include "../../devices/memory/memspace.h"
-#include "../../devices/cpu/registers.h"
-#include "../../devices/utilities.h"
-#include "../../devices/peripherals/port1.h"
-#include "../../devices/peripherals/usci.h"
+#include "../../main.h"
 
 enum {CONTROL, STDOUT, SERIAL};
 
@@ -68,6 +64,15 @@ static struct libwebsocket_protocols protocols[] = {
     NULL, NULL, 0   /* End of list */
   }
 };
+
+typedef struct Server {
+  // Pending Packets Queue  
+  Packet *pending_packets;
+  Packet *head, *tail;
+
+  // Other
+  
+} Server;
 
 void web_send (char *buf, uint8_t type);
 void *web_server (void *ctxt);

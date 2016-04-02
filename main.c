@@ -30,15 +30,18 @@ int main(int argc, char *argv[])
   Cpu *cpu = NULL;
   Debugger *deb = NULL;
 
-  emu->cpu = (Cpu *) calloc( 1, sizeof(Cpu) );
-  emu->cpu->p1 = (Port_1 *) calloc ( 1, sizeof(Port_1) );
-  emu->cpu->usci = (Usci *) calloc ( 1, sizeof(Usci) );  
+  emu->cpu = (Cpu *) calloc(1, sizeof(Cpu));
+  emu->cpu->p1 = (Port_1 *) calloc(1, sizeof(Port_1));
+  emu->cpu->usci = (Usci *) calloc(1, sizeof(Usci));  
 
-  emu->debugger = (Debugger *) calloc (1, sizeof(Debugger) );
-  setup_debugger(emu);
+  emu->debugger = (Debugger *) calloc(1, sizeof(Debugger));
+  setup_debugger(emu);  
   
   cpu = emu->cpu;
   deb = emu->debugger;
+
+  deb->server = (Server *) calloc(1, sizeof(Server));  
+
 
   if (deb->web_interface == true) {
     if (argv[1] == NULL) {
@@ -125,6 +128,7 @@ int main(int argc, char *argv[])
   free(cpu->p1);
   free(cpu->usci);
   free(cpu);
+  free(deb->server);
   free(deb);
   free(emu);
 

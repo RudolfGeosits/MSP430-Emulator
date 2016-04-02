@@ -53,6 +53,9 @@ typedef struct Debugger {
   uint16_t bp_addresses[MAX_BREAKPOINTS];
   uint16_t current_bp;
   uint32_t num_bps;
+
+  // debug server for web interface
+  Server *server;
 } Debugger;
 
 void setup_debugger(Emulator *emu);

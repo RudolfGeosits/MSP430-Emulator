@@ -117,7 +117,7 @@ int callback_emu (struct libwebsocket_context *this,
       static bool p1_5_on = false;
       static bool p1_6_on = false;
       static bool p1_7_on = false;
-
+      
       // P1.0 ON/OFF
       if (p1->DIR_0 == OUT) {
 	if (p1->OUT_0 == HIGH) {
@@ -133,7 +133,7 @@ int callback_emu (struct libwebsocket_context *this,
 	  }
 	}
       }
-
+      
       // P1.1 ON/OFF
       if (p1->DIR_1 == OUT) {
 	if (p1->OUT_1 == HIGH) {	  
@@ -361,6 +361,19 @@ void *web_server (void *ctxt)
     .ka_probes = false, 
     .ka_interval = false
   };
+
+  init_packet_queue(emu);
+
+  /*
+  printf("empty - %u\n", packet_queue_empty(emu));
+  enqueue(emu, "TEST", sizeof("TEST"));
+  printf("empty - %u\n", packet_queue_empty(emu));
+
+  Packet *p = dequeue(emu);
+  printf("empty - %u\n", packet_queue_empty(emu));
+
+  printf("Got %s of len %u\n", p->message, p->length);
+  */
 
   // create libwebsocket context representing this server
   context = libwebsocket_create_context(&context_info);

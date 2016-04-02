@@ -40,6 +40,8 @@ typedef struct Usci Usci;
 typedef struct Status_reg Status_reg;
 
 typedef struct Debugger Debugger;
+typedef struct Server Server;
+typedef struct Packet Packet;
 
 #include "devices/peripherals/port1.h"
 #include "devices/peripherals/usci.h"

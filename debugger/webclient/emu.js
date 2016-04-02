@@ -363,7 +363,7 @@ listener.onmessage = function (event) {
 
 		break;
 	    }
-
+		
 	    case "_STDOUT_": {
 		stdout_mode = true;
 		break;
@@ -434,6 +434,10 @@ function _move_elem(e) {
             selected.style.left   =  (x_pos - x_elem - canvas_left) + 'px';
             selected.style.top    =  (y_pos - y_elem - canvas_top) + 'px';
 	}
+	else if (selected == register_window) {
+            selected.style.left   =  (x_pos - x_elem - canvas_left) + 'px';
+            selected.style.top    =  (y_pos - y_elem - canvas_top) + 'px';
+	}	
     }
 }
 
@@ -457,9 +461,26 @@ document.getElementById('serial_window').onmousedown = function () {
     return false;
 };
 
+document.getElementById('register_window').onmousedown = function () {
+    _drag_init(this);
+
+    return false;
+};
+
 document.onmousemove = _move_elem;
 document.onmouseup = _destroy;
 
 $('#myCanvas').on('mousewheel', function(event) {
     console.log(event.deltaX, event.deltaY, event.deltaFactor);
 });
+
+var table = document.getElementById("register_table");
+for (var i = 0, row; row = table.rows[i]; i++) {
+    //iterate through rows
+    //rows would be accessed using the "row" variable assigned in the for loop
+    for (var j = 0, col; col = row.cells[j]; j++) {
+	col = "X";
+	//iterate through columns
+	//columns would be accessed using the "col" variable assigned in the for loop
+    }  
+}

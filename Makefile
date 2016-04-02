@@ -2,17 +2,14 @@ all: MSP430 SERVER
 
 MSP430 : main.o utilities.o server.o registers.o memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o \
-	usci.o port1.o
+	usci.o port1.o packet_queue.o
 
 	cc -o MSP430 main.o server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o \
-	-lreadline -lwebsockets -lpthread -lrt
+	packet_queue.o -lreadline -lwebsockets -lpthread -lrt
 
 main.o : main.c
 	cc -c main.c
-
-server.o : debugger/server/server.c
-	cc -c debugger/server/server.c	
 
 utilities.o : devices/utilities.c
 	cc -c devices/utilities.c
@@ -52,6 +49,12 @@ usci.o : devices/peripherals/usci.c
 
 port1.o : devices/peripherals/port1.c
 	cc -c devices/peripherals/port1.c
+
+server.o : debugger/server/server.c
+	cc -c debugger/server/server.c	
+
+packet_queue.o : debugger/server/packet_queue.c
+	cc -c debugger/server/packet_queue.c
 
 # Server Program
 

@@ -1,6 +1,14 @@
 #include "server.h"
 
 struct libwebsocket *ws = NULL;
+pid_t emulator_pids[1000] = {0};
+
+void handle_sigchld(int sig) {
+  int saved_errno = errno;
+
+  while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
+  errno = saved_errno;
+}
 
 void signal_callback_handler(int signum)
 {
@@ -57,8 +65,9 @@ int callback_emu (struct libwebsocket_context *this,
       pid_t pid;
       
       // Child (pty)                                                        
-      if( !(pid = fork()) ) {                                                       
+      if( !(pid = fork()) ) {     
 	printf("Child: Got pid #%u\n", pid);
+
 	char * const args[] = {                                             
 	  //"nice", "-20", "./MSP430", port_str,
 	  "./MSP430", port_str,
@@ -114,6 +123,16 @@ int main (int argc, char **argv)
   }
 
   signal(SIGINT, signal_callback_handler);
+
+  // Setup child reaping handler
+  struct sigaction sa;
+  sa.sa_handler = &handle_sigchld;
+  sigemptyset(&sa.sa_mask);
+  sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+  if (sigaction(SIGCHLD, &sa, 0) == -1) {
+    perror(0);
+    exit(1);
+  }
 
   printf("starting server...\n");
 

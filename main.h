@@ -26,6 +26,8 @@
 #include <string.h>
 #include <stdint.h>
 #include <signal.h>
+#include <sys/wait.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <pthread.h>
 #include <libwebsockets.h>

@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
       if (timeElapsed >= 900) break;
     }
   }
-  
+
   uninitialize_msp_memspace(emu->cpu);
   free(cpu->p1);
   free(cpu->usci);

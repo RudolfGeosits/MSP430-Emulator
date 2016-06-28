@@ -69,6 +69,7 @@ bool exec_cmd (Emulator *emu, char *line, int len) {
   else if ( !strncasecmp("quit", cmd, sizeof "quit") ||
 	    !strncasecmp("q", cmd, sizeof "q")) 
     {    
+      // This flag stops the main loop in main.c
       deb->quit = true;
     }
   

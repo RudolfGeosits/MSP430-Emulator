@@ -35,7 +35,7 @@ void load_bootloader(uint16_t virt_addr)
  * @param file_name The file name of the binary to load into virtual memory
  * @param virt_loc The location in virtual memory to load the firmware
  */
-void load_firmware(char *file_name, uint16_t virt_addr)
+void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr)
 {
   uint32_t size, result;
   char str[100] = {0};
@@ -43,7 +43,7 @@ void load_firmware(char *file_name, uint16_t virt_addr)
   sprintf(str, "Loading firmware: ( %s )\n", file_name);
   
   printf("%s", str);
-  web_send(str, STDOUT);
+  print_console(emu, str);
 
   FILE *fd = fopen(file_name, "rb+");
   
@@ -63,7 +63,7 @@ void load_firmware(char *file_name, uint16_t virt_addr)
 
   sprintf(str, "Placed %d bytes into flash\n\n", result);
   printf("%s", str);
-  web_send(str, STDOUT);
+  print_console(emu, str);
 
   fclose(fd);
 }
@@ -333,7 +333,7 @@ void display_help(Emulator *emu)
 	  "**************************************************\n");
 
   if (deb->web_interface) {
-    web_send(help_str, STDOUT);
+    print_console(emu, help_str);
   }
   else {
     printf("%s", help_str);

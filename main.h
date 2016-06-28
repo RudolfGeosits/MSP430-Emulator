@@ -48,13 +48,13 @@ typedef struct Packet Packet;
 #include "devices/cpu/registers.h"
 #include "devices/utilities.h"
 #include "devices/memory/memspace.h"
-#include "debugger/server/server.h"
+#include "debugger/websockets/emu_server.h"
 #include "devices/cpu/decoder.h"
 #include "debugger/debugger.h"
 
-typedef struct Emulator {
+struct Emulator {
   Cpu *cpu;
   Debugger *debugger;
-} Emulator;
+};
 
 #endif

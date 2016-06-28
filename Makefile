@@ -1,12 +1,12 @@
-all: MSP430 SERVER
+all: MSP430 SERVER clean
 
-MSP430 : main.o utilities.o server.o registers.o memspace.o debugger.o disassembler.o \
+MSP430 : main.o utilities.o emu_server.o registers.o memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o \
 	usci.o port1.o packet_queue.o
 
-	cc -o MSP430 main.o server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
+	cc -o MSP430 main.o emu_server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o \
-	packet_queue.o -lreadline -lwebsockets -lpthread -lrt
+	packet_queue.o -lreadline -lwebsockets -lpthread -lrt ;
 
 main.o : main.c
 	cc -c main.c
@@ -50,21 +50,23 @@ usci.o : devices/peripherals/usci.c
 port1.o : devices/peripherals/port1.c
 	cc -c devices/peripherals/port1.c
 
-server.o : debugger/server/server.c
-	cc -c debugger/server/server.c	
+emu_server.o : debugger/websockets/emu_server.c
+	cc -c debugger/websockets/emu_server.c
 
-packet_queue.o : debugger/server/packet_queue.c
-	cc -c debugger/server/packet_queue.c
+packet_queue.o : debugger/websockets/packet_queue.c
+	cc -c debugger/websockets/packet_queue.c
 
 # Server Program
 
-SERVER : listener.o
+SERVER : server.o
 
-	cc -o SERVER listener.o -lwebsockets -lrt -lpthread
+	cc -o server server.o -lwebsockets -lrt -lpthread;
 
-listener.o : debugger/server/listener.c
-	cc -c debugger/server/listener.c
+server.o : debugger/server/server.c
+	cc -c debugger/server/server.c
 
 
 clean :
-	rm *.o tmp.* *~ devices/*~ debugger/*~
+	rm server.o main.o utilities.o emu_server.o registers.o memspace.o debugger.o disassembler.o \
+	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o \
+	usci.o port1.o packet_queue.o;

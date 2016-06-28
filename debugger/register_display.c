@@ -153,5 +153,5 @@ void display_registers(Emulator *emu)
 	  cyan, v_flag, decor_col, value_col, cpu->sr.overflow);
 
   printf("%s", full);
-  web_send(full, STDOUT);
+  print_console(emu, full);
 }

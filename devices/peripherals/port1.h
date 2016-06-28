@@ -22,7 +22,7 @@
 #include "../cpu/registers.h"
 #include "../utilities.h"
 
-typedef struct Port_1 {
+struct Port_1 {
   // Peripheral register pointers
   
   // Port 1        = r/w =   = reset? =
@@ -46,7 +46,7 @@ typedef struct Port_1 {
   bool DIR_6, OUT_6, IFG_6, IE_6, SEL_6, SEL2_6;
   bool DIR_7, OUT_7, IFG_7, IE_7, SEL_7, SEL2_7;
 
-} Port_1;
+};
 
 void setup_port_1(Emulator *emu);
 void handle_port_1(Emulator *emu);

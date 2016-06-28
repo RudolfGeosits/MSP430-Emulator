@@ -411,17 +411,17 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       }
 
       printf("%s", hex_str);
-      web_send(hex_str, STDOUT);
+      print_console(emu, hex_str);
 
       for (i = strlen(hex_str);i < 12;i++) {
 	printf(" ");
-	web_send(" ", STDOUT);
+	print_console(emu, " ");
       }
 
       printf("\t%s", mnemonic);
 
-      web_send("\t", STDOUT);
-      web_send(mnemonic, STDOUT);
+      print_console(emu, "\t");
+      print_console(emu, mnemonic);
     }
 
   } //# end else

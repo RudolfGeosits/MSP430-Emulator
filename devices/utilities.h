@@ -32,7 +32,7 @@ uint16_t *get_stack_ptr(Emulator *emu);
 uint16_t *get_addr_ptr(uint16_t virt_addr);
 int8_t reg_name_to_num(char *name);
 void load_bootloader(uint16_t virt_addr);
-void load_firmware(char *file_name, uint16_t virt_addr);
+void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr);
 void display_help(Emulator *emu);
 
 #endif

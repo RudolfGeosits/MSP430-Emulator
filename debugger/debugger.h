@@ -60,8 +60,8 @@ typedef struct Debugger {
 
 void setup_debugger(Emulator *emu);
 
-void dump_memory(uint8_t *MEM, uint32_t size, uint32_t start_addr, 
-		 uint8_t stride);
+void dump_memory(Emulator *emu, uint8_t *MEM, uint32_t size, 
+		 uint32_t start_addr, uint8_t stride);
 
 void handle_sigint(int signal);
 

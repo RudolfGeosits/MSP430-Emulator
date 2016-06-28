@@ -248,137 +248,158 @@ listener.onmessage = function (event) {
     console.log("Here got " + msg);
     ws = new WebSocket("ws://127.0.0.1:" + msg, 'emu-protocol');
     //ws = new WebSocket("ws://poorhackers.com:" + msg, 'emu-protocol');
+    
+    ws.binaryType = "arraybuffer";
+
+    function ab2str(buf) {
+	return String.fromCharCode.apply(null, new Uint16Array(buf));
+    }
 
     ws.onmessage =  function (event) {
-	var msg = event.data;
+	var packet = event.data;
+	
+	var data = new DataView(packet);
+	var opcode = data.getUint8(0);
 
-	if (stdout_mode) {
-	    print_console(msg);		 
-	    stdout_mode = false;
+	var data_len = data.byteLength;
+	var message_len = data_len - 1;
+	
+	var str_array = new Uint16Array(message_len * 2);
+	
+	for (var i = 1;i < data_len;i = i+1) {
+	    str_array[i-1] = data.getUint8(i);
+	    //console.log(str_array[i-1]);
 	}
 	
-	else if (serial_mode) {
-	    print_serial(msg);
-	    serial_mode = false;
-	}
-	else {
-	    switch (msg) {
+	var message = ab2str(str_array);
+	var control_opcode = null;
+	var control_data   = null;
+	//console.log("Here got [" + message + "], len " + data_len);
 
-		// P1.0 OUTPUT
-	    case "P1.0 1": {
+	switch (opcode) {
+	   case 0x00: {
+	       control_opcode = data.getUint8(1);
+	       control_data   = null;
+
+	       //console.log("control: " + data.getUint8(1));
+	       break;
+	   }
+
+	   case 0x01: {
+	       print_console(message);
+	       break;
+	   }
+
+	   case 0x02: {
+	       print_serial(message);
+	       break;
+	   }
+	}
+	
+
+	switch (control_opcode) {	    
+	    // P1.0 OUTPUT
+	    case 0x00: {
 		P1_0_LED_image.visible = true;			 
 		P1_0_value_text.content = '1';
 
 		break;
 	    }	    
-	    case "P1.0 0": {
+	    case 0x01: {
 		P1_0_LED_image.visible = false;
 		P1_0_value_text.content = '0';
 
 		break;
 	    }
 		
-		// P1.1 OUTPUT
-	    case "P1.1 1": {
+	    // P1.1 OUTPUT
+	    case 0x02: {
 		P1_1_value_text.content = '1';
 
 		break;
 	    }
-	    case "P1.1 0": {
+	    case 0x03: {
 		P1_1_value_text.content = '0';
 
 		break;
 	    }
 
-		// P1.2 OUTPUT
-	    case "P1.2 1": {
+	    // P1.2 OUTPUT
+	    case 0x04: {
 		P1_2_value_text.content = '1';
 
 		break;
 	    }
-	    case "P1.2 0": {
+	    case 0x05: {
 		P1_2_value_text.content = '0';
 
 		break;
 	    }
 
-		// P1.3 OUTPUT
-	    case "P1.3 1": {
+	    // P1.3 OUTPUT
+	    case 0x06: {
 		P1_3_value_text.content = '1';
 
 		break;
 	    }
-	    case "P1.3 0": {
+	    case 0x07: {
 		P1_3_value_text.content = '0';
 
 		break;
 	    }
 
-		// P1.4 OUTPUT
-	    case "P1.4 1": {
+	    // P1.4 OUTPUT
+	    case 0x08: {
 		P1_4_value_text.content = '1';
 
 		break;
 	    }
-	    case "P1.4 0": {
+	    case 0x09: {
 		P1_4_value_text.content = '0';
 
 		break;
 	    }
 
-		// P1.5 OUTPUT
-	    case "P1.5 1": {
+	    // P1.5 OUTPUT
+	    case 0x0A: {
 		P1_5_value_text.content = '1';
 
 		break;
 	    }
-	    case "P1.5 0": {
+	    case 0x0B: {
 		P1_5_value_text.content = '0';
 
 		break;
 	    }
 
-		// P1.6 OUTPUT
-	    case "P1.6 1": {
+	    // P1.6 OUTPUT
+	    case 0x0C: {
 		P1_6_LED_image.visible = true;
 		P1_6_value_text.content = '1';
 
 		break;
 	    }
-	    case "P1.6 0": {
+	    case 0x0D: {
 		P1_6_LED_image.visible = false;
 		P1_6_value_text.content = '0';
 
 		break;
 	    }
 		
-		// P1.7 OUTPUT
-	    case "P1.7 1": {
+	    // P1.7 OUTPUT
+	    case 0x0E: {
 		P1_7_value_text.content = '1';
 
 		break;
 	    }
-	    case "P1.7 0": {
+	    case 0x0F: {
 		P1_7_value_text.content = '0';
 
 		break;
 	    }
-		
-	    case "_STDOUT_": {
-		stdout_mode = true;
-		break;
-	    }
 
-	    case "_SERIAL_": {
-		serial_mode = true;
-		break;
-	    }
-
-		// Line of text for the console
 	    default: {
-		//print_console(msg);
 		break;
-	    }
 	    }
 	}
 
@@ -424,7 +445,7 @@ function _move_elem(e) {
     var canvas_top = canvas.offsetTop;
     var canvas_right = canvas.offsetRight;
     var canvas_bottom = canvas.offsetBottom;
-
+    
     if (selected !== null) {
 	if (selected == console_window) {
             selected.style.left = (x_pos - x_elem - canvas_left) + 'px';
@@ -432,7 +453,7 @@ function _move_elem(e) {
 	}
 	else if (selected == serial_window) {
             selected.style.left   =  (x_pos - x_elem - canvas_left) + 'px';
-            selected.style.top    =  (y_pos - y_elem - canvas_top) + 'px';
+            selected.style.top    =  (y_pos - y_elem - canvas_top)  + 'px';
 	}
 	else if (selected == register_window) {
             selected.style.left   =  (x_pos - x_elem - canvas_left) + 'px';

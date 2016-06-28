@@ -62,10 +62,9 @@ int main(int argc, char *argv[])
     while (!deb->web_server_ready) usleep(100);
 
     printf("SERVER: Waiting for web client to upload firmware...\n");
-    web_send("MSP430 Emulator\nCopyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)\n\n", 
-	     STDOUT);
+    print_console(emu, "MSP430 Emulator\nCopyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)\n\n");
 
-    web_send("[!] Please upload your firmware (waiting)\n", STDOUT);
+    print_console(emu, "[!] Please upload your firmware (waiting)\n");
     while (!deb->web_firmware_uploaded) usleep(1000);
   }
   else if (deb->console_interface) {
@@ -90,9 +89,9 @@ int main(int argc, char *argv[])
   load_bootloader(0x0C00);
 
   if (deb->console_interface)
-    load_firmware(argv[1], 0xC000);
+    load_firmware(emu, argv[1], 0xC000);
   else if (deb->web_interface)
-    load_firmware("tmp.bin", 0xC000);
+    load_firmware(emu, "tmp.bin", 0xC000);
 
   // display first round of registers
   display_registers(emu);

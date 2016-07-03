@@ -42,7 +42,6 @@ int main(int argc, char *argv[])
 
   deb->server = (Server *) calloc(1, sizeof(Server));  
 
-
   if (deb->web_interface == true) {
     if (argv[1] == NULL) {
       puts("Need port argument");
@@ -92,7 +91,7 @@ int main(int argc, char *argv[])
     load_firmware(emu, argv[1], 0xC000);
   else if (deb->web_interface)
     load_firmware(emu, "tmp.bin", 0xC000);
-
+  
   // display first round of registers
   display_registers(emu);
   disassemble(emu, cpu->pc, 1);
@@ -100,18 +99,18 @@ int main(int argc, char *argv[])
   // Fetch-Decode-Execute Cycle (run machine)
   while (!deb->quit) {
     struct timespec start, end;
-
+    
     // Handle debugger
     if (!deb->run) {usleep(1000);continue;}
     handle_breakpoints(emu);
-
+    
     // Instruction Decoder
     decode(emu, fetch(emu), EXECUTE); 
-
+    
     // Handle Peripherals
     handle_port_1(emu);
     handle_usci(emu);
-
+    
     // Get close to 1.1 MHZ
     clock_gettime(CLOCK_MONOTONIC, &start);
 

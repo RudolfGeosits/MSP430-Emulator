@@ -429,13 +429,40 @@ void *web_server (void *ctxt)
 }
 
 void send_control(Emulator *emu, uint8_t opcode, 
-		  void *packet, size_t size)
+		  void *data, size_t data_size)
 {
-  if (packet == NULL) { // Simple case
+  const static NUM_OPCODE_BYTES   = 1;
+  const static NUM_DATA_LEN_BYTES = 1;
+
+  if (data == NULL) { // Simple case
     packet_enqueue(emu, (void *)&opcode, 1, CONTROL_PACKET_OPCODE);
   }
-  else { // data case
-    puts("not here yet");
+  else { // data case ( OP DL DATADATADATA )
+    uint8_t full_packet[NUM_OPCODE_BYTES + NUM_DATA_LEN_BYTES + data_size];
+
+    // First part of packet is the opcode for specific control type
+    memcpy(full_packet, (void *)&opcode, NUM_OPCODE_BYTES);
+
+    // Second part is the data length field for following data
+    memcpy(full_packet + NUM_OPCODE_BYTES, &data_size, 
+	   NUM_DATA_LEN_BYTES);
+
+    // Third part is the data itself.
+    memcpy(full_packet + NUM_OPCODE_BYTES + NUM_DATA_LEN_BYTES, 
+	   data, data_size);
+    
+    /*
+    int i;
+    for (i = 0;i < 1+size;i++) {
+      printf("%02X ", *(uint8_t *)(full_packet + i));
+    }
+    puts(" .");
+    */
+
+    packet_enqueue(emu, (void *)&full_packet, 
+		   NUM_OPCODE_BYTES + NUM_DATA_LEN_BYTES + data_size, 
+		   CONTROL_PACKET_OPCODE);
+    
   }
 }
 

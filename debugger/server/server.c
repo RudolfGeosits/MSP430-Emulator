@@ -12,8 +12,12 @@ void handle_sigchld(int sig) {
 
 void signal_callback_handler(int signum)
 {
-  printf("Caught signal %d\n",signum);
+  printf("Caught signal %d\n", signum);
   // Cleanup and close up stuff here
+  int saved_errno = errno;
+
+  while (waitpid((pid_t)(-1), 0, WNOHANG) > 0) {}
+  errno = saved_errno;
 
   // Terminate program
   exit(signum);

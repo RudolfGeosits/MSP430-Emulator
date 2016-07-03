@@ -236,6 +236,14 @@ function onMouseUp (event) {
     paper.view.update();
 }
 
+function hex2a(hexx) {
+    var hex = hexx.toString();//force conversion
+    var str = '';
+    for (var i = 0; i < hex.length; i += 2)
+	str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+    return str;
+}
+
 var stdout_mode = false;
 var serial_mode = false;
 
@@ -273,24 +281,37 @@ listener.onmessage = function (event) {
 	
 	var message = ab2str(str_array);
 	var control_opcode = null;
-	var control_data   = null;
+	var control_data   = "";
+	var control_data_len = 0;
 	//console.log("Here got [" + message + "], len " + data_len);
 
 	switch (opcode) {
 	   case 0x00: {
-	       control_opcode = data.getUint8(1);
-	       control_data   = null;
+	       control_opcode   = data.getUint8(1);
 
-	       //console.log("control: " + data.getUint8(1));
+	       if (data_len > 2) {
+		   control_data_len = data.getUint8(2);
+		   
+		   for (var k = 0;k < control_data_len;k++) {
+		       control_data += data.getUint8(k + 3);
+		       //console.log(data.getUint8(k));
+		   }
+
+		   console.log("control opcode: " + control_opcode);
+		   console.log("data len " + control_data_len);
+		   console.log("data: " + control_data);
+	       }
 	       break;
 	   }
 
 	   case 0x01: {
+	       //console.log("console");
 	       print_console(message);
 	       break;
 	   }
 
 	   case 0x02: {
+	       //console.log("serial");
 	       print_serial(message);
 	       break;
 	   }
@@ -491,17 +512,17 @@ document.getElementById('register_window').onmousedown = function () {
 document.onmousemove = _move_elem;
 document.onmouseup = _destroy;
 
+/*
 $('#myCanvas').on('mousewheel', function(event) {
     console.log(event.deltaX, event.deltaY, event.deltaFactor);
 });
+*/
 
 var table = document.getElementById("register_table");
 for (var i = 0, row; row = table.rows[i]; i++) {
     //iterate through rows
     //rows would be accessed using the "row" variable assigned in the for loop
     for (var j = 0, col; col = row.cells[j]; j++) {
-	col = "X";
-	//iterate through columns
-	//columns would be accessed using the "col" variable assigned in the for loop
+	//table.rows[i].cells[j].innerHTML = "X";
     }  
 }

@@ -62,6 +62,9 @@ enum {
 
   P1_7_ON_PACKET  = 0x0E,
   P1_7_OFF_PACKET = 0x0F,
+
+  UPDATE_REG_R0_PACKET = 0x10,
+  UPDATE_REG_R1_PACKET = 0x11,
 };
 
 int callback_http (struct libwebsocket_context *this,

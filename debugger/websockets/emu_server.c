@@ -366,7 +366,8 @@ int callback_emu (struct libwebsocket_context *this,
 	printf("%s\n", buf);
 
 	if (!deb->run && deb->debug_mode) {
-	  exec_cmd(emu, buf, len);
+	  exec_cmd(emu, buf, len);	  
+	  update_register_display(emu);
 	}
       }
 

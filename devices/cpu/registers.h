@@ -1,4 +1,3 @@
-
 #ifndef _REGISTERS_H_
 #define _REGISTERS_H_
 
@@ -37,7 +36,8 @@ typedef struct Cpu {
   Usci *usci;
 } Cpu;
 
-uint16_t sr_to_value(Emulator *emu);
-void initialize_msp_registers(Emulator *emu);
+uint16_t sr_to_value (Emulator *emu);
+void initialize_msp_registers (Emulator *emu);
+void update_register_display (Emulator *emu);
 
 #endif

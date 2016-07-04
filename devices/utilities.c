@@ -50,7 +50,7 @@ void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr)
   if (fd == NULL) {
     printf("Could not open %s, exiting.\n", file_name);
     exit(1);
-  }
+ }
 
   /* obtain file size */
   fseek(fd, 0, SEEK_END);
@@ -321,7 +321,7 @@ void display_help(Emulator *emu)
 	  "**************************************************\n"\
 	  "*\t\tMSP430-Emulator\n*\n*\tUsage: ./msp430 BINARY_FIRMWARE\n*\n"\
 	  "* run\t\t\t[Run Program Until Breakpoint is Hit]\n"\
-	  "* step [N]\t\t\t[Step Into Instruction]\n"\
+	  "* step [N]\t\t[Step Into Instruction]\n"\
 	  "* dump [HEX_ADDR|Rn]\t[Dump Memory direct or at register value]\n"\
 	  "* set [HEX_ADDR|Rn]\t[Set Memory or Register Location]\n"\
 	  "* dis [N][HEX_ADDR]\t[Disassemble Instructions]\n"\
@@ -329,6 +329,7 @@ void display_help(Emulator *emu)
 	  "* bps\t\t\t[Display Breakpoints]\n"\
 	  "* regs\t\t\t[Display Registers]\n"\
 	  "* CTRL+C\t\t[Pause Execution]\n"\
+	  "* reset\t\t\t[Reset Machine]\n"\
 	  "* quit\t\t\t[Exit program]\n"\
 	  "**************************************************\n");
 

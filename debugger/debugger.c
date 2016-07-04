@@ -20,7 +20,8 @@
 
 Emulator *local_emu = NULL;
 
-bool exec_cmd (Emulator *emu, char *line, int len) {
+bool exec_cmd (Emulator *emu, char *line, int len) 
+{
   Cpu *cpu = emu->cpu;
   Debugger *deb = emu->debugger;
 
@@ -34,7 +35,11 @@ bool exec_cmd (Emulator *emu, char *line, int len) {
   ops = sscanf(line, "%s %u %u", cmd, &op1, &op2);
   //printf("Got %s, %u, %u - ops %d\n", cmd, op1, op2, ops);
 
-  // reset the virtual machine //
+  /* RESET / RESTART
+     
+     Resets the entire virtual machine to it's starting state.
+     Puts the starting address back into Program Counter
+   */
   if ( !strncasecmp("reset", cmd, sizeof "reset") ||
        !strncasecmp("restart", cmd, sizeof "restart")) 
     {      
@@ -126,28 +131,45 @@ bool exec_cmd (Emulator *emu, char *line, int len) {
   // Set REG/LOC VALUE 
   else if ( !strncasecmp("set", cmd, sizeof "set") ) 
     {
-      int value = 0;
-      char reg_name_or_addr[100];
-      
-      print_console(emu, "Not yet implemented.\n");
-      
-      /*
-      sscanf(line, "%s %s", bogus1, reg_name_or_addr);
+      uint16_t value = 0;
+      char reg_name_or_addr[50] = {0};
+      char *reg_name = NULL;
+      char *addr_str = NULL;
 
-      if ( reg_name_to_num(reg_name_or_addr) != -1 ) {
-	uint16_t *p = get_reg_ptr(emu, reg_name_to_num(reg_name_or_addr) );
-	*p = value;
+      //print_console(emu, "Not yet implemented.\n");
+      
+      sscanf(line, "%s %s %X", bogus1, reg_name_or_addr, 
+	     (unsigned int*)&value);
+      
+      //printf("Got %s and %X\n", reg_name_or_addr, value);
+
+      // Figure out if the value given is a reg name or addr
+      int res = reg_name_to_num(reg_name_or_addr);
+
+      if (res != -1) {  // If its a reg name
+	reg_name = reg_name_or_addr;
+	printf("In reg part...\n");
+	
+	if (res == 2) { // SR (R2)
+	  set_sr_value(emu, value);
+	}
+	else { // All others
+	  uint16_t *p = get_reg_ptr(emu, res);
+	  *p = value;
+	}
 
 	display_registers(emu);
 	disassemble(emu, cpu->pc, 1);
       }
       else {
-	uint16_t virtual_addr = (uint16_t) strtol(reg_name_or_addr, NULL, 0);
+	addr_str = reg_name_or_addr;
+	printf("In addr part...\n");
+
+	uint16_t virtual_addr = (uint16_t) strtol(addr_str, NULL, 0);
 
 	uint16_t *p = get_addr_ptr(virtual_addr);
 	*p = value;
       }
-      */
     }
 
   // break BREAKPOINT_ADDRESS - set breakpoint //

@@ -15,9 +15,14 @@ You can use this emulator at: http://www.poorhackers.com/emu.html
   
   Please feel free to contribute! (TODO list below!) Also, we would like to hear from you if you are using this software! 
 
-  Please contact me at rgeosits@live.esu.edu if you are using this for something or would like more information on how to contribute.
+  Please contact me at rgeosits@live.esu.edu if you are using this for something or would like more information on how to contribute. Let me know if you need something specific emulated!
 
+  We appreciate all those who support this open sourced emulation project, for both educational
+  and professional purposes. Your contributions will go directly to time worked on this project.
+
+  Thank you!
   
+  --------------------------------------------------------------------------------------------------------------
 
 - TODO
   - Basic Clock Module / Timer

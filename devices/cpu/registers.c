@@ -52,7 +52,49 @@ void update_register_display (Emulator *emu)
   send_control(emu, UPDATE_REG_R0_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X", cpu->sp);
-  send_control(emu, UPDATE_REG_R1_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R1_PACKET, (void *)thing, strlen(thing));
+
+  sprintf(thing, "%04X", sr_to_value(emu));
+  send_control(emu, UPDATE_REG_R2_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X",(uint16_t) cpu->cg2);
+  send_control(emu, UPDATE_REG_R3_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X",(uint16_t) cpu->r4);
+  send_control(emu, UPDATE_REG_R4_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X",(uint16_t) cpu->r5);
+  send_control(emu, UPDATE_REG_R5_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X",(uint16_t) cpu->r6);
+  send_control(emu, UPDATE_REG_R6_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X",(uint16_t) cpu->r7);
+  send_control(emu, UPDATE_REG_R7_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X",(uint16_t) cpu->r8);
+  send_control(emu, UPDATE_REG_R8_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X",(uint16_t) cpu->r9);
+  send_control(emu, UPDATE_REG_R9_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X", (uint16_t)cpu->r10);
+  send_control(emu, UPDATE_REG_R10_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X", (uint16_t)cpu->r11);
+  send_control(emu, UPDATE_REG_R11_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X", (uint16_t)cpu->r12);
+  send_control(emu, UPDATE_REG_R12_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X", (uint16_t)cpu->r13);
+  send_control(emu, UPDATE_REG_R13_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X", (uint16_t)cpu->r14);
+  send_control(emu, UPDATE_REG_R14_PACKET, (void *)thing, strlen(thing));  
+
+  sprintf(thing, "%04X", (uint16_t)cpu->r15);
+  send_control(emu, UPDATE_REG_R15_PACKET, (void *)thing, strlen(thing));
 }
 
 //##########+++ Set SR struct Value +++##########

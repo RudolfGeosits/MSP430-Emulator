@@ -431,6 +431,98 @@ listener.onmessage = function (event) {
 		table.rows[0].cells[3].innerHTML = message;
 		break;
 	    }
+	    // UPDATE REG R2 (SR)
+	    case 0x12: {
+		table.rows[0].cells[5].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R3 (CG2)
+	    case 0x13: {
+		table.rows[0].cells[7].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R4
+	    case 0x14: {
+		table.rows[1].cells[1].innerHTML = message;
+		break;
+	    }
+
+	    // UPDATE REG R5
+	    case 0x15: {
+		table.rows[1].cells[3].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R6
+	    case 0x16: {
+		table.rows[1].cells[5].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R7
+	    case 0x17: {
+		table.rows[1].cells[7].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R8
+	    case 0x18: {
+		table.rows[2].cells[1].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R9
+	    case 0x19: {
+		table.rows[2].cells[3].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R10
+	    case 0x1A: {
+		table.rows[2].cells[5].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R11
+	    case 0x1B: {
+		table.rows[2].cells[7].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R12
+	    case 0x1C: {
+		table.rows[3].cells[1].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R13
+	    case 0x1D: {
+		table.rows[3].cells[3].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R14
+	    case 0x1E: {
+		table.rows[3].cells[5].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R15
+	    case 0x1F: {
+		table.rows[3].cells[7].innerHTML = message;
+		break;
+	    }
+
+	    // UPDATE C FLAG
+	    case 0x1F: {
+		table.rows[3].cells[7].innerHTML = message;
+		break;
+	    }
+	    // UPDATE Z FLAG
+	    case 0x1F: {
+		table.rows[3].cells[7].innerHTML = message;
+		break;
+	    }
+	    // UPDATE N FLAG
+	    case 0x1F: {
+		table.rows[3].cells[7].innerHTML = message;
+		break;
+	    }
+	    // UPDATE V FLAG
+	    case 0x1F: {
+		table.rows[3].cells[7].innerHTML = message;
+		break;
+	    }
 
 	    default: {
 		break;

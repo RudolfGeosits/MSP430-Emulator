@@ -105,6 +105,8 @@ var P1_7_value_text = new PointText({
     fontFamily: 'Terminal',
 });
 
+// Table Declaration
+var table = document.getElementById("register_table");
 
 // textArea declarations
 var stdout = document.getElementById('console');
@@ -294,12 +296,12 @@ listener.onmessage = function (event) {
 		   
 		   for (var k = 0;k < control_data_len;k++) {
 		       control_data += data.getUint8(k + 3);
-		       //console.log(data.getUint8(k));
+		       //console.log(' ' + data.getUint8(k + 3));
 		   }
 
-		   console.log("control opcode: " + control_opcode);
-		   console.log("data len " + control_data_len);
-		   console.log("data: " + control_data);
+		   //console.log("control opcode: " + control_opcode);
+		   //console.log("data len " + control_data_len);
+		   //console.log("data: " + control_data);
 	       }
 	       break;
 	   }
@@ -419,6 +421,17 @@ listener.onmessage = function (event) {
 		break;
 	    }
 
+	    // UPDATE REG R0 (PC)
+	    case 0x10: {
+		table.rows[0].cells[1].innerHTML = message;
+		break;
+	    }
+	    // UPDATE REG R1 (SP)
+	    case 0x11: {
+		table.rows[0].cells[3].innerHTML = message;
+		break;
+	    }
+
 	    default: {
 		break;
 	    }
@@ -453,33 +466,19 @@ var selected = null, // Object of the element to be moved
 function _drag_init(elem) {
     // Store the object of the element which needs to be moved
     selected = elem;
-    x_elem = x_pos - selected.offsetLeft;
+
+    x_elem = x_pos - selected.offsetLeft;    
     y_elem = y_pos - selected.offsetTop;
 }
 
 // Will be called when user dragging an element
 function _move_elem(e) {
-    x_pos = document.all ? window.event.clientX : e.pageX;
-    y_pos = document.all ? window.event.clientY : e.pageY;
+    x_pos = window.event.clientX;
+    y_pos = window.event.clientY;
 
-    var canvas_left = canvas.offsetLeft;
-    var canvas_top = canvas.offsetTop;
-    var canvas_right = canvas.offsetRight;
-    var canvas_bottom = canvas.offsetBottom;
-    
-    if (selected !== null) {
-	if (selected == console_window) {
-            selected.style.left = (x_pos - x_elem - canvas_left) + 'px';
-            selected.style.top =  (y_pos - y_elem - canvas_top) + 'px';
-	}
-	else if (selected == serial_window) {
-            selected.style.left   =  (x_pos - x_elem - canvas_left) + 'px';
-            selected.style.top    =  (y_pos - y_elem - canvas_top)  + 'px';
-	}
-	else if (selected == register_window) {
-            selected.style.left   =  (x_pos - x_elem - canvas_left) + 'px';
-            selected.style.top    =  (y_pos - y_elem - canvas_top) + 'px';
-	}	
+    if (selected != null) {
+        selected.style.left = (x_pos - x_elem) + 'px';
+        selected.style.top  = (y_pos - y_elem) + 'px';
     }
 }
 
@@ -512,13 +511,7 @@ document.getElementById('register_window').onmousedown = function () {
 document.onmousemove = _move_elem;
 document.onmouseup = _destroy;
 
-/*
-$('#myCanvas').on('mousewheel', function(event) {
-    console.log(event.deltaX, event.deltaY, event.deltaFactor);
-});
-*/
-
-var table = document.getElementById("register_table");
+//var table = document.getElementById("register_table");
 for (var i = 0, row; row = table.rows[i]; i++) {
     //iterate through rows
     //rows would be accessed using the "row" variable assigned in the for loop

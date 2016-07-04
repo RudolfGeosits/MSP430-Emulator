@@ -3,8 +3,6 @@ MSP430 Emulator
 
 You can use this emulator at: http://www.poorhackers.com/emu.html
 
-NOTE: We are in the process of moving to a web interface!
-
 - Providing a complete software model of the MSP430 16-bit instruction set
 - An interactive debugger for advanced development and in depth firmware/hardware analysis
 - Peripherals include:
@@ -13,17 +11,16 @@ NOTE: We are in the process of moving to a web interface!
 
   The project goal is to emulate all peripherals and devices on the TI MSP430 Launchpad starter kit, 
   to be able to run all firmware that would run on the physical device and test hardware inputs like UART or some of the other digital ports via programmable means. 
-  Then moving on to a more device agnostic end game. The C program is basically a server while the user interface is accessed through the browser. This will be put online soon.
+  The C program is basically a server while the user interface is accessed through the browser. This server and interface is available online at the link above.
   
-  Ultimately, we would like to develop a simple and configurable framework that can handle many architectures.
-  If you think this sounds fun, please feel free to contribute! (TODO list below!) Also, we would like to hear from you! 
+  Please feel free to contribute! (TODO list below!) Also, we would like to hear from you if you are using this software! 
+
   Please contact me at rgeosits@live.esu.edu if you are using this for something or would like more information on how to contribute.
+
   
-  ![Screen Grab](http://s14.postimg.org/oc29wu3e9/Screenshot_from_2015_08_22_20_08_24.png "Screen Grab")
 
 - TODO
-  - Support for ELF binary format
-  - Basic Clock Module
+  - Basic Clock Module / Timer
   
   - Instructions
     - DADD (BCD math)    
@@ -38,9 +35,11 @@ NOTE: We are in the process of moving to a web interface!
   - type 'make' (you can also make clean after)
 
 - User Instructions
-  - Log onto www.poorhackers.com/emu.html to use the ONLINE web interface
+  - Log onto www.poorhackers.com/emu.html to use the ONLINE Emulator
 
   - The following are instructions on how to use a LOCAL web interface
-    - run the server via ./SERVER
-    - load index.html from debugger/webclient/index.html to your browser
-    - You will be connected
+    - Install a local web service like apache or nginx
+    - load files from debugger/webclient/* to your local web service
+    - run the server via ./server
+    - Connect via loopback address, 127.0.0.1, in your browser
+    - You will be connected! Enjoy.

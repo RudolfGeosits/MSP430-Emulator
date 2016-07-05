@@ -325,18 +325,21 @@ int callback_emu (struct libwebsocket_context *this,
 	serial = false;
       }
       else if ( !strncmp((const char *)buf, (const char *)"PAUSE", sizeof("PAUSE")) ) {
-	if (deb->run) {
-	  deb->run = false;
+	if (cpu->running) {
+	  cpu->running = false;
 	  deb->debug_mode = true;
 
 	  // display first round of registers
 	  display_registers(emu);
 	  disassemble(emu, cpu->pc, 1);
+	  update_register_display(emu);
 	}
       }
       else if ( !strncmp((const char *)buf, (const char *)"PLAY", sizeof("PLAY")) ) {
-	deb->run = true;
+	cpu->running = true;
 	deb->debug_mode = false;
+
+	update_register_display(emu);
       }
       else if ( !strncmp((const char *)buf, (const char *)"UPLOAD", sizeof("UPLOAD")) ) {
 	upload = true;
@@ -365,7 +368,7 @@ int callback_emu (struct libwebsocket_context *this,
       else {
 	printf("%s\n", buf);
 
-	if (!deb->run && deb->debug_mode) {
+	if (!cpu->running && deb->debug_mode) {
 	  exec_cmd(emu, buf, len);	  
 	  update_register_display(emu);
 	}

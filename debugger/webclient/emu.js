@@ -502,28 +502,34 @@ listener.onmessage = function (event) {
 		table.rows[3].cells[7].innerHTML = message;
 		break;
 	    }
+	    // Set all reg items
+	    case 0x20: {
+		table.rows[0].cells[1].innerHTML = message;
+		table.rows[0].cells[3].innerHTML = message;
+		table.rows[0].cells[5].innerHTML = message;
+		table.rows[0].cells[7].innerHTML = message;
+		table.rows[0].cells[9].innerHTML = message;
 
-	    // UPDATE C FLAG
-	    case 0x1F: {
-		table.rows[3].cells[7].innerHTML = message;
-		break;
-	    }
-	    // UPDATE Z FLAG
-	    case 0x1F: {
-		table.rows[3].cells[7].innerHTML = message;
-		break;
-	    }
-	    // UPDATE N FLAG
-	    case 0x1F: {
-		table.rows[3].cells[7].innerHTML = message;
-		break;
-	    }
-	    // UPDATE V FLAG
-	    case 0x1F: {
-		table.rows[3].cells[7].innerHTML = message;
-		break;
-	    }
+		table.rows[1].cells[1].innerHTML = message;
+		table.rows[1].cells[3].innerHTML = message;
+		table.rows[1].cells[5].innerHTML = message;
+		table.rows[1].cells[7].innerHTML = message;
+		table.rows[1].cells[9].innerHTML = message;
 
+		table.rows[2].cells[1].innerHTML = message;
+		table.rows[2].cells[3].innerHTML = message;
+		table.rows[2].cells[5].innerHTML = message;
+		table.rows[2].cells[7].innerHTML = message;
+		table.rows[2].cells[9].innerHTML = message;
+
+		table.rows[3].cells[1].innerHTML = message;
+		table.rows[3].cells[3].innerHTML = message;
+		table.rows[3].cells[5].innerHTML = message;
+		table.rows[3].cells[7].innerHTML = message;
+		table.rows[3].cells[9].innerHTML = message;
+
+		break;
+	    }
 	    default: {
 		break;
 	    }

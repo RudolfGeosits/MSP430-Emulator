@@ -3,11 +3,8 @@ body {
 }
 
 th {
-    border: 2px solid red;
-    padding: 0.1rem;
-    padding: 0;
-    text-align: left;
-    text-decoration: underline;
+    border: 2px solid brown;
+    text-align: top;
 }
 
 td {

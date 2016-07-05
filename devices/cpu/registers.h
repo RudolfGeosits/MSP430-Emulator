@@ -23,6 +23,8 @@ typedef struct Status_reg {
 
 // Main CPU structure //
 typedef struct Cpu {
+  bool running;      /* CPU running or not */
+
   uint16_t pc, sp;   /* R0 and R1 respectively */
   Status_reg sr;     /* Status register fields */
   int16_t cg2;       /* R3 or Constant Generator #2 */

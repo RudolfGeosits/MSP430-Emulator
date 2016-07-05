@@ -64,7 +64,7 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
     printf("%s", inv);
     
     cpu->pc -= 2;
-    debugger->run = false;
+    cpu->running = false;
     debugger->debug_mode = true;
   }
 }

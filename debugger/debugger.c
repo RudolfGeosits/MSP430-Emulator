@@ -82,8 +82,10 @@ bool exec_cmd (Emulator *emu, char *line, int len)
   else if ( !strncasecmp("run", cmd, sizeof "run") ||
 	    !strncasecmp("r", cmd, sizeof "r")) 
     {
-      deb->run = true;
+      cpu->running = true;
       deb->debug_mode = false;
+
+      update_register_display(emu);
     }
 
   // Display disassembly of N at HEX_ADDR: dis [N] [HEX_ADDR] //
@@ -496,7 +498,6 @@ void setup_debugger(Emulator *emu)
   local_emu = emu;
   Debugger *deb = emu->debugger;
 
-  deb->run = false;
   deb->debug_mode = true;
   deb->disassemble_mode = false;
   deb->quit = false;
@@ -516,7 +517,7 @@ void handle_sigint(int sig)
 {
   if (local_emu == NULL) return;
 
-  local_emu->debugger->run = false;
+  local_emu->cpu->running = false;
   local_emu->debugger->debug_mode = true;
 }
 
@@ -535,7 +536,7 @@ void handle_breakpoints (Emulator *emu)
   for (i = 0;i < deb->num_bps;i++) {
 
     if (cpu->pc == deb->bp_addresses[i]) {
-      deb->run = false;
+      cpu->running = false;
       deb->debug_mode = true;
       
       sprintf(str, "\n\t[Breakpoint %d hit]\n\n", i + 1);

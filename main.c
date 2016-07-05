@@ -27,20 +27,19 @@ int64_t timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)
 int main(int argc, char *argv[])
 {
   Emulator *emu = (Emulator *) calloc( 1, sizeof(Emulator) );
-  Cpu *cpu = NULL;
-  Debugger *deb = NULL;
+  Cpu *cpu = NULL; Debugger *deb = NULL;
 
-  emu->cpu = (Cpu *) calloc(1, sizeof(Cpu));
-  emu->cpu->p1 = (Port_1 *) calloc(1, sizeof(Port_1));
+  emu->cpu       = (Cpu *) calloc(1, sizeof(Cpu));
+  emu->cpu->p1   = (Port_1 *) calloc(1, sizeof(Port_1));
   emu->cpu->usci = (Usci *) calloc(1, sizeof(Usci));  
 
-  emu->debugger = (Debugger *) calloc(1, sizeof(Debugger));
-  setup_debugger(emu);  
-  
+  emu->debugger  = (Debugger *) calloc(1, sizeof(Debugger));
+  setup_debugger(emu);    
+
   cpu = emu->cpu;
   deb = emu->debugger;
 
-  deb->server = (Server *) calloc(1, sizeof(Server));  
+  deb->server    = (Server *) calloc(1, sizeof(Server));
 
   if (deb->web_interface == true) {
     if (argv[1] == NULL) {
@@ -52,56 +51,43 @@ int main(int argc, char *argv[])
 
     pthread_t *t = &deb->web_server_thread;
 
-    if(pthread_create( t, NULL, web_server, (void *)emu )) {
+    if ( pthread_create(t, NULL, web_server, (void *)emu ) ) {
       fprintf(stderr, "Error creating web server thread\n");
       return 1;
     }
     
-    printf("SERVER: Waiting for web client to connect...\n");
-    while (!deb->web_server_ready) usleep(100);
+    while (!deb->web_server_ready) usleep(10000);
 
-    printf("SERVER: Waiting for web client to upload firmware...\n");
-    print_console(emu, "MSP430 Emulator\nCopyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)\n\n");
+    print_console(emu, "MSP430 Emulator\nCopyright (C) 2016 Rudolf"\
+		  " Geosits (rgeosits@live.esu.edu)\n\n");
 
     print_console(emu, "[!] Please upload your firmware (waiting)\n");
-    while (!deb->web_firmware_uploaded) usleep(1000);
+    while (!deb->web_firmware_uploaded) usleep(10000);
   }
-  else if (deb->console_interface) {
-    puts("console mode not implemented.");
 
-    if (argv[1] == NULL) {
-      display_help(emu);
-      exit(1);
-    }
-
-    register_signal(SIGINT); // Register Callback for CONTROL-c
-  }  
+  //register_signal(SIGINT); // Register Callback for CONTROL-c
   
   initialize_msp_memspace();
   initialize_msp_registers(emu);  
   setup_port_1(emu);
   setup_usci(emu);
-
-  // Open Pseudo terminal in console mode for Serial
-  //if (deb->console_interface) open_pty(emu);
   
   load_bootloader(0x0C00);
 
-  if (deb->console_interface)
-    load_firmware(emu, argv[1], 0xC000);
-  else if (deb->web_interface)
+  if (deb->web_interface)
     load_firmware(emu, "tmp.bin", 0xC000);
   
   // display first round of registers
   display_registers(emu);
   disassemble(emu, cpu->pc, 1);
+  update_register_display(emu);
 
   // Fetch-Decode-Execute Cycle (run machine)
   while (!deb->quit) {
-    struct timespec start, end;
-    
-    // Handle debugger
-    if (!deb->run) {usleep(1000);continue;}
+    // Handle debugger when CPU is not running
+    if (!cpu->running) { usleep(10000); continue; }
+
+    // Handle Breakpoints
     handle_breakpoints(emu);
     
     // Instruction Decoder
@@ -112,6 +98,7 @@ int main(int argc, char *argv[])
     handle_usci(emu);
     
     // Get close to 1.1 MHZ
+    struct timespec start, end;    
     clock_gettime(CLOCK_MONOTONIC, &start);
 
     while (true) {

@@ -36,6 +36,7 @@ void initialize_msp_registers(Emulator *emu)
   /* Initialize the status register */
   memset(&cpu->sr, 0, sizeof(Status_reg));
 
+  cpu->running = false;
   cpu->cg2 = 0;
 
   cpu->r4 = cpu->r5 = cpu->r6 = cpu->r7 = cpu->r8 = 
@@ -46,7 +47,13 @@ void initialize_msp_registers(Emulator *emu)
 void update_register_display (Emulator *emu) 
 {
   Cpu *cpu = emu->cpu;  
-  char thing[50] = {0};
+  char thing[50] = "....";  
+
+  if (emu->cpu->running) {
+    send_control(emu, UPDATE_ALL_REGS_PACKET, (void *)thing, strlen(thing));
+    
+    return;
+  }
 
   sprintf(thing, "%04X", cpu->pc);
   send_control(emu, UPDATE_REG_R0_PACKET, (void *)thing, strlen(thing));

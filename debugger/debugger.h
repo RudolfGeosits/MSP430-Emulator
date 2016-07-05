@@ -19,12 +19,6 @@
 #ifndef _DEBUGGER_H_
 #define _DEBUGGER_H_
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
-
 #include "../main.h"
 #include "../devices/cpu/registers.h"
 #include "../devices/memory/memspace.h"
@@ -33,7 +27,7 @@ typedef enum { BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE } Stride;
 enum { MAX_BREAKPOINTS = 100 };
 
 typedef struct Debugger {
-  bool run;
+  //bool run;
   bool disassemble_mode;
   bool debug_mode;
   bool web_interface;

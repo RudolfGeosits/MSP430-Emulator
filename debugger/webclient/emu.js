@@ -152,11 +152,22 @@ show_serial_button.onclick = function()
 // upload binary file //
 var contents;
 
-//upload_button.onclick = function(){	     
-upload_button.onclick = function() {	     
-    ws.send("UPLOAD");
-    ws.send(contents);
-    ws.send("NPLOAD");
+upload_button.onclick = function()
+{
+    // Prepare Opcode
+    var opcode = new Uint8Array(1);
+    opcode[0] = 0x00;
+
+    // Prepare Size
+    var buffer = new ArrayBuffer(4);
+    var dv = new DataView(buffer, 0);
+    dv.setUint32(0, contents.byteLength);
+
+    var blob = new Blob([opcode, buffer, contents]);
+
+    ws.binaryType = "blob";
+    ws.send(blob);
+    ws.binaryType = "arraybuffer";
 };
 
 function readSingleFile(e) {
@@ -189,26 +200,52 @@ enter_button.onclick = function(){
 	prev_cmd = stdin.value;
     }
 
-    ws.send(stdin.value);
+    // Prepare Opcode
+    var opcode = new Uint8Array(1);
+    opcode[0] = 0x04;
+
+    var blob = new Blob([opcode, stdin.value]);
+
+    ws.binaryType = "blob";
+    ws.send(blob);
+    ws.binaryType = "arraybuffer";
+
     stdin.value = "";
 };
 
-serial_enter_button.onclick = function(){
+serial_enter_button.onclick = function()
+{
     if (serial_in.value == "") {
 	return;
     }
-    
-    ws.send("_SERIAL_");
-    ws.send(serial_in.value + "\n");
+
+    // Prepare Opcode
+    var opcode = new Uint8Array(1);
+    opcode[0] = 0x03;
+
+    var blob = new Blob([opcode, serial_in.value + "\n"]);
+
+    ws.binaryType = "blob";
+    ws.send(blob);
+    ws.binaryType = "arraybuffer";
+
     serial_in.value = "";
 };
 
 pause_button.onclick = function(){
-    ws.send("PAUSE");
+    // Prepare Opcode
+    var opcode = new Uint8Array(1);
+    opcode[0] = 0x02;
+
+    ws.send(opcode);
 };
 
 play_button.onclick = function(){
-    ws.send("PLAY");
+    // Prepare Opcode
+    var opcode = new Uint8Array(1);
+    opcode[0] = 0x01;
+
+    ws.send(opcode);
 };	 
 
 function onMouseDown (event) {

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<meta charset="utf-8"/>
+
+<html lang="en-US">
+    <head>
+	<title>MSP430-Emulator</title>
+
+	<link rel="stylesheet" type="text/css" href="reset.css">
+	<link rel="stylesheet" type="text/css" href="emu.css">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+
+	<script type="text/javascript" src="jquery.mousewheel.min.js"></script>
+	
+	<!-- Load the Paper.js library -->
+	<script type="text/javascript" src="js/paper.js"></script>
+
+	<!-- Load the canvas script -->
+	<script type="text/paperscript" canvas="myCanvas" 
+		async src="emu.js">
+	</script>
+    </head>
+    
+    <body>		
+	<div id="banner">
+            <a href="index.html"><button class="button button1">
+		<h1 id="logo">Poor Hackers</h1>
+	    </button></a>
+
+	    <a href="emu.html"><button class="button button2">
+		<h1>MSP430 Emulator</h1>
+	    </button></a>
+	</div>
+
+	<hr/>
+	
+	<div id="toolbar">
+	    <button id="play_button">
+		<img src="play.svg" height="32"/>
+	    </button>
+
+	    <button id="pause_button">
+		<img src="pause.svg" height="32"/>
+	    </button>	    
+	    
+	    <button id="show_serial_button">
+		<img src="show_serial.svg" height="32"/>
+	    </button>
+	    
+            <a href="emu_help.html" target="_blank">
+		<button id="help_button">
+		    <img src="info.svg" height="32"/>
+		</button>
+	    </a>
+
+	    <button id="upload_button">
+		<img src="upload.svg" height="32"/>
+	    </button>
+
+	    <input type="file" id="file-input"/>
+
+	    <!--
+	    <button id="github_button">
+		<img src="github.svg" height="32"/>
+	    </button>
+	    -->
+	</div>
+	
+	<hr/>
+
+	<div id="main_window">
+
+	    <canvas id="myCanvas"></canvas>
+
+	    <!-- CONSOLE WINDOW -->
+	    <div draggable="true" id="console_window">
+		<textarea id="console" rows="24" cols="80" 
+			  readonly="readonly"></textarea>
+
+		<input type="text" id="stdin">
+	    </div>
+	    
+	    <!-- SERIAL WINDOW -->
+	    <div draggable="true" id="serial_window" style="display: none;">	    
+		<textarea id="serial_out" rows="24" cols="80" 
+			  readonly="readonly"></textarea>
+		
+		<input type="text" id="serial_in">
+	    </div>
+
+	    <!-- REGISTERS WINDOW -->
+	    <div id="register_window" draggable="true">
+		<table id="register_table">
+
+		    <tr>
+			<th>PC</th>
+			<td>0000</td>
+			<th>SP</th>
+			<td>0000</td>
+			<th>SR</th>
+			<td>0000</td>
+			<th>CG2</th>
+			<td>0000</td>
+			<th>C</th>
+			<td>0</td>
+		    </tr>
+
+		    <tr>
+			<th>%R4</th>
+			<td>0000</td>
+			<th>%R5</th>
+			<td>0000</td>
+			<th>%R6</th>
+			<td>0000</td>
+			<th>%R7</th>
+			<td>0000</td>
+			<th>Z</th>
+			<td>0</td>
+		    </tr>
+
+		    <tr>
+			<th>%R8</th>
+			<td>0000</td>
+			<th>%R9</th>
+			<td>0000</td>
+			<th>%R10</th>
+			<td>0000</td>
+			<th>%R11</th>
+			<td>0000</td>
+			<th>N</th>
+			<td>0</td>
+		    </tr>
+
+		    <tr>
+			<th>%R12</th>
+			<td>0000</td>
+			<th>%R13</th>
+			<td>0000</td>
+			<th>%R14</th>
+			<td>0000</td>
+			<th>%R15</th>
+			<td>0000</td>
+			<th>V</th>
+			<td>0</td>
+		    </tr>
+
+		</table>
+	    </div>
+	</div>
+	
+	<img id="msp" src="newmsp.png" alt="msp" hidden="true"></img>
+	<img id="button_down" src="pushed.png" alt="button_down" hidden="true"></img>
+	<img id="P1_0_LED" src="P1_0_LED.png" alt="P1_0_LED" hidden="true"></img>
+	<img id="P1_6_LED" src="P1_6_LED.png" alt="P1_6_LED" hidden="true"></img>
+
+	<button id="enter_button" hidden="true">enter</button> 
+	<button id="serial_enter_button" hidden="true">enter</button> 
+
+    </body>
+</html>

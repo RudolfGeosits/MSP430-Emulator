@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     print_console(emu, "MSP430 Emulator\nCopyright (C) 2016 Rudolf"\
 		  " Geosits (rgeosits@live.esu.edu)\n\n");
 
-    print_console(emu, "[!] Please upload your firmware (waiting)\n");
+    print_console(emu, "[!] Please upload your firmware (.elf ONLY)\n");
     while (!deb->web_firmware_uploaded) usleep(10000);
   }
 

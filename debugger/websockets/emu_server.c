@@ -90,10 +90,6 @@ int callback_emu (struct libwebsocket_context *this,
   Port_1 *p1 = emu->cpu->p1;
   Debugger *deb = emu->debugger;
 
-  static FILE *fp = NULL;
-  static bool upload = false;
-  static bool serial = false;
-
   switch (reason) {
     case LWS_CALLBACK_ESTABLISHED: {
       puts("connection established");
@@ -310,71 +306,138 @@ int callback_emu (struct libwebsocket_context *this,
     }
 
     case LWS_CALLBACK_RECEIVE: {
+      static FILE *fp = NULL;
+      static bool upload_in_progress = false;
+      static uint32_t uploaded_bytes, file_size;
+
       char *buf = (char *)in;      
       
-      if (serial) {
-	lent = len;
-	data = (uint8_t *) in;
+      if (upload_in_progress) { // Continue transaction of upload
+	int i;
+	for (i = 0;i < len;i++){	     
+	  fwrite(&buf[i], 1, 1, fp);
+	  uploaded_bytes++;
 
-	pthread_t t;                      	
+	  if (uploaded_bytes >= file_size) {
+	    //puts("met bytes");
+	    fclose(fp);
+	    system("msp430-objcopy -O binary tmp.elf tmp.bin");
 
-	if( pthread_create(&t, NULL, thrd, (void *)cpu->usci ) ) {
-	  fprintf(stderr, "Error creating thread\n");                    
-	}
+	    deb->web_firmware_uploaded = true;
+	    upload_in_progress = false;
+	    return;
+	  }
 
-	serial = false;
-      }
-      else if ( !strncmp((const char *)buf, (const char *)"PAUSE", sizeof("PAUSE")) ) {
-	if (cpu->running) {
-	  cpu->running = false;
-	  deb->debug_mode = true;
-
-	  // display first round of registers
-	  display_registers(emu);
-	  disassemble(emu, cpu->pc, 1);
-	  update_register_display(emu);
 	}
       }
-      else if ( !strncmp((const char *)buf, (const char *)"PLAY", sizeof("PLAY")) ) {
-	cpu->running = true;
-	deb->debug_mode = false;
+      
+      unsigned char opcode = buf[0];
+      printf("opcode: %02X\n", *(uint8_t*)in);
+      
+      switch (opcode) {
+        case 0x00: { // Upload File
+	   uint8_t byte1 = *((uint8_t *)(in+1));
+	   uint8_t byte2 = *((uint8_t *)(in+2));
+	   uint8_t byte3 = *((uint8_t *)(in+3));
+	   uint8_t byte4 = *((uint8_t *)(in+4));
 
-	update_register_display(emu);
+	   file_size = 0;
+	   file_size = byte1; file_size <<= 3*8;
+	   file_size |= ((0x00000000 | byte2) << 2*8);
+	   file_size |= ((0x00000000 | byte3) << 1*8);
+	   file_size |= ((0x00000000 | byte4));
+
+	   printf("got in with file_size %u, but got len %d\n", 
+		  (unsigned int)file_size, (unsigned int)len);	   
+
+	   if (file_size >= 40000) {
+	     exit(1);
+	     deb->quit = true;
+	   }
+
+	   upload_in_progress = true;
+	   uploaded_bytes = 0;
+	   fp = fopen("tmp.elf", "wb");
+
+	   // Get Any Bytes that are in with this packet
+	   int i;
+	   for (i = 5;i < len;i++){	     
+	     fwrite(&buf[i], 1, 1, fp);
+	     uploaded_bytes++;
+
+	     if (uploaded_bytes >= file_size) {
+	       //puts("met bytes");
+	       fclose(fp);
+	       system("msp430-objcopy -O binary tmp.elf tmp.bin");
+
+	       deb->web_firmware_uploaded = true;
+	       upload_in_progress = false;
+	       return;
+	     }
+	   }
+
+	   break;
+	 }
+
+         case 0x01: { // PLAY
+	   printf("Got play\n");
+	   cpu->running = true;
+	   deb->debug_mode = false;
+	   update_register_display(emu);
+
+	   return;
+	 }
+      
+         case 0x02: { // PAUSE
+	   printf("Got pause\n");
+
+	   if (cpu->running) {
+	     cpu->running = false;
+	     deb->debug_mode = true;
+
+	     // display first round of registers
+	     display_registers(emu);
+	     disassemble(emu, cpu->pc, 1);
+	     update_register_display(emu);
+	   }
+	   
+	   return;
+	 }
+
+         case 0x03: { // SERIAL DATA
+	   if (len > 1000) exit(1);
+
+	   lent = len - 1;
+	   data = (uint8_t *) (in + 1);
+	   
+	   pthread_t t;                      	
+
+	   if( pthread_create(&t, NULL, thrd, (void *)cpu->usci ) ) {
+	     fprintf(stderr, "Error creating thread\n");                    
+	   }
+
+	   //printf("Got serial data %s ... %d bytes long\n", 
+	   //(char *)(in + 1), (unsigned int)len - 1);
+	   
+	   return;
+	 }
+
+         case 0x04: { // Console Input Data
+	   if (len > 1000) exit(1);
+
+	   buf = buf + 1;	   
+	   printf("%s\n", buf);
+
+	   if (!cpu->running && deb->debug_mode) {
+	     exec_cmd(emu, buf, len);	  
+	     update_register_display(emu);
+	   }
+
+	   return;
+         }
+      
+         default: break;
       }
-      else if ( !strncmp((const char *)buf, (const char *)"UPLOAD", sizeof("UPLOAD")) ) {
-	upload = true;
-	fp = fopen("tmp.elf", "wb");
-	puts("upload set");
-      }      
-      else if ( !strncmp((const char *)buf, (const char *)"NPLOAD", sizeof("NPLOAD")) ) {
-	upload = false;
-	fclose(fp);
-	puts("npload reset");
-	system("msp430-objcopy -O binary tmp.elf tmp.bin");
-	puts("objcopy done");
-
-	deb->web_firmware_uploaded = true;
-      }
-      else if (upload) {
-	unsigned char *str = (unsigned char *)in;	
-	fwrite(str, 1, len, fp);
-      }
-
-      else if ( !strncmp((const char *)buf, (const char *)"_SERIAL_", sizeof("_SERIAL_")) ) {
-   	//puts("serial");
-	serial = true;
-      }
-
-      else {
-	printf("%s\n", buf);
-
-	if (!cpu->running && deb->debug_mode) {
-	  exec_cmd(emu, buf, len);	  
-	  update_register_display(emu);
-	}
-      }
-
-      break;
     }
   
   default: {

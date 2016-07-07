@@ -1,7 +1,7 @@
 MSP430 Emulator
 ===============
 
-You can use this emulator at: http://www.poorhackers.com/emu.html
+You can use this emulator at: http://www.msp430emulator.com/emu.html
 
 - Providing a complete software model of the MSP430 16-bit instruction set
 - An interactive debugger for advanced development and in depth firmware/hardware analysis
@@ -40,7 +40,7 @@ You can use this emulator at: http://www.poorhackers.com/emu.html
   - type 'make' (you can also make clean after)
 
 - User Instructions
-  - Log onto www.poorhackers.com/emu.html to use the ONLINE Emulator
+  - Log onto http://www.msp430emulator.com/emu.html to use the ONLINE Emulator
 
   - The following are instructions on how to use a LOCAL web interface
     - Install a local web service like apache or nginx

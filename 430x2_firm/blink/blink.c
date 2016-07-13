@@ -115,7 +115,7 @@ void main(void){
       // End Official FormatII Tester
       */
       );
-      
+
   // Stop the watchdog timer
   WDTCTL = WDTPW + WDTHOLD;
   
@@ -131,5 +131,4 @@ void main(void){
     P1OUT ^= BIT0 | BIT6;
     for(i = 0;i < 33000;i++);
   }
- 
 }

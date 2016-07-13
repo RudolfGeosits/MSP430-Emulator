@@ -36,6 +36,7 @@ typedef struct Cpu {
   Port_1 *p1;
   //Port_2 *p2;
   Usci *usci;
+  Bcm *bcm;
 } Cpu;
 
 uint16_t sr_to_value (Emulator *emu);

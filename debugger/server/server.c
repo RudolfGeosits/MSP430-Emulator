@@ -73,8 +73,8 @@ int callback_emu (struct libwebsocket_context *this,
 	printf("Child: Got pid #%u\n", pid);
 
 	char * const args[] = {                                             
-	  //"nice", "-20", "./MSP430", port_str,
-	  "./MSP430", port_str,
+	  "nice", "-20", "./MSP430", port_str,
+	  //"./MSP430", port_str,
 	  //"gdb", "-ex", "run", "--args", "./MSP430", port_str,
 	  NULL                                                              
 	};                                                                  

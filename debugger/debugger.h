@@ -26,8 +26,8 @@
 typedef enum { BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE } Stride;
 enum { MAX_BREAKPOINTS = 100 };
 
-typedef struct Debugger {
-  //bool run;
+typedef struct Debugger 
+{
   bool disassemble_mode;
   bool debug_mode;
   bool web_interface;

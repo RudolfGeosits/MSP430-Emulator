@@ -36,7 +36,7 @@ struct Port_1 {
   uint8_t *SEL2; /* r/w     PUC reset */
   uint8_t *REN;  /* r/w     PUC reset */
 
-  // Peripherals activation flags
+  // Peripherals activation flags (for emulator)
   bool DIR_0, OUT_0, IFG_0, IE_0, SEL_0, SEL2_0;
   bool DIR_1, OUT_1, IFG_1, IE_1, SEL_1, SEL2_1;
   bool DIR_2, OUT_2, IFG_2, IE_2, SEL_2, SEL2_2;

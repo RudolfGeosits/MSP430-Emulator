@@ -19,8 +19,11 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 uint8_t *MEMSPACE;   /* Memory Space */
+uint8_t *CODE;       // Code Memory
+uint8_t *INFO;       // Info memory
 uint8_t *IVT;        /* Interrupt Vector Table {Within ROM} */
 uint8_t *ROM;        /* Flash/Read-Only memory */
 uint8_t *RAM;        /* Random Access Memory */

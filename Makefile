@@ -2,10 +2,10 @@ all: MSP430 SERVER clean
 
 MSP430 : main.o utilities.o emu_server.o registers.o memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o \
-	usci.o port1.o packet_queue.o
+	usci.o port1.o packet_queue.o bcm.o
 
 	cc -o MSP430 main.o emu_server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
-	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o \
+	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o bcm.o \
 	packet_queue.o -lreadline -lwebsockets -lpthread -lrt ;
 
 main.o : main.c
@@ -44,6 +44,9 @@ formatII.o : devices/cpu/formatII.c
 formatIII.o : devices/cpu/formatIII.c
 	cc -c devices/cpu/formatIII.c
 
+bcm.o : devices/peripherals/bcm.c
+	cc -c devices/peripherals/bcm.c
+
 usci.o : devices/peripherals/usci.c
 	cc -c devices/peripherals/usci.c
 
@@ -69,4 +72,4 @@ server.o : debugger/server/server.c
 clean :
 	rm server.o main.o utilities.o emu_server.o registers.o memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o \
-	usci.o port1.o packet_queue.o;
+	usci.o port1.o packet_queue.o bcm.o;

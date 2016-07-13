@@ -39,12 +39,14 @@ typedef struct Emulator Emulator;
 typedef struct Cpu Cpu;
 typedef struct Port_1 Port_1;
 typedef struct Usci Usci;
+typedef struct Bcm Bcm;
 typedef struct Status_reg Status_reg;
 
 typedef struct Debugger Debugger;
 typedef struct Server Server;
 typedef struct Packet Packet;
 
+#include "devices/peripherals/bcm.h"
 #include "devices/peripherals/port1.h"
 #include "devices/peripherals/usci.h"
 #include "devices/cpu/registers.h"

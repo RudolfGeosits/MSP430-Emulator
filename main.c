@@ -18,18 +18,13 @@
 
 #include "main.h"
 
-int64_t timespecDiff(struct timespec *timeA_p, struct timespec *timeB_p)
-{
-  return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) -
-    ((timeB_p->tv_sec * 1000000000) + timeB_p->tv_nsec);
-}
-
 int main(int argc, char *argv[])
 {
   Emulator *emu = (Emulator *) calloc( 1, sizeof(Emulator) );
   Cpu *cpu = NULL; Debugger *deb = NULL;
 
   emu->cpu       = (Cpu *) calloc(1, sizeof(Cpu));
+  emu->cpu->bcm  = (Bcm *) calloc(1, sizeof(Bcm));
   emu->cpu->p1   = (Port_1 *) calloc(1, sizeof(Port_1));
   emu->cpu->usci = (Usci *) calloc(1, sizeof(Usci));  
 
@@ -69,6 +64,8 @@ int main(int argc, char *argv[])
   
   initialize_msp_memspace();
   initialize_msp_registers(emu);  
+
+  setup_bcm(emu);
   setup_port_1(emu);
   setup_usci(emu);
   
@@ -94,19 +91,12 @@ int main(int argc, char *argv[])
     decode(emu, fetch(emu), EXECUTE); 
     
     // Handle Peripherals
+    handle_bcm(emu);
     handle_port_1(emu);
     handle_usci(emu);
-    
-    // Get close to 1.1 MHZ
-    struct timespec start, end;    
-    clock_gettime(CLOCK_MONOTONIC, &start);
 
-    while (true) {
-      clock_gettime(CLOCK_MONOTONIC, &end);
-      uint64_t timeElapsed = timespecDiff(&end, &start);
-      
-      if (timeElapsed >= 900) break;
-    }
+    // Average of 4 cycles per instruction
+    mclk_wait_cycles(emu, 4);
   }
 
   uninitialize_msp_memspace(emu->cpu);

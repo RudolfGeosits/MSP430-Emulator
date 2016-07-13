@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     handle_usci(emu);
 
     // Average of 4 cycles per instruction
-    mclk_wait_cycles(emu, 4);
+    mclk_wait_cycles(emu, 1);
   }
 
   uninitialize_msp_memspace(emu->cpu);

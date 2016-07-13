@@ -297,6 +297,7 @@ int callback_emu (struct libwebsocket_context *this,
 
     case LWS_CALLBACK_CLOSED: {
       puts("Connection Closed");
+      exit(0);
       break;
     }
 
@@ -481,6 +482,7 @@ void *web_server (void *ctxt)
 
   if (context == NULL) {
     fprintf(stderr, "libwebsocket init failed\n");
+    deb->quit = true;
     exit(1);
   }
     

@@ -62,8 +62,11 @@ bool exec_cmd (Emulator *emu, char *line, int len)
 
       for (i = 0;i < steps;i++) {
 	decode(emu, fetch(emu), EXECUTE);
+
+        // Handle Peripherals     
+	handle_bcm(emu);
 	handle_port_1(emu);
-	handle_usci(emu);
+	handle_usci(emu); 
       }
 
       display_registers(emu);

@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 
   emu->cpu       = (Cpu *) calloc(1, sizeof(Cpu));
   emu->cpu->bcm  = (Bcm *) calloc(1, sizeof(Bcm));
+  emu->cpu->timer_a  = (Timer_a *) calloc(1, sizeof(Timer_a));
   emu->cpu->p1   = (Port_1 *) calloc(1, sizeof(Port_1));
   emu->cpu->usci = (Usci *) calloc(1, sizeof(Usci));  
 
@@ -100,6 +101,8 @@ int main(int argc, char *argv[])
   }
 
   uninitialize_msp_memspace(emu->cpu);
+  free(cpu->timer_a);
+  free(cpu->bcm);
   free(cpu->p1);
   free(cpu->usci);
   free(cpu);

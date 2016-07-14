@@ -26,7 +26,7 @@
 #include "../cpu/registers.h"
 #include "../utilities.h"
 
-enum {DCOCLK = 0, XT2CLK, VLOCLK, NUM_CLOCKS};
+enum {DCOCLK = 0, XT2CLK, VLOCLK, TACLK, ACLK, SMCLK, MCLK, INCLK, NUM_CLOCKS};
 
 struct Bcm {
   // Peripheral register pointers //

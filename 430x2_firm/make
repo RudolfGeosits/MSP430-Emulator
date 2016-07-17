@@ -13,3 +13,5 @@ msp430-objcopy -O binary servo/main.elf ../servo.bin
 msp430-gcc -g -mmcu=msp430g2553 port1/main.c -o port1/main.elf
 
 msp430-gcc -g -mmcu=msp430g2553 bcm/bcm.c -o bcm/bcm.elf
+
+msp430-gcc -g -mmcu=msp430g2553 timer/main.c -o timer/main.elf

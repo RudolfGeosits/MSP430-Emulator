@@ -320,7 +320,7 @@ int callback_emu (struct libwebsocket_context *this,
 	  uploaded_bytes++;
 
 	  if (uploaded_bytes >= file_size) {
-	    //puts("met bytes");
+	    puts("met bytes");
 	    fclose(fp);
 	    system("msp430-objcopy -O binary tmp.elf tmp.bin");
 
@@ -328,8 +328,9 @@ int callback_emu (struct libwebsocket_context *this,
 	    upload_in_progress = false;
 	    return;
 	  }
-
 	}
+	
+	return;
       }
       
       unsigned char opcode = buf[0];
@@ -367,7 +368,7 @@ int callback_emu (struct libwebsocket_context *this,
 	     uploaded_bytes++;
 
 	     if (uploaded_bytes >= file_size) {
-	       //puts("met bytes");
+	       puts("met bytes");
 	       fclose(fp);
 	       system("msp430-objcopy -O binary tmp.elf tmp.bin");
 

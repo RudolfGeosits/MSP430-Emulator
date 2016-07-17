@@ -123,9 +123,9 @@ void main(void){
   
   // A register that configures the direction of a port pin as an
   // input or output 
-  P1DIR |= BIT0 | BIT6;
   P1OUT |= BIT0;
   P1OUT &= ~BIT6;
+  P1DIR |= BIT0 | BIT6;
   
   while(1){
     P1OUT ^= BIT0 | BIT6;

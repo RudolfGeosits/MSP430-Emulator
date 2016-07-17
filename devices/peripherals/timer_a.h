@@ -81,6 +81,12 @@ struct Timer_a {
   // Timer_A1 Interrupt Vector
   uint16_t *TA1IV; // READ ONLY
 
+  bool timer_0_started;
+  uint8_t source_0;
+  uint8_t idiv_0;
+  uint8_t mode_0;
+
+  bool timer_1_started;
   uint8_t source_1;
   uint8_t idiv_1;
   uint8_t mode_1;

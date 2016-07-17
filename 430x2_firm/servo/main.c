@@ -12,33 +12,41 @@ int main(void)
 {
   WDTCTL = WDTPW + WDTHOLD;              
 
-  // P2.2/TA1.1 is used for servo output
-  P2DIR |= BIT2;
-  P2OUT = 0; // Clear all outputs P2
-  P2SEL |= BIT2; // P2.2 select TA1.1 option
+  // Set DCO to 1 MHZ                                                          
+  if(CALBC1_1MHZ!=0xFF){
+    DCOCTL=0;            //SelectlowestDCOxandMODx                             
+    BCSCTL1=CALBC1_1MHZ; //Setrange                                            
+    DCOCTL=CALDCO_1MHZ;  //SetDCOstep+modulation                               
+  }
+
+  // P1.5/TA0.0 is used for servo output
+  P1DIR |= BIT6;
+  P1OUT = 0;
+  P1SEL |= BIT6;
+  P1SEL2 &= ~BIT6;
   
-  // if SMCLK is about 1.1MHz (or 1100000Hz), 
+  // if SMCLK is about 1 MHz (or 1000000Hz), 
   // and 1000ms are the equivalent of 1 Hz,
   // then, by setting CCR0 to 22000 (1100000 / 1000 * 20)
   // we get a period of 20ms  
-  TA1CCR0 = 21881;
+  TA0CCR0 = 20000-1;
 
   // Pulse Width (ticks)
-  TA1CCR1 = 600;
+  TA0CCR1 = 600;
 
   // Timer A1 capture/compare control register options:
   // Select (reset/set) option
-  TA1CCTL1 = OUTMOD_6;
+  TA0CCTL1 = OUTMOD_6;
   
   // Timer A1 control register options: (and start)
   // Select SMCLK, UP mode, x1 divider, 
-  TA1CTL = TASSEL_2 + MC_1 + ID_0;
+  TA0CTL = TASSEL_2 + MC_1 + ID_0;
 
   while (1) {
     delay();
-    TA1CCR1 = 600;
+    TA0CCR1 = 600;
 
     delay();
-    TA1CCR1 = 1500;    
+    TA0CCR1 = 1500;    
   }
 }

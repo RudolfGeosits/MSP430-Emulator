@@ -23,15 +23,15 @@ void handle_timer_a (Emulator *emu)
   Cpu *cpu = emu->cpu;
   Timer_a *timer = cpu->timer_a;
 
-  uint8_t TA1CTL = *timer->TA1CTL;
+  uint8_t TA0CTL = *timer->TA0CTL;
 
-  // Handle Timer_A1 Control Register
-  uint8_t TASSEL1 = (TA1CTL >> 8) & 0x03;
-  uint8_t ID1     = (TA1CTL >> 6) & 0x03;
-  uint8_t MC1     = (TA1CTL >> 4) & 0x03;
-  uint8_t TA1CLR   = (TA1CTL >> 2) & 0x01;
-  uint8_t TA1IE    = (TA1CTL >> 1) & 0x01;
-  uint8_t TA1IFG   = TA1CTL & 0x01;
+  // Handle Timer_A0 Control Register
+  uint8_t TASSEL1 = (TA0CTL >> 8) & 0x03;
+  uint8_t ID1     = (TA0CTL >> 6) & 0x03;
+  uint8_t MC1     = (TA0CTL >> 4) & 0x03;
+  uint8_t TA0CLR   = (TA0CTL >> 2) & 0x01;
+  uint8_t TA0IE    = (TA0CTL >> 1) & 0x01;
+  uint8_t TA0IFG   = TA0CTL & 0x01;
 
   switch (TASSEL1) {
   case 0b00: {timer->source_1 = TACLK; break;}
@@ -49,14 +49,18 @@ void handle_timer_a (Emulator *emu)
   default: break;
   }
 
-  timer->mode_1 = MC1;
+  timer->mode_0 = MC1;
+  
+  if (!timer->timer_0_started && MC1 != 0) {
+    print_console(emu, "START TIMER\n");
+  }
 
   /* Timer_A clear; setting this bit resets TAR, the clock divider,
      and the count direction. The TACLR bit is automatically 
      reset and is always read as zero. */
-  if (TA1CLR) {    
-    *timer->TA1R = 0;
-    *timer->TA1CTL &= 0xFF0B; // 0b00001011
+  if (TA0CLR) {    
+    *timer->TA0R = 0;
+    *timer->TA0CTL &= 0xFF0B; // 0b00001011
   }
 }
 
@@ -108,7 +112,11 @@ void setup_timer_a (Emulator *emu)
   *(timer->TA1IV  = (uint16_t *) get_addr_ptr(TA1IV_VLOC)) = 0;
 
   // Configure other
+  timer->source_0 = 0b10;
+  timer->timer_0_started = false;
+
   timer->source_1 = 0b10;
+  timer->timer_1_started = false;
 }
 
 /* POWER UP CLEAR (PUC)      

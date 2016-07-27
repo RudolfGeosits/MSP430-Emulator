@@ -79,8 +79,9 @@ enum {
   UPDATE_REG_R13_PACKET = 0x1D,
   UPDATE_REG_R14_PACKET = 0x1E,
   UPDATE_REG_R15_PACKET = 0x1F,
-
   UPDATE_ALL_REGS_PACKET = 0x20,
+
+  SERVO_MOTOR = 0x21,
 };
 
 int callback_http (struct libwebsocket_context *this,

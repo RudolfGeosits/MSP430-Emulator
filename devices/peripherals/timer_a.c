@@ -23,36 +23,39 @@ void handle_timer_a (Emulator *emu)
   Cpu *cpu = emu->cpu;
   Timer_a *timer = cpu->timer_a;
 
-  uint8_t TA0CTL = *timer->TA0CTL;
+  uint16_t TA0CTL = *timer->TA0CTL;
 
+  // --------------------------------------------------------------
   // Handle Timer_A0 Control Register
-  uint8_t TASSEL1 = (TA0CTL >> 8) & 0x03;
-  uint8_t ID1     = (TA0CTL >> 6) & 0x03;
-  uint8_t MC1     = (TA0CTL >> 4) & 0x03;
+  uint8_t TASSEL0 = (TA0CTL >> 8) & 0x03;
+  uint8_t ID0     = (TA0CTL >> 6) & 0x03;
+  uint8_t MC0     = (TA0CTL >> 4) & 0x03;
   uint8_t TA0CLR   = (TA0CTL >> 2) & 0x01;
   uint8_t TA0IE    = (TA0CTL >> 1) & 0x01;
   uint8_t TA0IFG   = TA0CTL & 0x01;
 
-  switch (TASSEL1) {
-  case 0b00: {timer->source_1 = TACLK; break;}
-  case 0b01: {timer->source_1 = ACLK; break;}
-  case 0b10: {timer->source_1 = SMCLK; break;}
-  case 0b11: {timer->source_1 = INCLK; break;}
+  switch (TASSEL0) {
+  case 0b00: {timer->source_0 = TACLK; break;}
+  case 0b01: {timer->source_0 = ACLK; break;}
+  case 0b10: {timer->source_0 = SMCLK; break;}
+  case 0b11: {timer->source_0 = INCLK; break;}
   default: break;
   }
 
-  switch (ID1) {
-  case 0b00: {timer->idiv_1 = 1; break;}
-  case 0b01: {timer->idiv_1 = 2; break;}
-  case 0b10: {timer->idiv_1 = 4; break;}
-  case 0b11: {timer->idiv_1 = 8; break;}
+  switch (ID0) {
+  case 0b00: {timer->idiv_0 = 1; break;}
+  case 0b01: {timer->idiv_0 = 2; break;}
+  case 0b10: {timer->idiv_0 = 4; break;}
+  case 0b11: {timer->idiv_0 = 8; break;}
   default: break;
   }
 
-  timer->mode_0 = MC1;
-  
-  if (!timer->timer_0_started && MC1 != 0) {
-    print_console(emu, "START TIMER\n");
+  switch (MC0) {
+  case 0b00: {timer->mode_0 = STOP_MODE; break;}
+  case 0b01: {timer->mode_0 = UP_MODE; break;}
+  case 0b10: {timer->mode_0 = CONTINOUS_MODE; break;}
+  case 0b11: {timer->mode_0 = UP_DOWN_MODE; break;}
+  default: break;
   }
 
   /* Timer_A clear; setting this bit resets TAR, the clock divider,
@@ -62,6 +65,96 @@ void handle_timer_a (Emulator *emu)
     *timer->TA0R = 0;
     *timer->TA0CTL &= 0xFF0B; // 0b00001011
   }
+  // --------------------------------------------------------------
+
+  // --------------------------------------------------------------
+  // Handle Timer_A0 Capture/Compare Control Register
+  
+  uint16_t TA0CCTL1 = *timer->TA0CCTL1;
+ 
+  uint8_t OUTMOD1 = (TA0CCTL1 >> 5) & 0x07;  
+  uint8_t CAP     = (TA0CCTL1 >> 8) & 0x01;
+
+  switch (OUTMOD1) {
+  case 0b000: {break;}
+  case 0b001: {break;}
+  case 0b010: {break;}
+  case 0b011: {break;}
+  case 0b100: {break;}
+  case 0b101: {break;}
+  case 0b110: {break;}
+  case 0b111: {break;}
+  default: break;
+  }  
+
+  // CAP field (Capture or compare mode?)
+  timer->capture_mode_0 = CAP;
+  timer->compare_mode_0 = !CAP;
+
+  // --------------------------------------------------------------
+
+
+
+  // Figure Out Frequency in up mode
+  if (timer->compare_mode_0) {
+    if (timer->mode_0 == UP_MODE) {
+      uint16_t period_ct = *timer->TA0CCR0 + 1;       
+      uint64_t frequency = emu->cpu->bcm->mclk_freq;
+
+      double period = (1.0/frequency) * period_ct;// In seconds
+      double pulse_width = (1.0/frequency) * (*timer->TA0CCR1);
+      double duty_cycle  = pulse_width / period; 
+
+      printf("period: %lf\npulse_width: %lf\nduty: %lf%%\n", 
+	     period, pulse_width, duty_cycle);
+
+      if (OUTMOD1 == 0b111) { // RESET/SET
+	uint16_t pulse_width = *timer->TA0CCR1;	
+      }
+    }
+  }
+
+  if (!timer->timer_0_running && MC0 != 0) {
+    print_console(emu, "START TIMER\n");
+    timer->timer_0_running = true;
+
+    //pthread_t pp;
+    //if(pthread_create(&pp, NULL, timer_A0_thread , (void*)emu)){
+    //printf("ErrorcreatingDCOthread\n");
+    //exit(1);
+    //}
+  }
+}
+
+void *timer_A0_thread (void *data)
+{
+  Emulator *emu = (Emulator *) data;
+  Timer_a *timer = emu->cpu->timer_a;
+  uint64_t counter;
+
+  bool high = false;
+
+  while (true) {
+    high = true;
+    counter = 0;
+
+    while (true) {
+      if ( counter == (*timer->TA0CCR1) ) {
+	high = false;
+      }
+      else if ( counter == (*timer->TA0CCR0 + 1) ) {
+	break;
+      }
+      
+      mclk_wait_cycles(emu, 1);
+      counter++;
+
+      high ? printf("-") : printf("_");
+      fflush(stdout);
+    }
+  }
+
+  return NULL;
 }
 
 void setup_timer_a (Emulator *emu)
@@ -113,10 +206,10 @@ void setup_timer_a (Emulator *emu)
 
   // Configure other
   timer->source_0 = 0b10;
-  timer->timer_0_started = false;
+  timer->timer_0_running = false;
 
   timer->source_1 = 0b10;
-  timer->timer_1_started = false;
+  timer->timer_1_running = false;
 }
 
 /* POWER UP CLEAR (PUC)      

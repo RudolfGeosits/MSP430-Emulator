@@ -57,6 +57,7 @@ struct Bcm {
   // ----
   uint8_t mclk_source;
   uint64_t mclk_div;
+  uint64_t mclk_freq;
 };
 
 uint64_t nanosec_diff(struct timespec *timeA_p, struct timespec *timeB_p);

@@ -3,7 +3,8 @@
 void delay() 
 {
   volatile unsigned long i;
-  i = 49999;
+  //i = 49999;
+  i = 1;
   do (i--);
   while (i != 0);
 }
@@ -36,7 +37,7 @@ int main(void)
 
   // Timer A1 capture/compare control register options:
   // Select (reset/set) option
-  TA0CCTL1 = OUTMOD_6;
+  TA0CCTL1 = OUTMOD_7;
   
   // Timer A1 control register options: (and start)
   // Select SMCLK, UP mode, x1 divider, 

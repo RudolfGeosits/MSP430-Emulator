@@ -65,6 +65,7 @@ bool exec_cmd (Emulator *emu, char *line, int len)
 
         // Handle Peripherals     
 	handle_bcm(emu);
+	handle_timer_a(emu);
 	handle_port_1(emu);
 	handle_usci(emu); 
       }

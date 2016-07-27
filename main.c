@@ -67,6 +67,7 @@ int main(int argc, char *argv[])
   initialize_msp_registers(emu);  
 
   setup_bcm(emu);
+  setup_timer_a(emu);
   setup_port_1(emu);
   setup_usci(emu);
   
@@ -93,11 +94,12 @@ int main(int argc, char *argv[])
     
     // Handle Peripherals
     handle_bcm(emu);
+    handle_timer_a(emu);
     handle_port_1(emu);
     handle_usci(emu);
 
     // Average of 4 cycles per instruction
-    mclk_wait_cycles(emu, 1);
+    mclk_wait_cycles(emu, 4);
   }
 
   uninitialize_msp_memspace(emu->cpu);

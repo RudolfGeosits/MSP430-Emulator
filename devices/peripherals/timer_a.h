@@ -22,6 +22,8 @@
 #include "../cpu/registers.h"
 #include "../utilities.h"
 
+enum {STOP_MODE = 0, UP_MODE, CONTINOUS_MODE, UP_DOWN_MODE, NUM_MODES};
+
 struct Timer_a {
   // (ALL RESET WITH POR)
 
@@ -81,17 +83,22 @@ struct Timer_a {
   // Timer_A1 Interrupt Vector
   uint16_t *TA1IV; // READ ONLY
 
-  bool timer_0_started;
+  bool timer_0_running;
+  bool capture_mode_0;
+  bool compare_mode_0;
   uint8_t source_0;
   uint8_t idiv_0;
   uint8_t mode_0;
 
-  bool timer_1_started;
+  bool timer_1_running;
+  bool capture_mode_1;
+  bool compare_mode_1;
   uint8_t source_1;
   uint8_t idiv_1;
   uint8_t mode_1;
 };
 
+void *timer_A0_thread (void *data);
 void setup_timer_a (Emulator *emu);
 void handle_timer_a (Emulator *emu);
 

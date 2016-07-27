@@ -34,6 +34,7 @@ void handle_bcm (Emulator *emu)
 
   if (SELMx == 0b00 || SELMx == 0b01) { // source = DCOCLK
     bcm->mclk_source = DCOCLK;
+    bcm->mclk_freq = (bcm->dco_freq*1.0) / bcm->mclk_div;
   }
   else if (SELMx == 0b10) { // XT2CLK
     bcm->mclk_source = XT2CLK;    
@@ -185,9 +186,6 @@ void mclk_wait_cycles (Emulator *emu, uint64_t cycles)
 
       // Choose timing based on clock source
       if (bcm->mclk_source == DCOCLK) {
-	//printf("div: %llu\n", 
-	//(long long unsigned)(1/(bcm->dco_freq/bcm->mclk_div)));
-
 	double thing = (1.0/(bcm->dco_freq/bcm->mclk_div))*1000000000.0;
 
 	if (elapsed_nsecs >= (uint64_t)thing) {

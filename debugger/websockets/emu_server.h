@@ -27,7 +27,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <libwebsockets.h>
+#include "../../lib/libwebsockets.h"
 
 #include "../../main.h"
 #include "packet_queue.h"
@@ -84,17 +84,19 @@ enum {
   SERVO_MOTOR = 0x21,
 };
 
-int callback_http (struct libwebsocket_context *this,
-                          struct libwebsocket *wsi,
-                          enum libwebsocket_callback_reasons reason,
-                          void *user, void *in, size_t len);
+int callback_http (
+                   struct lws *wsi,
+                   enum lws_callback_reasons reason,
+                   void *user, void *in, size_t len);
 
-int callback_emu (struct libwebsocket_context *this,
-                         struct libwebsocket *wsi,
-                         enum libwebsocket_callback_reasons reason,
-                         void *user, void *in, size_t len);
+int callback_emu (
+		  struct lws *wsi,
+		  //enum lws_callback_reasons reason,
+		  enum lws_callback_reasons reason,
+		  void *user, void *in, size_t len);
 
-static struct libwebsocket_protocols protocols[] = {
+//static struct libwebsocket_protocols protocols[] = {
+static struct lws_protocols protocols [] = {
   /* first protocol must always be HTTP handler */
   {
     "http-only",   // name

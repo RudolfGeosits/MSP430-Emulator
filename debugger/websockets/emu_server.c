@@ -81,10 +81,11 @@ void *thrd (void *ctxt)
   return NULL;
 }
 
-int callback_emu (struct libwebsocket_context *this,
-			 struct libwebsocket *wsi,
-			 enum libwebsocket_callback_reasons reason,
-			 void *user, void *in, size_t len)
+int callback_emu (
+		  struct lws *wsi,
+		  //enum lws_callback_reasons reason,
+		  enum lws_callback_reasons reason,
+		  void *user, void *in, size_t len)
 {
   Cpu *cpu = emu->cpu;
   Port_1 *p1 = emu->cpu->p1;
@@ -98,7 +99,8 @@ int callback_emu (struct libwebsocket_context *this,
       deb->web_server_ready = true;
 
       // get the ball rolling
-      libwebsocket_callback_on_writable(this, wsi);
+      //libwebsocket_callback_on_writable(this, wsi);
+      lws_callback_on_writable(wsi);
       
       break;
     }
@@ -141,7 +143,7 @@ int callback_emu (struct libwebsocket_context *this,
 	  puts("\n");
 	  */
 
-	  libwebsocket_write(wsi, packet+LWS_SEND_BUFFER_PRE_PADDING, 
+	  lws_write(wsi, packet+LWS_SEND_BUFFER_PRE_PADDING, 
 			     msg_len + sizeof(op), 
 			     LWS_WRITE_BINARY);
 	  
@@ -286,7 +288,7 @@ int callback_emu (struct libwebsocket_context *this,
 	}
       }      
 
-      libwebsocket_callback_on_writable(this, wsi);
+      lws_callback_on_writable( wsi);
       break;
     }
 
@@ -456,7 +458,8 @@ void *web_server (void *ctxt)
   Debugger *deb = emu->debugger;
 
   int port = 9001;
-  struct libwebsocket_context *context;
+  //struct libwebsocket_context *context;
+  struct lws_context *context;
 
   struct lws_context_creation_info context_info = {
     .port = deb->ws_port, //port, 
@@ -479,7 +482,7 @@ void *web_server (void *ctxt)
   init_packet_queue(emu);
   
   // create libwebsocket context representing this server
-  context = libwebsocket_create_context(&context_info);
+  context = lws_create_context(&context_info);
 
   if (context == NULL) {
     fprintf(stderr, "libwebsocket init failed\n");
@@ -490,11 +493,11 @@ void *web_server (void *ctxt)
   printf("starting server...\n");
     
   while (true) {
-    libwebsocket_service(context, 10); // ms
+    lws_service(context, 10); // ms
     usleep(1000);
   }
 
-  libwebsocket_context_destroy(context);
+  lws_context_destroy(context);
   return NULL;
 }
 
@@ -546,10 +549,11 @@ void print_console (Emulator *emu, char *buf)
   packet_enqueue(emu, buf, strlen(buf) + 1, CONSOLE_PACKET_OPCODE);
 }
 
-int callback_http (struct libwebsocket_context *this, 
-			  struct libwebsocket *wsi,
-			  enum libwebsocket_callback_reasons reason, 
-			  void *user, void *in, size_t len)
+int callback_http (
+		   struct lws *wsi,
+		   //enum libwebsocket_callback_reasons reason, 
+		   enum lws_callback_reasons reason, 
+		   void *user, void *in, size_t len)
 {
   return 0;
 }

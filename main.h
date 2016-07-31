@@ -57,6 +57,8 @@ typedef struct Packet Packet;
 #include "debugger/websockets/emu_server.h"
 #include "devices/cpu/decoder.h"
 #include "debugger/debugger.h"
+#include "debugger/register_display.h"
+#include "debugger/disassembler.h"
 
 struct Emulator {
   Cpu *cpu;

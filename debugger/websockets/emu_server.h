@@ -27,7 +27,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <pthread.h>
-//#include "../../lib/libwebsockets.h"
+#include "../../libs/libwebsockets-2.0.2/libwebsockets.h"
 
 #include "../../main.h"
 #include "packet_queue.h"

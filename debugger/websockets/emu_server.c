@@ -328,11 +328,11 @@ int callback_emu (
 
 	    deb->web_firmware_uploaded = true;
 	    upload_in_progress = false;
-	    return;
+	    return 0;
 	  }
 	}
 	
-	return;
+	return 0;
       }
       
       unsigned char opcode = buf[0];
@@ -376,7 +376,7 @@ int callback_emu (
 
 	       deb->web_firmware_uploaded = true;
 	       upload_in_progress = false;
-	       return;
+	       return 0;
 	     }
 	   }
 
@@ -389,7 +389,7 @@ int callback_emu (
 	   deb->debug_mode = false;
 	   update_register_display(emu);
 
-	   return;
+	   return 0;
 	 }
       
          case 0x02: { // PAUSE
@@ -405,7 +405,7 @@ int callback_emu (
 	     update_register_display(emu);
 	   }
 	   
-	   return;
+	   return 0;
 	 }
 
          case 0x03: { // SERIAL DATA
@@ -423,7 +423,7 @@ int callback_emu (
 	   //printf("Got serial data %s ... %d bytes long\n", 
 	   //(char *)(in + 1), (unsigned int)len - 1);
 	   
-	   return;
+	   return 0;
 	 }
 
          case 0x04: { // Console Input Data
@@ -437,7 +437,7 @@ int callback_emu (
 	     update_register_display(emu);
 	   }
 
-	   return;
+	   return 0;
          }
       
          default: break;
@@ -504,8 +504,8 @@ void *web_server (void *ctxt)
 void send_control(Emulator *emu, uint8_t opcode, 
 		  void *data, size_t data_size)
 {
-  const static NUM_OPCODE_BYTES   = 1;
-  const static NUM_DATA_LEN_BYTES = 1;
+  const static uint8_t NUM_OPCODE_BYTES   = 1;
+  const static uint8_t NUM_DATA_LEN_BYTES = 1;
 
   if (data == NULL) { // Simple case
     packet_enqueue(emu, (void *)&opcode, 1, CONTROL_PACKET_OPCODE);

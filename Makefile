@@ -5,7 +5,7 @@ MSP430 : main.o utilities.o emu_server.o registers.o memspace.o debugger.o disas
 	usci.o port1.o packet_queue.o bcm.o timer_a.o
 
 	cc -o MSP430 main.o emu_server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
-	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o bcm.o timer_a.o packet_queue.o -lreadline -L:"libs/libwebsockets-2.0.2/" -lwebsockets -lpthread -lrt -lssl -lcrypto;
+	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o bcm.o timer_a.o packet_queue.o -lreadline -L"libs/libwebsockets-2.0.2/" -lwebsockets -lpthread -lrt -lssl -lcrypto;
 
 main.o : main.c
 	cc -c main.c

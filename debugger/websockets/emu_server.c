@@ -414,12 +414,11 @@ int callback_emu (
 	   lent = len - 1;
 	   data = (uint8_t *) (in + 1);
 	   
-	   pthread_t t;                      	
-
+	   pthread_t t;
 	   if( pthread_create(&t, NULL, thrd, (void *)cpu->usci ) ) {
 	     fprintf(stderr, "Error creating thread\n");                    
 	   }
-
+	   
 	   //printf("Got serial data %s ... %d bytes long\n", 
 	   //(char *)(in + 1), (unsigned int)len - 1);
 	   

@@ -3,8 +3,7 @@
 void delay() 
 {
   volatile unsigned long i;
-  //i = 49999;
-  i = 1;
+  i = 49999;
   do (i--);
   while (i != 0);
 }

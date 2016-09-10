@@ -9,19 +9,19 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <stdlib.h>
-#include <libwebsockets.h>
+#include "../../libs/libwebsockets-2.0.2/libwebsockets.h"
 
-int callback_http (struct libwebsocket_context *this,
-                   struct libwebsocket *wsi,
-                   enum libwebsocket_callback_reasons reason,
+extern int callback_http (
+                   struct lws *wsi,
+                   enum lws_callback_reasons reason,
                    void *user, void *in, size_t len);
 
-int callback_emu (struct libwebsocket_context *this,
-                  struct libwebsocket *wsi,
-                  enum libwebsocket_callback_reasons reason,
+extern int callback_emu (
+		  struct lws *wsi,
+                  enum lws_callback_reasons reason,
                   void *user, void *in, size_t len);
 
-static struct libwebsocket_protocols protocols[]= {
+static struct lws_protocols protocols [] = {
   {
     "http-only",
     callback_http,
@@ -34,11 +34,10 @@ static struct libwebsocket_protocols protocols[]= {
     0,
     1024 * 4,
     0,
-    0
   },
 
   {
-    NULL, NULL, 0
+    NULL, NULL, 0, 0
   }
 };
 

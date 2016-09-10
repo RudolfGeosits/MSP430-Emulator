@@ -19,6 +19,8 @@
 #ifndef _DECODE_FORMATII_H
 #define _DECODE_FORMATII_H
 
+#include "flag_handler.h"
+
 void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble);
 
 #endif

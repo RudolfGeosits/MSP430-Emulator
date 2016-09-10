@@ -41,6 +41,7 @@ typedef struct Cpu {
 } Cpu;
 
 uint16_t sr_to_value (Emulator *emu);
+void set_sr_value (Emulator *emu, uint16_t value);
 void initialize_msp_registers (Emulator *emu);
 void update_register_display (Emulator *emu);
 

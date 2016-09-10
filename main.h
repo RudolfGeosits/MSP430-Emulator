@@ -30,7 +30,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <libwebsockets.h>
+#include "libs/libwebsockets-2.0.2/libwebsockets.h"
 #include <readline/readline.h>
 #include <readline/history.h>
 
@@ -57,6 +57,8 @@ typedef struct Packet Packet;
 #include "debugger/websockets/emu_server.h"
 #include "devices/cpu/decoder.h"
 #include "debugger/debugger.h"
+#include "debugger/register_display.h"
+#include "debugger/disassembler.h"
 
 struct Emulator {
   Cpu *cpu;

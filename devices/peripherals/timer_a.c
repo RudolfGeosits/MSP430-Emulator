@@ -94,6 +94,8 @@ void handle_timer_a (Emulator *emu)
   // --------------------------------------------------------------
 
 
+  static double last_period = 0;
+  static double last_pulse_width = 0;
 
   // Figure Out Frequency in up mode
   if (timer->compare_mode_0) {
@@ -104,13 +106,62 @@ void handle_timer_a (Emulator *emu)
       double period = (1.0/frequency) * period_ct;// In seconds
       double pulse_width = (1.0/frequency) * (*timer->TA0CCR1);
       double duty_cycle  = pulse_width / period; 
+      
+      /*
+	printf("period: %lf\npulse_width: %lf\nduty: %lf%%\n", 
+	period, pulse_width, duty_cycle);
+      */
+      
+      if (last_period != period || last_pulse_width != pulse_width) {
+	if (period >= 0.015 && period <= 0.025) { // 0.020 is sweet spot 50 Hz
+	  //printf("period: %lf, last_period: %lf\n", period, last_period);
+	  //printf("pw: %lf, last_pw: %lf\n", pulse_width, last_pulse_width);
 
-      printf("period: %lf\npulse_width: %lf\nduty: %lf%%\n", 
-	     period, pulse_width, duty_cycle);
+	  if (pulse_width < 0.0009) {
+	    // Send Control for 0 degrees
+	    //print_console(emu, "0 degrres\n");
+	    
+	    uint8_t byte = 0;
+	    send_control(emu, SERVO_MOTOR, (void *)&byte, 1);
+	  }
+	  else if (pulse_width < 0.0012) {
+	    // Send Control for 30 Degrees
+	    //print_console(emu, "30 degrres\n");
+	    
+	    uint8_t byte = 30;
+	    send_control(emu, SERVO_MOTOR, (void *)&byte, 1);
+	  }
+	  else if (pulse_width < 0.0015) {
+	    // Send Control for 60 degrees
+	    uint8_t byte = 60;
+	    send_control(emu, SERVO_MOTOR, (void *)&byte, 1);
+	  }
+	  else if (pulse_width < 0.0018) {
+	    // Send Control for 90 degrees
+	    //print_console(emu, "90 degrres\n");
+	    
+	    uint8_t byte = 90;
+	    send_control(emu, SERVO_MOTOR, (void *)&byte, 1);
+	  }
+	  else if (pulse_width < 0.0021) {
+	    // Send Control for 120 degrees
+	    uint8_t byte = 120;
+	    send_control(emu, SERVO_MOTOR, (void *)&byte, 1);
+	  }
+	  else if (pulse_width >= 0.0021) {
+	    // Send Control for 150 degrees
+	    uint8_t byte = 150;
+	    send_control(emu, SERVO_MOTOR, (void *)&byte, 1);
+	  }
+	}
+      }
 
       if (OUTMOD1 == 0b111) { // RESET/SET
 	uint16_t pulse_width = *timer->TA0CCR1;	
       }
+
+      last_period = period;
+      last_pulse_width = pulse_width;
     }
   }
 

@@ -1,6 +1,7 @@
 #include "server.h"
 
-struct libwebsocket *ws = NULL;
+struct lws *ws = NULL;
+struct lws_context *context;
 pid_t emulator_pids[1000] = {0};
 
 void handle_sigchld(int sig) {
@@ -30,66 +31,86 @@ void web_send (char *buf)
 
   // send message 
   len = strlen(buf);
+
   msg = (char *) malloc(len + LWS_SEND_BUFFER_PRE_PADDING
 			+ LWS_SEND_BUFFER_POST_PADDING);
 
   begin = msg + LWS_SEND_BUFFER_PRE_PADDING;
 
   strncpy(begin, buf, len);
-  libwebsocket_write(ws, begin, len, LWS_WRITE_TEXT);
-
+  int n = lws_write(ws, begin, len, LWS_WRITE_TEXT);
+  printf("sent %d bytes of %d len\n", n, len);
+  
   free(msg);
 }
 
 
-int callback_http (struct libwebsocket_context *this,
-		   struct libwebsocket *wsi,
-		   enum libwebsocket_callback_reasons reason,
+int callback_http (
+		   struct lws *wsi,
+		   enum lws_callback_reasons reason,
 		   void *user, void *in, size_t len)
 {
   ws = wsi;
   return 0;
 }
 
-
-int callback_emu (struct libwebsocket_context *this,
-		  struct libwebsocket *wsi,
-		  enum libwebsocket_callback_reasons reason,
-		  void *user, void *in, size_t len)
+int callback_emu ( struct lws *wsi,
+		   enum lws_callback_reasons reason,
+		   void *user, void *in, size_t len )
 {
   static unsigned new_ws_port = 9001;
   char port_str[100] = {0};
   
   switch (reason) {
-    case LWS_CALLBACK_ESTABLISHED: {
-      sprintf(port_str, "%u", new_ws_port);
+    case LWS_CALLBACK_PROTOCOL_INIT: {
+      ws = wsi;
+      break;
+    };
 
-      puts("connection established");
-
+    case LWS_CALLBACK_SERVER_WRITEABLE: {
       pid_t pid;
-      
-      // Child (pty)                                                        
+      sprintf(port_str, "%u", new_ws_port);
+  
+      // Child (pty)     
       if( !(pid = fork()) ) {     
 	printf("Child: Got pid #%u\n", pid);
 
-	char * const args[] = {                                             
+	char * const args[] = {
 	  "nice", "-20", "./MSP430", port_str,
 	  //"./MSP430", port_str,
 	  //"gdb", "-ex", "run", "--args", "./MSP430", port_str,
-	  NULL                                                              
-	};                                                                  
-                                                                        
-	setpgid(0, 0);                                                      
-	execvp(args[0], args);                                              
-	exit(1);                                                            
-      }                                                                     
+	  NULL
+	};
+
+	setpgid(0, 0);     
+	execvp(args[0], args);
+	exit(1);                
+      }
 
       // Parent 
       printf("Parent: Got pid #%u\n", pid);
-
       usleep(1000);
+    
       web_send(port_str);
       ++new_ws_port;
+
+      lws_close_reason(wsi, 0, NULL, 0);
+
+      break;
+    };
+
+    case LWS_CALLBACK_ESTABLISHED: {
+      puts("connection established");
+
+      lws_callback_on_writable(wsi);
+      break;
+    }
+
+    default: {
+      printf("Some other thing: %d\n", reason); 
+      break;
+      
+      ws = wsi;
     }
   }
   
@@ -99,31 +120,28 @@ int callback_emu (struct libwebsocket_context *this,
 int main (int argc, char **argv)
 {
   int port = 9000;
-  struct libwebsocket_context *context;
 
   struct lws_context_creation_info context_info = {
     .port = port,
     .iface = NULL,
     .protocols = protocols,
-    .extensions = NULL,
     .ssl_cert_filepath = NULL,
     .ssl_private_key_filepath = NULL,
     .ssl_ca_filepath = NULL,
+
     .gid = -1,
     .uid = -1,
+
+    .max_http_header_pool = 1,
     .options = 0,
-    NULL,
-    .ka_time = false,
-    .ka_probes = false,
-    .ka_interval = false
   };
   
-  // create libwebsocket context representing this server
-  context = libwebsocket_create_context(&context_info);
+  // create lws context representing this server
+  context = lws_create_context(&context_info);
   
   if (context == NULL) {
-    fprintf(stderr, "libwebsocket init failed\n");
-    exit(1);
+    puts("lws init failed\n");
+    return -1;
   }
 
   signal(SIGINT, signal_callback_handler);
@@ -141,10 +159,11 @@ int main (int argc, char **argv)
   printf("starting server...\n");
 
   while (true) {
-    libwebsocket_service(context, 10); // ms
+    lws_service(context, 10); // ms
+    //lws_callback_on_writable_all_protocol(context, &protocols[1]);
     usleep(1000);
   }
 
-  libwebsocket_context_destroy(context);  
+  lws_context_destroy(context);  
   return 0;
 }

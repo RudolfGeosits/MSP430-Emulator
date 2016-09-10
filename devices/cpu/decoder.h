@@ -25,6 +25,9 @@
 
 #include "registers.h"
 #include "../utilities.h"
+#include "formatI.h"
+#include "formatII.h"
+#include "formatIII.h"
 
 int16_t run_constant_generator(uint8_t source, uint8_t as_flag);
 

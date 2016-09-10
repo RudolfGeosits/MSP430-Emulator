@@ -27,7 +27,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <pthread.h>
-#include <libwebsockets.h>
+#include "../../libs/libwebsockets-2.0.2/libwebsockets.h"
 
 #include "../../main.h"
 #include "packet_queue.h"
@@ -79,21 +79,24 @@ enum {
   UPDATE_REG_R13_PACKET = 0x1D,
   UPDATE_REG_R14_PACKET = 0x1E,
   UPDATE_REG_R15_PACKET = 0x1F,
-
   UPDATE_ALL_REGS_PACKET = 0x20,
+
+  SERVO_MOTOR = 0x21,
 };
 
-int callback_http (struct libwebsocket_context *this,
-                          struct libwebsocket *wsi,
-                          enum libwebsocket_callback_reasons reason,
-                          void *user, void *in, size_t len);
+int callback_http (
+                   struct lws *wsi,
+                   enum lws_callback_reasons reason,
+                   void *user, void *in, size_t len);
 
-int callback_emu (struct libwebsocket_context *this,
-                         struct libwebsocket *wsi,
-                         enum libwebsocket_callback_reasons reason,
-                         void *user, void *in, size_t len);
+int callback_emu (
+		  struct lws *wsi,
+		  //enum lws_callback_reasons reason,
+		  enum lws_callback_reasons reason,
+		  void *user, void *in, size_t len);
 
-static struct libwebsocket_protocols protocols[] = {
+//static struct libwebsocket_protocols protocols[] = {
+static struct lws_protocols protocols [] = {
   /* first protocol must always be HTTP handler */
   {
     "http-only",   // name

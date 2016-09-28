@@ -20,6 +20,8 @@ You can use this emulator online now at: http://www.msp430emulator.com/emu.html
   Please contact me at rgeosits@live.esu.edu if you are using this for something or would like more information on how to contribute. Let me know if you need something specific emulated!
   Thank you!
   
+[![cap2.png](https://s9.postimg.org/he4a72qfz/cap2.png)]
+  
   --------------------------------------------------------------------------------------------------------------
 
 - TODO
@@ -43,8 +45,5 @@ You can use this emulator online now at: http://www.msp430emulator.com/emu.html
   - Log onto http://www.msp430emulator.com/emu.html to use the ONLINE Emulator
 
   - The following are instructions on how to use a LOCAL web interface
-    - Install a local web service like apache or nginx
-    - load files from debugger/webclient/* to your local web service
-    - run the server via ./server
-    - Connect via loopback address, 127.0.0.1, in your browser
+    - Click local debugging in the online emulator (Not yet available)
     - You will be connected! Enjoy.

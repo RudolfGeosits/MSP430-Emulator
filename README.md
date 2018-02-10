@@ -1,12 +1,7 @@
 MSP430 Emulator
 ===============
 
-<<<<<<< HEAD
-
-You can use this emulator at: http://www.msp430emulator.com/emu.html
-=======
 You can use this emulator online now at: http://www.msp430emulator.com/emu.html
->>>>>>> 85b1fb4170098e5d5042ca1a1ee50fe60e506a46
 
 - Providing a complete software model of the MSP430 16-bit instruction set
 - An interactive debugger for advanced development and in depth firmware/hardware analysis
@@ -37,21 +32,11 @@ You can use this emulator online now at: http://www.msp430emulator.com/emu.html
     - RETI (Return from Interrupt)
 
 - Build Instructions (You will need the following packages)
-<<<<<<< HEAD
   - Install dependancies via ./install_deps.sh
-=======
-  - readline (apt-get install libreadline-dev)
-  - msp430*  (apt-get install msp430*)
-  - libwebsockets-dev (apt-get install libwebsockets-dev)
-
-  - ( sudo apt-get install libreadline-dev msp430* libwebsockets-dev; )
-
->>>>>>> 85b1fb4170098e5d5042ca1a1ee50fe60e506a46
   - navigate to the root of the source tree
   - type 'make' (you can also make clean after)
 
 - User Instructions
-<<<<<<< HEAD
   - Log onto http://www.msp430emulator.com/emu.html to use the online emulation server.
 
   - How to use a local instance of this server (typically for time sensitive applications where latency would cause errors in accuracy)
@@ -59,10 +44,3 @@ You can use this emulator online now at: http://www.msp430emulator.com/emu.html
     - Run the emulation server on your machine (./server)
     - Log onto http://www.msp430emulator.com/emu.html and select the checkbox for "Run Local" at the bottom left of the interface.
     - You will be connected! Enjoy.
-=======
-  - Log onto http://www.msp430emulator.com/emu.html to use the ONLINE Emulator
-
-  - The following are instructions on how to use a LOCAL web interface
-    - Click local debugging in the online emulator (Not yet available)
-    - You will be connected! Enjoy.
->>>>>>> 85b1fb4170098e5d5042ca1a1ee50fe60e506a46

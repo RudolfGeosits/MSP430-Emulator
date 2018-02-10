@@ -166,7 +166,7 @@ void handle_timer_a (Emulator *emu)
   }
 
   if (!timer->timer_0_running && MC0 != 0) {
-    print_console(emu, "START TIMER\n");
+    //print_console(emu, "START TIMER\n");
     timer->timer_0_running = true;
 
     //pthread_t pp;

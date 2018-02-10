@@ -1,6 +1,7 @@
 MSP430 Emulator
 ===============
 
+
 You can use this emulator at: http://www.msp430emulator.com/emu.html
 
 - Providing a complete software model of the MSP430 16-bit instruction set
@@ -32,19 +33,15 @@ You can use this emulator at: http://www.msp430emulator.com/emu.html
     - RETI (Return from Interrupt)
 
 - Build Instructions (You will need the following packages)
-  - readline (apt-get install libreadline-dev)
-  - msp430*  (apt-get install msp430*)
-  - libwebsockets-dev (apt-get install libwebsockets-dev)
-
+  - Install dependancies via ./install_deps.sh
   - navigate to the root of the source tree
   - type 'make' (you can also make clean after)
 
 - User Instructions
-  - Log onto http://www.msp430emulator.com/emu.html to use the ONLINE Emulator
+  - Log onto http://www.msp430emulator.com/emu.html to use the online emulation server.
 
-  - The following are instructions on how to use a LOCAL web interface
-    - Install a local web service like apache or nginx
-    - load files from debugger/webclient/* to your local web service
-    - run the server via ./server
-    - Connect via loopback address, 127.0.0.1, in your browser
+  - How to use a local instance of this server (typically for time sensitive applications where latency would cause errors in accuracy)
+    - Build this emulation server (instructions above)
+    - Run the emulation server on your machine (./server)
+    - Log onto http://www.msp430emulator.com/emu.html and select the checkbox for "Run Local" at the bottom left of the interface.
     - You will be connected! Enjoy.

@@ -20,7 +20,7 @@ You can use this emulator online now at: http://www.msp430emulator.com/emu.html
   Please contact me at rgeosits@live.esu.edu if you are using this for something or would like more information on how to contribute. Let me know if you need something specific emulated!
   Thank you!
   
-[![cap2.png](https://s9.postimg.org/he4a72qfz/cap2.png)]
+  ![cap2.png](https://s9.postimg.org/he4a72qfz/cap2.png)
   
   --------------------------------------------------------------------------------------------------------------
 
@@ -39,7 +39,7 @@ You can use this emulator online now at: http://www.msp430emulator.com/emu.html
 - User Instructions
   - Log onto http://www.msp430emulator.com/emu.html to use the online emulation server.
 
-  - How to use a local instance of this server (typically for time sensitive applications where latency would cause errors in accuracy)
+  - How to use a local instance of this server (for time sensitive applications where latency would cause errors)
     - Build this emulation server (instructions above)
     - Run the emulation server on your machine (./server)
     - Log onto http://www.msp430emulator.com/emu.html and select the checkbox for "Run Local" at the bottom left of the interface.

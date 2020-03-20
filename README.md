@@ -20,7 +20,7 @@ You can use this emulator online now at: http://www.msp430emulator.com/emu.html
   Please contact me at rgeosits@live.esu.edu if you are using this for something or would like more information on how to contribute. Let me know if you need something specific emulated!
   Thank you!
   
-  ![cap2.png](https://s9.postimg.org/he4a72qfz/cap2.png)
+  ![cap2.png](http://www.msp430emulator.com/images/cap2.png)
   
   --------------------------------------------------------------------------------------------------------------
 

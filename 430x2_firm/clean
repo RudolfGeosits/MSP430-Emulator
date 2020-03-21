@@ -1,0 +1,10 @@
+rm blink/blink.elf
+rm counter/counter.elf
+rm timer/timer.elf
+rm spi/master.elf
+rm servo/main.elf
+rm port1/main.elf
+rm bcm/bcm.elf
+rm timer/main.elf
+rm uart/uart.elf
+

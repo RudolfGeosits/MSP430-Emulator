@@ -9,7 +9,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <stdlib.h>
-#include "../../libs/libwebsockets-2.0.2/libwebsockets.h"
+#include <libwebsockets.h>
 
 extern int callback_http (
                    struct lws *wsi,

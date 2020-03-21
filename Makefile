@@ -1,11 +1,11 @@
-all: MSP430 SERVER clean
+all: MSP430 SERVER
 
 MSP430 : main.o utilities.o emu_server.o registers.o memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o \
 	usci.o port1.o packet_queue.o bcm.o timer_a.o
 
-	cc -o MSP430 main.o emu_server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
-	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o bcm.o timer_a.o packet_queue.o -lreadline -L"libs/libwebsockets-2.0.2/" -lwebsockets -lpthread -lrt -lssl -lcrypto;
+	cc -no-pie -o MSP430 main.o emu_server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
+	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o bcm.o timer_a.o packet_queue.o -lreadline -lwebsockets -lpthread -lrt -lssl -lcrypto;
 
 main.o : main.c
 	cc -c main.c
@@ -64,7 +64,7 @@ packet_queue.o : debugger/websockets/packet_queue.c
 # Server Program
 
 SERVER : server.o
-	cc -o server server.o -lrt -lpthread -L"libs/libwebsockets-2.0.2/" -lwebsockets -lssl -lcrypto;
+	cc -o server server.o -lrt -lpthread -lwebsockets -lssl -lcrypto;
 
 server.o : debugger/server/server.c
 	cc -c debugger/server/server.c
@@ -76,4 +76,5 @@ clean :
 	register_display.o decoder.o flag_handler.o formatI.o \
 	formatII.o formatIII.o \
 	usci.o port1.o packet_queue.o bcm.o timer_a.o \
-	*.bin *.tmp *.elf;
+	*.bin *.tmp *.elf \
+	MSP430 server;

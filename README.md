@@ -20,9 +20,9 @@ You can use this emulator online now at: http://www.msp430emulator.com/emu.html
   Please contact me at rgeosits@live.esu.edu if you are using this for something or would like more information on how to contribute. Let me know if you need something specific emulated!
   Thank you!
   
-    ![Interface.PNG](http://www.msp430emulator.com/images/Interface.PNG)
+![Interface.PNG](http://www.msp430emulator.com/images/Interface.PNG)
   
---------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------
 
 - Build Instructions (You will need the following packages)
   - Install dependancies via ./install_deps.sh
@@ -37,6 +37,10 @@ You can use this emulator online now at: http://www.msp430emulator.com/emu.html
     - Run the emulation server on your machine (./server)
     - Log onto http://www.msp430emulator.com/emu.html and select the checkbox for "Run Local" at the bottom left of the interface.
     - You will be connected! Enjoy.
+
+- Documentation & Sample Programs:
+  - Sample Programs: http://www.msp430emulator.com/examples.html
+  - User Guide: http://www.msp430emulator.com/help.html
 
 - TODO
   - Basic Clock Module / Timer

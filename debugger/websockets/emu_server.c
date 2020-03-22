@@ -1,19 +1,19 @@
 /*
   MSP430 Emulator
-  Copyright (C) 2016 Rudolf Geosits (rgeosits@live.esu.edu)  
-                                                                      
-  This program is free software: you can redistribute it and/or modify
+  Copyright (C) 2020 Rudolf Geosits (rgeosits@live.esu.edu)
+
+  "MSP430 Emulator" is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-                                                                   
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+
+  "MSP430 Emulator" is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU General Public License for more details.          
-                                                       
+  GNU General Public License for more details.
+
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses
+  along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "emu_server.h"
@@ -55,7 +55,7 @@ void *thrd (void *ctxt)
       if (*bytes == 'h' || *bytes == 'H') {
 	++bytes;
 	
-	char buf[3] = {*bytes, *(bytes+1), 0};
+	char buf[3] = {*((char*)bytes), *((char*)bytes+1), 0};
 
 	//printf("%s - %s\n", buf, bytes);
 	thing = (uint8_t) strtoul(buf, NULL, 16);
@@ -124,14 +124,14 @@ int callback_emu (
 	  void *packet = malloc(pack_len);
 	
 	  // Zero out our packet
-	  memset( (packet + LWS_SEND_BUFFER_PRE_PADDING), 0, 
+	  memset( ((uint8_t*)packet + LWS_SEND_BUFFER_PRE_PADDING), 0, 
 		  msg_len + sizeof(op) );
 
 	  // Place opcode into packet
-	  *((uint8_t *)(packet + LWS_SEND_BUFFER_PRE_PADDING)) = op;
+	  *((uint8_t *)((uint8_t*)packet + LWS_SEND_BUFFER_PRE_PADDING)) = op;
 	
 	  // Place message into packet
-	  memcpy( (packet + LWS_SEND_BUFFER_PRE_PADDING + sizeof(op)),
+	  memcpy( ((uint8_t*)packet + LWS_SEND_BUFFER_PRE_PADDING + sizeof(op)),
 		  (const void *)p.message, msg_len);
 
 	  /*
@@ -143,9 +143,7 @@ int callback_emu (
 	  puts("\n");
 	  */
 
-	  lws_write(wsi, packet+LWS_SEND_BUFFER_PRE_PADDING, 
-			     msg_len + sizeof(op), 
-			     LWS_WRITE_BINARY);
+	  lws_write(wsi, ((unsigned char*)(packet))+LWS_SEND_BUFFER_PRE_PADDING, msg_len + sizeof(op), LWS_WRITE_BINARY);
 	  
 	  free(p.message);
 	  free(packet);
@@ -340,10 +338,10 @@ int callback_emu (
       
       switch (opcode) {
         case 0x00: { // Upload File
-	   uint8_t byte1 = *((uint8_t *)(in+1));
-	   uint8_t byte2 = *((uint8_t *)(in+2));
-	   uint8_t byte3 = *((uint8_t *)(in+3));
-	   uint8_t byte4 = *((uint8_t *)(in+4));
+	   uint8_t byte1 = *((uint8_t*)in+1);
+	   uint8_t byte2 = *((uint8_t*)in+2);
+	   uint8_t byte3 = *((uint8_t*)in+3);
+	   uint8_t byte4 = *((uint8_t*)in+4);
 
 	   file_size = 0;
 	   file_size = byte1; file_size <<= 3*8;
@@ -412,7 +410,7 @@ int callback_emu (
 	   if (len > 1000) exit(1);
 
 	   lent = len - 1;
-	   data = (uint8_t *) (in + 1);
+	   data = ((uint8_t*)in + 1);
 	   
 	   pthread_t t;
 	   if( pthread_create(&t, NULL, thrd, (void *)cpu->usci ) ) {
@@ -456,26 +454,25 @@ void *web_server (void *ctxt)
   emu = (Emulator *) ctxt;
   Debugger *deb = emu->debugger;
 
-  int port = 9001;
-  //struct libwebsocket_context *context;
-  struct lws_context *context;
+    int port = 9001;
+    //struct libwebsocket_context *context;
+    struct lws_context *context;
 
-  struct lws_context_creation_info context_info = {
-    .port = deb->ws_port, //port, 
-    .iface = NULL, 
-    .protocols = protocols, 
-    .extensions = NULL,
-    .ssl_cert_filepath = NULL, 
-    .ssl_private_key_filepath = NULL, 
-    .ssl_ca_filepath = NULL,
-    .gid = -1, 
-    .uid = -1, 
-    .options = 0, 
-    NULL, 
-    .ka_time = false, 
-    .ka_probes = false, 
-    .ka_interval = false
-  };
+    struct lws_context_creation_info context_info = {0};
+
+    context_info.port = deb->ws_port;
+    context_info.iface = NULL;
+    context_info.protocols = protocols;
+    context_info.extensions = NULL;
+    context_info.ssl_cert_filepath = NULL;
+    context_info.ssl_private_key_filepath = NULL;
+    context_info.ssl_ca_filepath = NULL;
+    context_info.gid = -1;
+    context_info.uid = -1;
+    context_info.options = 0;
+    context_info.ka_time = false;
+    context_info.ka_probes = false;
+    context_info.ka_interval = false;
 
   // Initialize packet queuing system
   init_packet_queue(emu);
@@ -543,9 +540,9 @@ void print_serial (Emulator *emu, char *buf)
   packet_enqueue(emu, buf, strlen(buf) + 1, SERIAL_PACKET_OPCODE);
 }
 
-void print_console (Emulator *emu, char *buf)
+void print_console (Emulator *emu, const char *buf)
 {
-  packet_enqueue(emu, buf, strlen(buf) + 1, CONSOLE_PACKET_OPCODE);
+    packet_enqueue(emu, (void*)buf, strlen(buf) + 1, CONSOLE_PACKET_OPCODE);
 }
 
 int callback_http (

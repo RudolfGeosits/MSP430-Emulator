@@ -1,19 +1,19 @@
 /*
   MSP430 Emulator
-  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)
+  Copyright (C) 2020 Rudolf Geosits (rgeosits@live.esu.edu)
 
-  This program is free software: you can redistribute it and/or modify
+  "MSP430 Emulator" is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
-  This program is distributed in the hope that it will be useful,
+  "MSP430 Emulator" is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses
+  along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 //##########+++ Decode Format I Instructions +++##########
@@ -90,7 +90,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "%s, %s", s_reg_name, d_reg_name);
     }
 
-    destination_addr = d_reg;          /* Destination Register */
+    destination_addr = (uint16_t *)d_reg;         // Destination Register
 
     if (!disassemble) {
       bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
@@ -179,7 +179,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
 	      (uint16_t) source_offset, s_reg_name, d_reg_name);  
     }
 
-    destination_addr = d_reg;          /* Destination register */
+    destination_addr = (uint16_t *)d_reg;          /* Destination register */
     
     if (!disassemble) {
       bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
@@ -269,7 +269,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "@%s, %s", s_reg_name, d_reg_name);
     }
 
-    destination_addr = d_reg;          /* Destination Register */
+    destination_addr = (uint16_t*)d_reg;          /* Destination Register */
 
     if (!disassemble) {
       bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
@@ -349,7 +349,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       }
     }
 
-    destination_addr = d_reg;           /* Destination Register */
+    destination_addr = (uint16_t*)d_reg;           /* Destination Register */
 
     if (!disassemble) {
       bw_flag == BYTE ? *d_reg &= 0x00FF : 0;
@@ -464,7 +464,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
         }
 
         cpu->sr.zero = is_zero(destination_addr, bw_flag);
-        cpu->sr.negative = is_negative(destination_addr, bw_flag);
+        cpu->sr.negative = is_negative((int16_t*)destination_addr, bw_flag);
 
         cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
 
@@ -497,7 +497,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
         }
         
         cpu->sr.zero = is_zero(destination_addr, bw_flag);
-        cpu->sr.negative = is_negative(destination_addr, bw_flag);
+        cpu->sr.negative = is_negative((int16_t*)destination_addr, bw_flag);
 
         cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
 
@@ -532,7 +532,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
         }
 
         cpu->sr.zero = is_zero(destination_addr, bw_flag);
-        cpu->sr.negative = is_negative(destination_addr, bw_flag);
+        cpu->sr.negative = is_negative((int16_t*)destination_addr, bw_flag);
 
         cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
 
@@ -567,7 +567,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
         }
 
         cpu->sr.zero = is_zero(destination_addr, bw_flag);
-        cpu->sr.negative = is_negative(destination_addr, bw_flag);
+        cpu->sr.negative = is_negative((int16_t*)destination_addr, bw_flag);
         
         if ( is_carried(~source_value, 1, bw_flag) ||
              is_carried(original_dst_value, source_value, bw_flag) ) {
@@ -604,19 +604,17 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
         }
         
         cpu->sr.negative = is_negative(&result, bw_flag);      
-        cpu->sr.zero = is_zero(&result, bw_flag);
+        cpu->sr.zero = is_zero((uint16_t*)&result, bw_flag);
 
         /* Check if the carry happens durring conversion to 2's comp */
         if (! early_carry) {
-          cpu->sr.carry = is_carried(original_dst_value, 
-          			   unsigned_source_value, bw_flag);
+          cpu->sr.carry = is_carried(original_dst_value, unsigned_source_value, bw_flag);
         }
         else {
           cpu->sr.carry = true;
         }
 
-        cpu->sr.overflow = is_overflowed(unsigned_source_value, 
-          			       original_dst_value,  &result, bw_flag);
+        cpu->sr.overflow = is_overflowed(unsigned_source_value, original_dst_value, (uint16_t*)&result, bw_flag);
         break;
       }
 

@@ -1,22 +1,23 @@
 /*
-  MSP430 Emulator                     
-  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)
+  MSP430 Emulator
+  Copyright (C) 2020 Rudolf Geosits (rgeosits@live.esu.edu)
 
-  This program is free software: you can redistribute it and/or modify
+  "MSP430 Emulator" is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
-  the Free Software Foundation, either version 3 of the License, or 
-  (at your option) any later version.   
-                           
-  This program is distributed in the hope that it will be useful,
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  "MSP430 Emulator" is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU General Public License for more details.               
-                                                         
+  GNU General Public License for more details.
+
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses
+  along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "debugger.h"
+extern uint8_t* MEMSPACE;
 
 Emulator *local_emu = NULL;
 
@@ -125,9 +126,10 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       if (str[0] >= '0' && str[0] <= '9') {
 	sscanf(str, "%X", (unsigned int *) &start_addr);
       }
-      else if (str[0] == '%' || str[0] == 'r' || str[0] == 'R'){
-	uint16_t *p = get_reg_ptr(emu, reg_name_to_num(str));
-	start_addr = *p;
+      else if (str[0] == '%' || str[0] == 'r' || str[0] == 'R')
+      {
+        uint16_t *p = (uint16_t *)get_reg_ptr(emu, reg_name_to_num(str));
+	    start_addr = *p;
       }
       
       stride = BYTE_STRIDE;
@@ -160,7 +162,7 @@ bool exec_cmd (Emulator *emu, char *line, int len)
 	  set_sr_value(emu, value);
 	}
 	else { // All others
-	  uint16_t *p = get_reg_ptr(emu, res);
+	  uint16_t *p = (uint16_t*)get_reg_ptr(emu, res);
 	  *p = value;
 	}
 
@@ -389,7 +391,7 @@ bool command_loop (Emulator *emu, char *buf, int len)
 	sscanf(param1, "%X", (unsigned int *) &start_addr);
       }
       else if (param1[0] == '%' || param1[0] == 'r' || param1[0] == 'R') {   
-	uint16_t *p = get_reg_ptr(emu, reg_name_to_num(param1));
+	uint16_t *p = (uint16_t *)get_reg_ptr(emu, reg_name_to_num(param1));
 	start_addr = *p;
       }
       
@@ -405,7 +407,7 @@ bool command_loop (Emulator *emu, char *buf, int len)
       sscanf(line, "%s %X", reg_name_or_addr, &value);
 
       if ( reg_name_to_num(reg_name_or_addr) != -1 ) {
-	uint16_t *p = get_reg_ptr(emu, reg_name_to_num(reg_name_or_addr) );
+	uint16_t *p = (uint16_t *)get_reg_ptr(emu, reg_name_to_num(reg_name_or_addr) );
 	*p = value;
 
 	display_registers(emu);
@@ -454,8 +456,7 @@ bool command_loop (Emulator *emu, char *buf, int len)
 }
 
 //##########+++ Dump Memory Function +++##########
-void dump_memory ( Emulator *emu, uint8_t *MEM, uint32_t size, 
-		   uint32_t start_addr, uint8_t stride)
+void dump_memory ( Emulator *emu, uint8_t *MEM, uint32_t size, uint32_t start_addr, uint8_t stride)
 {
   uint32_t i, msp_addr = start_addr;
   MEM += start_addr;

@@ -1,19 +1,19 @@
 /*
   MSP430 Emulator
-  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)  
-                                                                      
-  This program is free software: you can redistribute it and/or modify
+  Copyright (C) 2020 Rudolf Geosits (rgeosits@live.esu.edu)
+
+  "MSP430 Emulator" is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
-                                                                   
-  This program is distributed in the hope that it will be useful, 
-  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+
+  "MSP430 Emulator" is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-  GNU General Public License for more details.          
-                                                       
+  GNU General Public License for more details.
+
   You should have received a copy of the GNU General Public License
-  along with this program. If not, see <http://www.gnu.org/licenses
+  along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 #include "register_display.h"
@@ -45,61 +45,61 @@ void display_registers(Emulator *emu)
   char *red, *green, *cyan, *clear, *blue, *white, *yellow;
   char *reg_col, *spec_reg_col, *decor_col, *value_col;
 
-  char *r0_name = "PC";
-  char *r1_name = "SP";
-  char *r2_name = "SR";
-  char *r3_name = "CG2";
-  char *r4_name = "R4";
-  char *r5_name = "R5";
-  char *r6_name = "R6";
-  char *r7_name = "R7";
-  char *r8_name = "R8";
-  char *r9_name = "R9";
-  char *r10_name = "R10";
-  char *r11_name = "R11";
-  char *r12_name = "R12";
-  char *r13_name = "R13";
-  char *r14_name = "R14";
-  char *r15_name = "R15";    
+  const char *r0_name = "PC";
+  const char *r1_name = "SP";
+  const char *r2_name = "SR";
+  const char *r3_name = "CG2";
+  const char *r4_name = "R4";
+  const char *r5_name = "R5";
+  const char *r6_name = "R6";
+  const char *r7_name = "R7";
+  const char *r8_name = "R8";
+  const char *r9_name = "R9";
+  const char *r10_name = "R10";
+  const char *r11_name = "R11";
+  const char *r12_name = "R12";
+  const char *r13_name = "R13";
+  const char *r14_name = "R14";
+  const char *r15_name = "R15";    
 
 
   if (debugger->console_interface) {
-    red = "\x1b[31;1m";
-    green = "\x1b[32;1m";
-    cyan = "\x1b[36;1m";
-    blue = "\x1b[34;1m";
-    white = "\x1b[37;1m";
-    yellow = "\x1b[33;1m";
-    clear = "";
+    red = (char*)"\x1b[31;1m";
+    green = (char*)"\x1b[32;1m";
+    cyan = (char*)"\x1b[36;1m";
+    blue = (char*)"\x1b[34;1m";
+    white = (char*)"\x1b[37;1m";
+    yellow = (char*)"\x1b[33;1m";
+    clear = (char*)"";
 
     reg_col = blue;
     value_col = white;
     spec_reg_col = red;
     decor_col = green;
 
-    v_flag = "V\x1b[0m";
-    n_flag = "\x1b[36;1mN\x1b[0m";
-    z_flag = "\x1b[36;1mZ\x1b[0m";
-    c_flag = "\x1b[36;1mC\x1b[0m";
+    v_flag = (char*)"V\x1b[0m";
+    n_flag = (char*)"\x1b[36;1mN\x1b[0m";
+    z_flag = (char*)"\x1b[36;1mZ\x1b[0m";
+    c_flag = (char*)"\x1b[36;1mC\x1b[0m";
   }
   else {
-    red = "";
-    green = "";
-    cyan = "";
-    blue = "";
-    white = "";
-    yellow = "";
-    clear = "";
+    red = (char*)"";
+    green = (char*)"";
+    cyan = (char*)"";
+    blue = (char*)"";
+    white = (char*)"";
+    yellow = (char*)"";
+    clear = (char*)"";
 
-    reg_col = "";
-    value_col = "";
-    spec_reg_col = "";
-    decor_col = "";
+    reg_col = (char*)"";
+    value_col = (char*)"";
+    spec_reg_col = (char*)"";
+    decor_col = (char*)"";
 
-    v_flag = "V";
-    n_flag = "N";
-    z_flag = "Z";
-    c_flag = "C";
+    v_flag = (char*)"V";
+    n_flag = (char*)"N";
+    z_flag = (char*)"Z";
+    c_flag = (char*)"C";
   }
   
   sprintf(full,

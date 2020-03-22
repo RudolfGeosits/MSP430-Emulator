@@ -1,19 +1,19 @@
-/*                                                                             
-  MSP430 Emulator                                                              
-  Copyright (C) 2014, 2015 Rudolf Geosits (rgeosits@live.esu.edu)              
-                                                                               
-  This program is free software: you can redistribute it and/or modify         
-  it under the terms of the GNU General Public License as published by         
-  the Free Software Foundation, either version 3 of the License, or            
-  (at your option) any later version.                                          
-                                                                               
-  This program is distributed in the hope that it will be useful,              
-  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the                 
-  GNU General Public License for more details.                                 
-                                                                               
-  You should have received a copy of the GNU General Public License            
-  along with this program. If not, see <http://www.gnu.org/licenses            
+/*
+  MSP430 Emulator
+  Copyright (C) 2020 Rudolf Geosits (rgeosits@live.esu.edu)
+
+  "MSP430 Emulator" is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  "MSP430 Emulator" is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 //##########+++ Decode Format II Instructions +++#########
@@ -42,7 +42,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
   char reg_name[10];
   reg_num_to_name(source, reg_name);
   
-  uint16_t *reg = get_reg_ptr(emu, source);
+  uint16_t *reg = (uint16_t * )get_reg_ptr(emu, source);
   uint16_t bogus_reg; /* For immediate values to be operated on */
 
   uint8_t constant_generator_active = 0;    /* Specifies if CG1/CG2 active */
@@ -220,7 +220,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       }
 
       cpu->sr.zero = is_zero(source_address, bw_flag);
-      cpu->sr.negative = is_negative(source_address, bw_flag);
+      cpu->sr.negative = is_negative((int16_t*)source_address, bw_flag);
       cpu->sr.overflow = false;
 
       break;
@@ -263,7 +263,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       }
 
       cpu->sr.zero = is_zero(source_address, bw_flag);
-      cpu->sr.negative = is_negative(source_address, bw_flag);
+      cpu->sr.negative = is_negative((int16_t*)source_address, bw_flag);
       cpu->sr.overflow = false;
       break;
     }
@@ -287,7 +287,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 	*source_address &= 0x00FF;
       }
     
-      cpu->sr.negative = is_negative(source_address, WORD);
+      cpu->sr.negative = is_negative((int16_t*)source_address, WORD);
       cpu->sr.zero = is_zero(source_address, WORD);
       cpu->sr.carry = ! cpu->sr.zero;
       cpu->sr.overflow = false;

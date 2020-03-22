@@ -34,3 +34,4 @@ TAGS
 
 # Debug files
 *.dSYM/
+*.vs

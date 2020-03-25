@@ -38,6 +38,7 @@ void initialize_msp_memspace()
   // MSP430g2553 Device Specific ...
   // 16 KB / 64 KB Addressable Space
   MEMSPACE = (uint8_t *) calloc(1, 0x10000);
+  //MEMSPACE = (uint8_t*)calloc(1, 0x100000);
 
   // (lower bounds, so increment upwards)
 

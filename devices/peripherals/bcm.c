@@ -165,40 +165,40 @@ void setup_bcm (Emulator *emu)
 
 uint64_t nanosec_diff(struct timespec *timeA_p, struct timespec *timeB_p)
 {
-  return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) -
-    ((timeB_p->tv_sec * 1000000000) + timeB_p->tv_nsec);
+    return ((timeA_p->tv_sec * 1000000000) + timeA_p->tv_nsec) - ((timeB_p->tv_sec * 1000000000) + timeB_p->tv_nsec);
 }
 
 void mclk_wait_cycles (Emulator *emu, uint64_t cycles)
 {
-  Cpu *cpu = emu->cpu;
-  Bcm *bcm = cpu->bcm;  
+    Cpu *cpu = emu->cpu;
+    Bcm *bcm = cpu->bcm;  
 
-  struct timespec start, end;
-  uint64_t i, elapsed_nsecs;
+    struct timespec start, end;
+    uint64_t i, elapsed_nsecs;
   
-  for (i = 0;i < cycles;i++) {
-    clock_gettime(CLOCK_MONOTONIC, &start);
+    for (i = 0;i < cycles;i++)
+    {
+        clock_gettime(CLOCK_MONOTONIC, &start);
 
-    while (true) {
-      clock_gettime(CLOCK_MONOTONIC, &end);
-      elapsed_nsecs = nanosec_diff(&end, &start);
+        while (true)
+        {
+            clock_gettime(CLOCK_MONOTONIC, &end);
+            elapsed_nsecs = nanosec_diff(&end, &start);
 
-      // Choose timing based on clock source
-      if (bcm->mclk_source == DCOCLK) {
-	double thing = (1.0/(bcm->dco_freq/bcm->mclk_div))*1000000000.0;
+            // Choose timing based on clock source
+            if (bcm->mclk_source == DCOCLK)
+            {
+                double thing = (1.0/(bcm->dco_freq/bcm->mclk_div))*1000000000.0;
 
-	if (elapsed_nsecs >= (uint64_t)thing) {
-	  break;
-	}    
-      }
-      else {
-	puts("Error, clock source");
-      }
-
+                if (elapsed_nsecs >= (uint64_t)thing)
+                    break;
+            }
+            else
+            {
+                puts("Error, clock source");
+            }
+        }
     }
-  }
-  
 }
 
 void smclk_wait_cycles (Emulator *emu, uint64_t cycles)

@@ -35,3 +35,7 @@ TAGS
 # Debug files
 *.dSYM/
 *.vs
+*.sln
+obj/
+*.vcxproj*
+*.i64

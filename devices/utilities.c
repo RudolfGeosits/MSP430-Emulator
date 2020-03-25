@@ -61,6 +61,15 @@ void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr)
     size = ftell(fd);
     rewind(fd);
 
+    // check size
+    if (size > (0x10000 - 0x0C000))
+    {
+        printf("SizeTooBig\n");
+        print_console(emu, "Flash Size too small to fit your binary. Quitting, please refresh to try again. Ensure you are compiling for the right MSP version.\n");
+        usleep(20000);
+        exit(1);
+    }
+
     uint16_t *real_addr = get_addr_ptr(virt_addr);
 
     result = fread(real_addr, 1, size, fd);

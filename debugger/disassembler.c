@@ -29,13 +29,15 @@ void disassemble(Emulator *emu, uint16_t start_addr, uint8_t times)
   debugger->disassemble_mode = true;
   cpu->pc = start_addr;
   
-  for (i = 0;i < times;i++) {
+  for (i = 0;i < times;i++)
+  {
     char addr_str[32] = {0};
 
     sprintf(addr_str, "0x%04X:\t", cpu->pc);
 
     printf("%s", addr_str);
-    if (debugger->web_interface) print_console(emu, addr_str);
+    if (debugger->web_interface)
+        print_console(emu, addr_str);
 
     opcode = fetch(emu);    
     decode(emu, opcode, DISASSEMBLE);

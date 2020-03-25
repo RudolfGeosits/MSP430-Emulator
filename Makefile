@@ -55,8 +55,8 @@ usci.o : devices/peripherals/usci.c
 port1.o : devices/peripherals/port1.c
 	g++ -c devices/peripherals/port1.c
 
-emu_server.o : debugger/websockets/emu_server.c
-	g++ -c debugger/websockets/emu_server.c
+emu_server.o : debugger/websockets/emu_server.cpp
+	g++ -c debugger/websockets/emu_server.cpp
 
 packet_queue.o : debugger/websockets/packet_queue.c
 	g++ -c debugger/websockets/packet_queue.c

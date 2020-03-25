@@ -16,6 +16,7 @@
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <string>
 #include "emu_server.h"
 
 #define TXIFG 0x02
@@ -25,8 +26,11 @@
 #define OUT   1
 #define IN    0
 
-Emulator *emu = NULL;
+//
+#define MAX_UPLOAD_FILENAME_SIZE 0xFFFF+1
+char UploadFileName[MAX_UPLOAD_FILENAME_SIZE] = {0};
 
+Emulator *emu = NULL;
 uint8_t *data;
 int lent;
 
@@ -81,18 +85,16 @@ void *thrd (void *ctxt)
   return NULL;
 }
 
-int callback_emu (
-		  struct lws *wsi,
-		  //enum lws_callback_reasons reason,
-		  enum lws_callback_reasons reason,
-		  void *user, void *in, size_t len)
+int callback_emu (struct lws *wsi, enum lws_callback_reasons reason, void *user, void *in, size_t len)
 {
   Cpu *cpu = emu->cpu;
   Port_1 *p1 = emu->cpu->p1;
   Debugger *deb = emu->debugger;
 
-  switch (reason) {
-    case LWS_CALLBACK_ESTABLISHED: {
+  switch (reason)
+  {
+    case LWS_CALLBACK_ESTABLISHED:
+    {
       puts("connection established");
       
       // Flip ready flag for the emulator to begin
@@ -105,74 +107,77 @@ int callback_emu (
       break;
     }
       
-    case LWS_CALLBACK_SERVER_WRITEABLE: {
-      if ( !packet_queue_empty(emu) ) {
-	  Packet p = packet_dequeue(emu);
+    case LWS_CALLBACK_SERVER_WRITEABLE:
+    {
+        if ( !packet_queue_empty(emu) )
+        {
+            Packet p = packet_dequeue(emu);
 	  
-	  void *msg = p.message;
-	  size_t msg_len = p.length;
-	  uint8_t op = p.opcode;
+            void *msg = p.message;
+            size_t msg_len = p.length;
+            uint8_t op = p.opcode;
 	
-	  //printf("[%s] of len %u, opcode: %u\n\n",
-	  //(char *)msg, (unsigned int)msg_len, op);
+            //printf("[%s] of len %u, opcode: %u\n\n",
+            //(char *)msg, (unsigned int)msg_len, op);
 	
-	  // Leave room for websock header/trailer & opcode
-	  size_t pack_len = msg_len + sizeof(op)
-	    + LWS_SEND_BUFFER_PRE_PADDING 
-	    + LWS_SEND_BUFFER_POST_PADDING;
+            // Leave room for websock header/trailer & opcode
+            size_t pack_len = msg_len + sizeof(op) + LWS_SEND_BUFFER_PRE_PADDING + LWS_SEND_BUFFER_POST_PADDING;
 	
-	  void *packet = malloc(pack_len);
+            void *packet = malloc(pack_len);
 	
-	  // Zero out our packet
-	  memset( ((uint8_t*)packet + LWS_SEND_BUFFER_PRE_PADDING), 0, 
-		  msg_len + sizeof(op) );
+            // Zero out our packet
+            memset( ((uint8_t*)packet + LWS_SEND_BUFFER_PRE_PADDING), 0, msg_len + sizeof(op) );
 
-	  // Place opcode into packet
-	  *((uint8_t *)((uint8_t*)packet + LWS_SEND_BUFFER_PRE_PADDING)) = op;
+            // Place opcode into packet
+            *((uint8_t *)((uint8_t*)packet + LWS_SEND_BUFFER_PRE_PADDING)) = op;
 	
-	  // Place message into packet
-	  memcpy( ((uint8_t*)packet + LWS_SEND_BUFFER_PRE_PADDING + sizeof(op)),
-		  (const void *)p.message, msg_len);
+            // Place message into packet
+            memcpy( ((uint8_t*)packet + LWS_SEND_BUFFER_PRE_PADDING + sizeof(op)), (const void *)p.message, msg_len);
 
-	  /*
-	  int i;
-	  for (i = 0;i < pack_len;i++){
-	    printf( "%02X (%c) | ", *((uint8_t *)(packet+i)),
-		    *((char *)(packet+i)) );
-	  }
-	  puts("\n");
-	  */
+            /*
+            int i;
+            for (i = 0;i < pack_len;i++){
+            printf( "%02X (%c) | ", *((uint8_t *)(packet+i)),
+	            *((char *)(packet+i)) );
+            }
+            puts("\n");
+            */
 
-	  lws_write(wsi, ((unsigned char*)(packet))+LWS_SEND_BUFFER_PRE_PADDING, msg_len + sizeof(op), LWS_WRITE_BINARY);
+            lws_write(wsi, ((unsigned char*)(packet))+LWS_SEND_BUFFER_PRE_PADDING, msg_len + sizeof(op), LWS_WRITE_BINARY);
 	  
-	  free(p.message);
-	  free(packet);
-      }
+            free(p.message);
+            free(packet);
+        }
 
-      static bool p1_0_on = false;
-      static bool p1_1_on = false;
-      static bool p1_2_on = false;
-      static bool p1_3_on = false;
-      static bool p1_4_on = false;
-      static bool p1_5_on = false;
-      static bool p1_6_on = false;
-      static bool p1_7_on = false;
+        static bool p1_0_on = false;
+        static bool p1_1_on = false;
+        static bool p1_2_on = false;
+        static bool p1_3_on = false;
+        static bool p1_4_on = false;
+        static bool p1_5_on = false;
+        static bool p1_6_on = false;
+        static bool p1_7_on = false;
       
-      // P1.0 ON/OFF
-      if (p1->DIR_0 == OUT) {
-	if (p1->OUT_0 == HIGH) {
-	  if (p1_0_on == false) {
-	    send_control(emu, P1_0_ON_PACKET, NULL, 0);
-	    p1_0_on = true;
-	  }
-	}
-	else if (p1->OUT_0 == LOW) {
-	  if (p1_0_on == true) {
-	    send_control(emu, P1_0_OFF_PACKET, NULL, 0);
-	    p1_0_on = false;
-	  }
-	}
-      }
+        // P1.0 ON/OFF
+        if (p1->DIR_0 == OUT)
+        {
+            if (p1->OUT_0 == HIGH)
+            {
+                if (p1_0_on == false)
+                {
+                    send_control(emu, P1_0_ON_PACKET, NULL, 0);
+                    p1_0_on = true;
+                }
+            }
+            else if (p1->OUT_0 == LOW)
+            {
+                if (p1_0_on == true)
+                {
+                    send_control(emu, P1_0_OFF_PACKET, NULL, 0);
+                    p1_0_on = false;
+                }
+            }
+        }
 
       // P1.1 ON/OFF
       if (p1->DIR_1 == OUT) {
@@ -195,6 +200,7 @@ int callback_emu (
 	if (p1->OUT_2 == HIGH) {	  
 	  if (p1_2_on == false) {
 	    send_control(emu, P1_2_ON_PACKET, NULL, 0);
+        puts("p2 on");
 	    p1_2_on = true;
 	  }
 	}
@@ -306,147 +312,165 @@ int callback_emu (
       break;
     }
 
-    case LWS_CALLBACK_RECEIVE: {
-      static FILE *fp = NULL;
-      static bool upload_in_progress = false;
-      static uint32_t uploaded_bytes, file_size;
+    case LWS_CALLBACK_RECEIVE:
+    {
+        static FILE *fp = NULL;
+        static bool upload_in_progress = false;
+        static uint32_t uploaded_bytes;
 
-      char *buf = (char *)in;      
+        static uint16_t FileSize = 0;
+
+        char *buf = (char *)in;      
       
-      if (upload_in_progress) { // Continue transaction of upload
-	int i;
-	for (i = 0;i < len;i++){	     
-	  fwrite(&buf[i], 1, 1, fp);
-	  uploaded_bytes++;
+        if (upload_in_progress)
+        { // Continue transaction of upload
+            int i;
 
-	  if (uploaded_bytes >= file_size) {
-	    puts("met bytes");
-	    fclose(fp);
-	    system("msp430-objcopy -O binary tmp.elf tmp.bin");
+            for (i = 0;i < len;i++)
+            {
+                fwrite(&buf[i], 1, 1, fp);
+                uploaded_bytes++;
 
-	    deb->web_firmware_uploaded = true;
-	    upload_in_progress = false;
-	    return 0;
-	  }
-	}
+                if (uploaded_bytes >= FileSize)
+                {
+                    puts("met bytes");
+                    fclose(fp);
+                   // system("msp430-objcopy -O binary tmp.elf tmp.bin");
+                    std::string ObjCopyLine = "objcopy -I elf32-little -O binary \"" + std::string(UploadFileName) + "\" tmp.bin";
+                    system(ObjCopyLine.c_str());
+
+                    deb->web_firmware_uploaded = true;
+                    upload_in_progress = false;
+                    return 0;
+                }
+            }
 	
-	return 0;
-      }
+            return 0;
+        }
       
-      unsigned char opcode = buf[0];
-      printf("opcode: %02X\n", *(uint8_t*)in);
+        unsigned char opcode = buf[0];
+        printf("opcode: %02X\n", *(uint8_t*)in);
       
-      switch (opcode) {
-        case 0x00: { // Upload File
-	   uint8_t byte1 = *((uint8_t*)in+1);
-	   uint8_t byte2 = *((uint8_t*)in+2);
-	   uint8_t byte3 = *((uint8_t*)in+3);
-	   uint8_t byte4 = *((uint8_t*)in+4);
+        switch (opcode)
+        {
+            case 0x00: // Upload File
+            {
+                // Get the 32-bit length of the file
+                FileSize = ntohs( *((uint16_t*)((uint8_t*)in + 1)) );
 
-	   file_size = 0;
-	   file_size = byte1; file_size <<= 3*8;
-	   file_size |= ((0x00000000 | byte2) << 2*8);
-	   file_size |= ((0x00000000 | byte3) << 1*8);
-	   file_size |= ((0x00000000 | byte4));
+                // Get the 8-bit length of the ASCII filename
+                uint16_t FileNameSize = ntohs(*((uint16_t*)((uint8_t*)in + 3)));
 
-	   printf("got in with file_size %u, but got len %d\n", 
-		  (unsigned int)file_size, (unsigned int)len);	   
+	            printf(" Got file size %u, got data len %u for first callback.\n", (unsigned int)FileSize, (unsigned int)len);
 
-	   if (file_size >= 40000) {
-	     exit(1);
-	     deb->quit = true;
-	   }
+                // Ensure that the file isn't too big, otherwise just quit on the user for now
+	            if (FileSize >= 0xFFFF)
+                {
+                    print_console(emu, "File Size Not Supported. Quitting.\n");
+                    deb->quit = true;
+                    exit(1);
+                }
 
-	   upload_in_progress = true;
-	   uploaded_bytes = 0;
-	   fp = fopen("tmp.elf", "wb");
+                // for now assume the entire filename is uploaded, and has no 0 at the end so add one
+                memset(UploadFileName, 0, MAX_UPLOAD_FILENAME_SIZE);
+                memmove(&UploadFileName[0], &buf[5], FileNameSize);
 
-	   // Get Any Bytes that are in with this packet
-	   int i;
-	   for (i = 5;i < len;i++){	     
-	     fwrite(&buf[i], 1, 1, fp);
-	     uploaded_bytes++;
+                printf(" Got name size %u, name %s.\n", FileNameSize, UploadFileName);
 
-	     if (uploaded_bytes >= file_size) {
-	       puts("met bytes");
-	       fclose(fp);
-	       system("msp430-objcopy -O binary tmp.elf tmp.bin");
+                upload_in_progress = true;
+	            uploaded_bytes = 0;
+	            fp = fopen(UploadFileName, "wb");
 
-	       deb->web_firmware_uploaded = true;
-	       upload_in_progress = false;
-	       return 0;
+	            // Get Any Bytes that are in with this packet
+	            for (uint32_t i = 5+FileNameSize;i < len;i++)
+                {	         
+	                fwrite(&buf[i], 1, 1, fp);
+	                uploaded_bytes++;
+
+	                if (uploaded_bytes >= FileSize)
+                    {
+	                    puts("met bytes");
+	                    fclose(fp);
+
+	                    //system("msp430-objcopy -O binary tmp.elf tmp.bin");
+                        std::string ObjCopyLine = "objcopy -I elf32-little -O binary \"" + std::string(UploadFileName) + "\" tmp.bin";
+                        system(ObjCopyLine.c_str());
+
+	                    deb->web_firmware_uploaded = true;
+	                    upload_in_progress = false;
+	                    return 0;
+	                }
+	            }
+
+	            break;
+	        }
+
+                 case 0x01: { // PLAY
+	     printf("Got play\n");
+	     cpu->running = true;
+	     deb->debug_mode = false;
+	     update_register_display(emu);
+
+	     return 0;
+	 }
+            
+                 case 0x02: { // PAUSE
+	     printf("Got pause\n");
+
+	     if (cpu->running) {
+	         cpu->running = false;
+	         deb->debug_mode = true;
+
+	         // display first round of registers
+	         display_registers(emu);
+	         disassemble(emu, cpu->pc, 1);
+	         update_register_display(emu);
 	     }
-	   }
-
-	   break;
+	     
+	     return 0;
 	 }
 
-         case 0x01: { // PLAY
-	   printf("Got play\n");
-	   cpu->running = true;
-	   deb->debug_mode = false;
-	   update_register_display(emu);
+                 case 0x03: { // SERIAL DATA
+	     if (len > 1000) exit(1);
 
-	   return 0;
-	 }
-      
-         case 0x02: { // PAUSE
-	   printf("Got pause\n");
-
-	   if (cpu->running) {
-	     cpu->running = false;
-	     deb->debug_mode = true;
-
-	     // display first round of registers
-	     display_registers(emu);
-	     disassemble(emu, cpu->pc, 1);
-	     update_register_display(emu);
-	   }
-	   
-	   return 0;
+	     lent = len - 1;
+	     data = ((uint8_t*)in + 1);
+	     
+	     pthread_t t;
+	     if( pthread_create(&t, NULL, thrd, (void *)cpu->usci ) ) {
+	         fprintf(stderr, "Error creating thread\n");                                        
+	     }
+	     
+	     //printf("Got serial data %s ... %d bytes long\n", 
+	     //(char *)(in + 1), (unsigned int)len - 1);
+	     
+	     return 0;
 	 }
 
-         case 0x03: { // SERIAL DATA
-	   if (len > 1000) exit(1);
+                 case 0x04: { // Console Input Data
+	     if (len > 1000) exit(1);
 
-	   lent = len - 1;
-	   data = ((uint8_t*)in + 1);
-	   
-	   pthread_t t;
-	   if( pthread_create(&t, NULL, thrd, (void *)cpu->usci ) ) {
-	     fprintf(stderr, "Error creating thread\n");                    
-	   }
-	   
-	   //printf("Got serial data %s ... %d bytes long\n", 
-	   //(char *)(in + 1), (unsigned int)len - 1);
-	   
-	   return 0;
-	 }
+	     buf = buf + 1;	     
+	     printf("%s\n", buf);
 
-         case 0x04: { // Console Input Data
-	   if (len > 1000) exit(1);
+	     if (!cpu->running && deb->debug_mode) {
+	         exec_cmd(emu, buf, len);	    
+	         update_register_display(emu);
+	     }
 
-	   buf = buf + 1;	   
-	   printf("%s\n", buf);
-
-	   if (!cpu->running && deb->debug_mode) {
-	     exec_cmd(emu, buf, len);	  
-	     update_register_display(emu);
-	   }
-
-	   return 0;
-         }
-      
-         default: break;
-      }
-    }
-  
-  default: {
-    break;
-  }
-}
+	     return 0;
+                 }
+            
+                 default: break;
+            }
+        }
     
-  return 0;
+    default: {
+        break;
+    }
+}
+        
+    return 0;
 }
 
 void *web_server (void *ctxt)
@@ -497,8 +521,7 @@ void *web_server (void *ctxt)
   return NULL;
 }
 
-void send_control(Emulator *emu, uint8_t opcode, 
-		  void *data, size_t data_size)
+void send_control(Emulator *emu, uint8_t opcode, void *data, size_t data_size)
 {
   const static uint8_t NUM_OPCODE_BYTES   = 1;
   const static uint8_t NUM_DATA_LEN_BYTES = 1;

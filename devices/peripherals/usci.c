@@ -100,6 +100,7 @@ void open_pty (Emulator *emu)
   }
 }
 */
+
 void handle_usci (Emulator *emu) 
 {
   Cpu *cpu = emu->cpu;

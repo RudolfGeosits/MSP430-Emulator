@@ -16,8 +16,7 @@
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef _USCI_H_
-#define _USCI_H_
+#pragma once
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -94,9 +93,8 @@ typedef struct Usci
   
   Ctl0 ctl0;
   Ctl1 ctl1;
-} Usci;
+}
+Usci;
 
 void setup_usci(Emulator *emu);
 void handle_usci(Emulator *emu);
-
-#endif

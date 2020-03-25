@@ -16,8 +16,7 @@
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef _MAIN_H_
-#define _MAIN_H_
+#pragma once
 
 #include <stdio.h>
 #include <time.h>
@@ -65,5 +64,3 @@ struct Emulator
     Cpu *cpu;
     Debugger *debugger;
 };
-
-#endif

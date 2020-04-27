@@ -17,6 +17,7 @@
 */
 
 #include "register_display.h"
+#include "io.h"
 
 /*   Display all 16 registers                                                  
  *   - Toggle between Common mode and Specific mode                         

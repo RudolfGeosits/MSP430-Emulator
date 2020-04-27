@@ -20,6 +20,7 @@
 #define RXIFG 0x01
 
 #include "usci.h"
+#include "../../debugger/io.h"
 
 /*
 int master;

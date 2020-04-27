@@ -25,6 +25,7 @@
 //########################################################
 
 #include "decoder.h"
+#include "../../debugger/io.h"
 
 void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
 {

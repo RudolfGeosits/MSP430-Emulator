@@ -17,6 +17,7 @@
 */
 
 #include "decoder.h"
+#include "../../debugger/io.h"
 
 // ##########+++ CPU Fetch Cycle  +++##########
 uint16_t fetch(Emulator *emu)

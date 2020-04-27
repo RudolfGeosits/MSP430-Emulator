@@ -17,6 +17,7 @@
 */
 
 #include "debugger.h"
+#include "io.h"
 extern uint8_t* MEMSPACE;
 
 Emulator *local_emu = NULL;

@@ -19,6 +19,7 @@
 
 
 #include "main.h"
+#include "debugger/io.h"
 
 static void printVersion()
 {
@@ -213,13 +214,15 @@ int main(int argc, char *argv[])
         if (!startWebServer(emu))
             return -1;
     }
+    if (emu->mode == Emulator_Mode_Cli)
+    {
+        register_signal(SIGINT); // Register Callback for CONTROL-c
+    }
 
     if (emu->binary != NULL)
     {
         load_firmware(emu, emu->binary, 0xC000);
     }
-
-    //register_signal(SIGINT); // Register Callback for CONTROL-c
 
     // display first round of registers
     display_registers(emu);

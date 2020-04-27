@@ -53,6 +53,8 @@ typedef struct Debugger
   Server *server;
 } Debugger;
 
+void register_signal(int sig);
+
 void setup_debugger(Emulator *emu);
 
 void dump_memory(Emulator *emu, uint8_t *MEM, uint32_t size,

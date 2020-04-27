@@ -128,8 +128,6 @@ struct Server {
   bool spin_lock;
 };
 
-void print_console (Emulator *emu, const char *buf);
-void print_serial (Emulator *emu, char *buf);
 void send_control (Emulator *emu, uint8_t opcode, 
 		   void *data, size_t size);
 void *web_server (void *ctxt);

@@ -17,6 +17,7 @@
 */
 
 #include "utilities.h"
+#include "../debugger/io.h"
 
 extern uint8_t* MEMSPACE;
 
@@ -338,7 +339,7 @@ void reg_num_to_name(uint8_t number, char *name)
  */
 const char* LocalHelpStr =
 "**************************************************\n"\
-"*\t\tMSP430-Emulator\n*\n*\tUsage: ./msp430 BINARY_FIRMWARE\n*\n"\
+"*\t\tMSP430-Emulator\n"\
 "* run\t\t\t[Run Program Until Breakpoint is Hit]\n"\
 "* step [N]\t\t[Step Into Instruction]\n"\
 "* dump [HEX_ADDR|Rn]\t[Dump Memory direct or at register value]\n"\

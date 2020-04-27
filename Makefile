@@ -2,12 +2,11 @@ CFLAGS=-g
 
 all: MSP430 SERVER
 
-MSP430 : main.o utilities.o emu_server.o registers.o memspace.o debugger.o disassembler.o \
-	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o \
-	usci.o port1.o packet_queue.o bcm.o timer_a.o
+MSP430 : main.o emu_server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
+	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o bcm.o \
+	timer_a.o packet_queue.o io.o
 
-	g++ ${CFLAGS} -o MSP430 main.o emu_server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
-	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o bcm.o timer_a.o packet_queue.o -lreadline -lwebsockets -lpthread -lrt -lssl -lcrypto;
+	g++ ${CFLAGS} -o MSP430 $^ -lreadline -lwebsockets -lpthread -lrt -lssl -lcrypto;
 
 main.o : main.cpp
 	g++ ${CFLAGS} -c main.cpp
@@ -56,6 +55,9 @@ usci.o : devices/peripherals/usci.c
 
 port1.o : devices/peripherals/port1.c
 	g++ ${CFLAGS} -c devices/peripherals/port1.c
+
+io.o: debugger/io.c
+	g++ ${CFLAGS} -c $<
 
 emu_server.o : debugger/websockets/emu_server.cpp
 	g++ ${CFLAGS} -c debugger/websockets/emu_server.cpp

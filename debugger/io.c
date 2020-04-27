@@ -16,34 +16,32 @@
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "disassembler.h"
 #include "io.h"
+#include "websockets/packet_queue.h"
 
-void disassemble(Emulator *emu, uint16_t start_addr, uint8_t times)
+void print_serial (Emulator *emu, char *buf) 
 {
-  Cpu *cpu = emu->cpu;
-  Debugger *debugger = emu->debugger;
+    switch (emu->mode)
+    {
+        case Emulator_Mode_Web:
+            packet_enqueue(emu, buf, strlen(buf) + 1, SERIAL_PACKET_OPCODE);
+            break;
+        case Emulator_Mode_Cli:
+            // TODO
+            printf("Serial %s\n", buf);
+            break;
+    }  
+}
 
-  uint16_t saved_pc = cpu->pc, opcode;
-  uint32_t i;
-
-  debugger->disassemble_mode = true;
-  cpu->pc = start_addr;
-  
-  for (i = 0;i < times;i++)
-  {
-    char addr_str[32] = {0};
-
-    sprintf(addr_str, "0x%04X:\t", cpu->pc);
-
-    printf("%s", addr_str);
-    if (debugger->web_interface)
-        print_console(emu, addr_str);
-
-    opcode = fetch(emu);    
-    decode(emu, opcode, DISASSEMBLE);
-  }
-
-  debugger->disassemble_mode = false;
-  cpu->pc = saved_pc; // Restore PC
+void print_console (Emulator *emu, const char *buf)
+{
+    switch (emu->mode)
+    {
+    case Emulator_Mode_Web:
+        packet_enqueue(emu, (void*)buf, strlen(buf) + 1, CONSOLE_PACKET_OPCODE);   
+        break;
+    case Emulator_Mode_Cli:
+        printf("%s", buf);
+        break;
+    }    
 }

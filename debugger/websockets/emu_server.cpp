@@ -18,6 +18,7 @@
 
 #include <string>
 #include "emu_server.h"
+#include "../io.h"
 
 #define TXIFG 0x02
 #define RXIFG 0x01
@@ -556,16 +557,6 @@ void send_control(Emulator *emu, uint8_t opcode, void *data, size_t data_size)
 		   CONTROL_PACKET_OPCODE);
     
   }
-}
-
-void print_serial (Emulator *emu, char *buf) 
-{
-  packet_enqueue(emu, buf, strlen(buf) + 1, SERIAL_PACKET_OPCODE);
-}
-
-void print_console (Emulator *emu, const char *buf)
-{
-    packet_enqueue(emu, (void*)buf, strlen(buf) + 1, CONSOLE_PACKET_OPCODE);
 }
 
 int callback_http (

@@ -17,6 +17,7 @@
 */
 
 #include "registers.h"
+#include "../../debugger/io.h"
 
 //##########+++ MSP430 Register initialization +++##########
 void initialize_msp_registers(Emulator *emu)

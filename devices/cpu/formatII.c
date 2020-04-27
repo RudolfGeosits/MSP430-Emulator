@@ -28,6 +28,7 @@
 #include "formatII.h"
 #include "decoder.h"
 #include "../utilities.h"
+#include "../../debugger/io.h"
 
 void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 {

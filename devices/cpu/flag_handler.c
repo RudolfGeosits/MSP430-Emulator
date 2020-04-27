@@ -18,6 +18,7 @@
 
 #include "decoder.h"
 #include "flag_handler.h"
+#include "../../debugger/io.h"
 
 /**
  * @brief Test if the result of the asm instruction is zero

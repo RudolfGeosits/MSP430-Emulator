@@ -24,9 +24,10 @@
 #include "../devices/memory/memspace.h"
 
 typedef enum { BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE } Stride;
+
 enum { MAX_BREAKPOINTS = 100 };
 
-typedef struct Debugger 
+typedef struct Debugger
 {
   bool disassemble_mode;
   bool debug_mode;
@@ -54,7 +55,7 @@ typedef struct Debugger
 
 void setup_debugger(Emulator *emu);
 
-void dump_memory(Emulator *emu, uint8_t *MEM, uint32_t size, 
+void dump_memory(Emulator *emu, uint8_t *MEM, uint32_t size,
 		 uint32_t start_addr, uint8_t stride);
 
 void handle_sigint(int signal);

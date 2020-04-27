@@ -18,6 +18,9 @@
 
 #pragma once
 
+#define VERSION_STRING "1.0.0"
+#define PROGRAM_NAME "MSP430 Emulator"
+
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -32,6 +35,11 @@
 #include <libwebsockets.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+
+typedef enum {
+  Emulator_Mode_Web,
+  Emulator_Mode_Cli
+} Emulator_Mode;
 
 typedef struct Emulator Emulator;
 
@@ -63,4 +71,6 @@ struct Emulator
 {
     Cpu *cpu;
     Debugger *debugger;
+    Emulator_Mode mode;
+    int port;
 };

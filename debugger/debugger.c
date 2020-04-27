@@ -45,7 +45,9 @@ bool exec_cmd (Emulator *emu, char *line, int len)
   if ( !strncasecmp("reset", cmd, sizeof "reset") ||
        !strncasecmp("restart", cmd, sizeof "restart"))
     {
-      cpu->pc = 0xC000;
+      // Reset interrupt      
+      uint16_t resetIntHandlerAddress = ((uint16_t*)MEMSPACE)[0xfffe / 2];
+      cpu->pc = resetIntHandlerAddress;
 
       display_registers(emu);
       disassemble(emu, cpu->pc, 1);

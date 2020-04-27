@@ -19,9 +19,9 @@
 //##########+++ Decode Format III Instructions +++#########
 //# Format III are jump instructions of the form:
 //#   [001C][CCXX][XXXX][XXXX]
-//# 
-//# Where C = Condition, X = 10-bit signed offset 
-//# 
+//#
+//# Where C = Condition, X = 10-bit signed offset
+//#
 //########################################################
 
 #include "decoder.h"
@@ -35,7 +35,7 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   uint8_t condition = (instruction & 0x1C00) >> 10;
   int16_t signed_offset = (instruction & 0x03FF) * 2;
   bool negative = signed_offset >> 9;
-  
+
   char value[20];
 
   char mnemonic[100] = {0};
@@ -50,8 +50,8 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
 
   if (!disassemble) {
   switch(condition){
-  
-  /* JNE/JNZ Jump if not equal/zero             
+
+  /* JNE/JNZ Jump if not equal/zero
   *
   * If Z = 0: PC + 2 offset → PC
   * If Z = 1: execute following instruction
@@ -63,7 +63,7 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
 
     break;
   }
-  
+
   /* JEQ/JZ Jump is equal/zero
    * If Z = 1: PC + 2 offset → PC
    * If Z = 0: execute following instruction
@@ -75,7 +75,7 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
 
     break;
   }
-  
+
   /* JNC/JLO Jump if no carry/lower
   *
   *  if C = 0: PC + 2 offset → PC
@@ -84,8 +84,8 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   case 0x2:{
     if (cpu->sr.carry == false) {
       cpu->pc += signed_offset;
-    }    
-    
+    }
+
     break;
   }
 
@@ -97,11 +97,11 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   case 0x3:{
     if (cpu->sr.carry == true) {
       cpu->pc += signed_offset;
-    }    
+    }
 
     break;
   }
-  
+
   /* JN Jump if negative
   *
   *  if N = 1: PC + 2 ×offset → PC
@@ -110,11 +110,11 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   case 0x4:{
     if (cpu->sr.negative == true) {
       cpu->pc += signed_offset;
-    }    
+    }
 
     break;
   }
-   
+
   /* JGE Jump if greater or equal (N == V)
   *
   *  If (N .XOR. V) = 0 then jump to label: PC + 2 P offset → PC
@@ -123,12 +123,12 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   case 0x5:{
     if ((cpu->sr.negative ^ cpu->sr.overflow) == false) {
       cpu->pc += signed_offset;
-    }    
-    
+    }
+
     break;
   }
-    
-  /* JL Jump if less (N != V)  
+
+  /* JL Jump if less (N != V)
   *
   *  If (N .XOR. V) = 1 then jump to label: PC + 2 offset → PC
   *  If (N .XOR. V) = 0 then execute following instruction
@@ -136,13 +136,13 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   case 0x6:{
     if ((cpu->sr.negative ^ cpu->sr.overflow) == true) {
       cpu->pc += signed_offset;
-    }    
-    
+    }
+
     break;
   }
- 
+
   /* JMP Jump Unconditionally
-   *   
+   *
    *  PC + 2 × offset → PC
    *
    */
@@ -155,7 +155,7 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
     puts("Undefined Jump operation!\n");
     return;
   }
-  
+
   } //# End of Switch
   } //# end if
 
@@ -164,7 +164,7 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
     switch(condition){
 
     case 0x0:{
-      sprintf(mnemonic, "JNZ"); 
+      sprintf(mnemonic, "JNZ");
       sprintf(value, "0x%04X", cpu->pc + signed_offset);
       break;
     }
@@ -189,15 +189,15 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
       break;
     }
     case 0x5:{
-      sprintf(mnemonic, "JGE");    
+      sprintf(mnemonic, "JGE");
       sprintf(value, "0x%04X", cpu->pc + signed_offset);
-    
+
       break;
     }
     case 0x6:{
       sprintf(mnemonic, "JL");
       sprintf(value, "0x%04X", cpu->pc + signed_offset);
-    
+
       break;
     }
     case 0x7:{
@@ -208,39 +208,35 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
     default:{
       puts("Undefined Jump operation!\n");
       return;
-    }  
+    }
 
     } //# End of Switch
 
     strncat(mnemonic, "\t", sizeof(mnemonic));
     strncat(mnemonic, value, sizeof(mnemonic));
     strncat(mnemonic, "\n", sizeof(mnemonic));
-  
+
     if (disassemble && emu->debugger->debug_mode) {
       int i;
       char one = 0, two = 0;
 
       // Make little endian big endian
       for (i = 0;i < strlen(hex_str);i += 4) {
-	one = hex_str[i];
-	two = hex_str[i + 1];
+	      one = hex_str[i];
+	      two = hex_str[i + 1];
 
-	hex_str[i] = hex_str[i + 2];
-	hex_str[i + 1] = hex_str[i + 3];
+	      hex_str[i] = hex_str[i + 2];
+	      hex_str[i + 1] = hex_str[i + 3];
 
-	hex_str[i + 2] = one;
-	hex_str[i + 3] = two;
+	      hex_str[i + 2] = one;
+	      hex_str[i + 3] = two;
       }
 
-      printf("%s", hex_str);
       print_console(emu, hex_str);
 
       for (i = strlen(hex_str);i < 12;i++) {
-	printf(" ");
-	print_console(emu, " ");
+	      print_console(emu, " ");
       }
-      
-      printf("\t%s", mnemonic);
 
       print_console(emu, "\t");
       print_console(emu, mnemonic);

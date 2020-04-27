@@ -33,8 +33,6 @@ void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr)
     char str[100] = {0};
 
     sprintf(str, "Loading firmware: ( %s )\n", file_name);
-
-    printf("%s", str);
     print_console(emu, str);
 
     FILE *fd = fopen(file_name, "rb+");
@@ -53,7 +51,6 @@ void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr)
     // check size
     if (size > (0x10000 - 0x0C000))
     {
-        printf("SizeTooBig\n");
         print_console(emu, "Flash Size too small to fit your binary. Quitting, please refresh to try again. Ensure you are compiling for the right MSP version.\n");
         usleep(20000);
         exit(1);
@@ -64,7 +61,6 @@ void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr)
     result = fread(real_addr, 1, size, fd);
 
     sprintf(str, "Placed %d bytes into flash\n\n", result);
-    printf("%s", str);
     print_console(emu, str);
 
     fclose(fd);

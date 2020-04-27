@@ -92,6 +92,7 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
                 break;
             case 'b':
                 emu->binary = optarg;
+                break;
             default:
                 printf("Unknown option\n");
                 return false;
@@ -166,10 +167,10 @@ static void handleCommanding(Emulator* const emu)
                 break;
             case Emulator_Mode_Cli:
                 {
-                    char buffer[CLI_BUFFER_SIZE];
-                    scanf("%s", buffer);
+                    char* buffer = readline(NULL);
                     const int bufferLength = strlen(buffer);
                     exec_cmd(emu, buffer, bufferLength);
+                    free(buffer);
                 }
                 break;
         }

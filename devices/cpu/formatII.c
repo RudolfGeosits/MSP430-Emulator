@@ -19,10 +19,10 @@
 //##########+++ Decode Format II Instructions +++#########
 //# Format II are single operand of the form:
 //#   [0001][00CC][CBAA][SSSS]
-//# 
-//# Where C = Opcode, B = Byte/Word flag, 
+//#
+//# Where C = Opcode, B = Byte/Word flag,
 //#       A = Addressing mode for source
-//#       S = Source 
+//#       S = Source
 //########################################################
 
 #include "formatII.h"
@@ -39,10 +39,10 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
   uint8_t bw_flag = (instruction & 0x0040) >> 6;
   uint8_t as_flag = (instruction & 0x0030) >> 4;
   uint8_t source = (instruction & 0x000F);
-  
+
   char reg_name[10];
   reg_num_to_name(source, reg_name);
-  
+
   uint16_t *reg = (uint16_t * )get_reg_ptr(emu, source);
   uint16_t bogus_reg; /* For immediate values to be operated on */
 
@@ -192,12 +192,12 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
   if (!disassemble) {
     switch (opcode) {
-        
+
       /*  RRC Rotate right through carry
        *    C → MSB → MSB-1 .... LSB+1 → LSB → C
-       *  
-       *  Description The destination operand is shifted right one position 
-       *  as shown in Figure 3-18. The carry bit (C) is shifted into the MSB, 
+       *
+       *  Description The destination operand is shifted right one position
+       *  as shown in Figure 3-18. The carry bit (C) is shifted into the MSB,
        *  the LSB is shifted into the carry bit (C).
        *
        * N: Set if result is negative, reset if positive
@@ -210,14 +210,14 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       bool CF = cpu->sr.carry;
 
       if (bw_flag == WORD) {
-	cpu->sr.carry = *source_address & 0x0001;  /* Set CF from LSB */
-	*source_address >>= 1;                /* Shift one right */
-	CF ? *source_address |= 0x8000 : 0;   /* Set MSB from prev CF */
+	      cpu->sr.carry = *source_address & 0x0001;  /* Set CF from LSB */
+	      *source_address >>= 1;                /* Shift one right */
+	      CF ? *source_address |= 0x8000 : 0;   /* Set MSB from prev CF */
       }
       else if (bw_flag == BYTE){
-	cpu->sr.carry = *(uint8_t *) source_address & 0x01;
-	*(uint8_t *) source_address >>= 1;
-	CF ? *(uint8_t *) source_address |= 0x80 : 0;
+	      cpu->sr.carry = *(uint8_t *) source_address & 0x01;
+	      *(uint8_t *) source_address >>= 1;
+	      CF ? *(uint8_t *) source_address |= 0x80 : 0;
       }
 
       cpu->sr.zero = is_zero(source_address, bw_flag);
@@ -226,24 +226,24 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
       break;
     }
-    
+
       /* SWPB Swap bytes
        * bw flag always 0 (word)
        * Bits 15 to 8 ↔ bits 7 to 0
        */
-    case 0x1:{	
+    case 0x1:{
       uint8_t upper_nibble, lower_nibble;
       upper_nibble = (*source_address & 0xFF00) >> 8;
       lower_nibble = *source_address & 0x00FF;
-    
+
       *source_address = ((uint16_t)0|(lower_nibble << 8)) | upper_nibble;
 
       break;
     }
-    
-      /* RRA Rotate right arithmetic 
+
+      /* RRA Rotate right arithmetic
        *   MSB → MSB, MSB → MSB-1, ... LSB+1 → LSB, LSB → C
-       * 
+       *
        * N: Set if result is negative, reset if positive
        * Z: Set if result is zero, reset otherwise
        * C: Loaded from the LSB
@@ -251,16 +251,16 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
        */
     case 0x2:{
       if (bw_flag == WORD) {
-	cpu->sr.carry = *source_address & 0x0001;
-	bool msb = *source_address >> 15;
-	*source_address >>= 1;
-	msb ? *source_address |= 0x8000 : 0; /* Extend Sign */
+	      cpu->sr.carry = *source_address & 0x0001;
+	      bool msb = *source_address >> 15;
+	      *source_address >>= 1;
+	      msb ? *source_address |= 0x8000 : 0; /* Extend Sign */
       }
       else if (bw_flag == BYTE) {
-	cpu->sr.carry = *source_address & 0x0001;
-	bool msb = *source_address >> 7;
-	*source_address >>= 1;
-	msb ? *source_address |= 0x0080 : 0;
+	      cpu->sr.carry = *source_address & 0x0001;
+	      bool msb = *source_address >> 7;
+	      *source_address >>= 1;
+	      msb ? *source_address |= 0x0080 : 0;
       }
 
       cpu->sr.zero = is_zero(source_address, bw_flag);
@@ -273,7 +273,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
        *   bw flag always 0 (word)
        *
        * Bit 7 → Bit 8 ......... Bit 15
-       * 
+       *
        * N: Set if result is negative, reset if positive
        * Z: Set if result is zero, reset otherwise
        * C: Set if result is not zero, reset otherwise (.NOT. Zero)
@@ -282,12 +282,12 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
     case 0x3:{
       if (*source_address & 0x0080) {
-	*source_address |= 0xFF00;
+	      *source_address |= 0xFF00;
       }
       else {
-	*source_address &= 0x00FF;
+	      *source_address &= 0x00FF;
       }
-    
+
       cpu->sr.negative = is_negative((int16_t*)source_address, WORD);
       cpu->sr.zero = is_zero(source_address, WORD);
       cpu->sr.carry = ! cpu->sr.zero;
@@ -295,9 +295,9 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
       break;
     }
-  
+
       /* PUSH push value on to the stack
-       *   
+       *
        *   SP - 2 → SP
        *   src → @SP
        *
@@ -306,7 +306,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
       cpu->sp -= 2; /* Yes, even for BYTE Instructions */
       uint16_t *stack_address = get_stack_ptr(emu);
-    
+
       if (bw_flag == WORD) {
 	*stack_address = source_value;
       }
@@ -318,14 +318,14 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       break;
     }
 
-      /* CALL SUBROUTINE: 
+      /* CALL SUBROUTINE:
        *     PUSH PC and PC = SRC
-       *     
+       *
        *     This is always a word instruction. Supporting all addressing modes
        */
-    
+
     case 0x5:{
-    
+
       cpu->sp -= 2;
       uint16_t *stack_address = get_stack_ptr(emu);
       *stack_address = cpu->pc;
@@ -333,10 +333,10 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
       break;
     }
-  
+
       //# RETI Return from interrupt: Pop SR then pop PC
     case 0x6:{
-       
+
       break;
     }
     default:{
@@ -345,36 +345,36 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
     } //# End of Switch
   } //# end if
-  
 
-  else {    
+
+  else {
     switch (opcode) {
     case 0x0: {
       bw_flag == WORD ?
 	strncpy(mnemonic, "RRC", sizeof mnemonic) :
-	strncpy(mnemonic, "RRC.B", sizeof mnemonic);    
+	strncpy(mnemonic, "RRC.B", sizeof mnemonic);
 
       break;
     }
     case 0x1: {
-      strncpy(mnemonic, "SWPB", sizeof mnemonic);    
+      strncpy(mnemonic, "SWPB", sizeof mnemonic);
       break;
     }
     case 0x2: {
       bw_flag == WORD ?
 	strncpy(mnemonic, "RRA", sizeof mnemonic) :
-	strncpy(mnemonic, "RRA.B", sizeof mnemonic);     
+	strncpy(mnemonic, "RRA.B", sizeof mnemonic);
 
       break;
     }
     case 0x3: {
-      strncpy(mnemonic, "SXT", sizeof mnemonic);    
+      strncpy(mnemonic, "SXT", sizeof mnemonic);
       break;
     }
     case 0x4: {
       bw_flag == WORD ?
-	strncpy(mnemonic, "PUSH", sizeof mnemonic) :
-	strncpy(mnemonic, "PUSH.B", sizeof mnemonic);    
+	  strncpy(mnemonic, "PUSH", sizeof mnemonic) :
+	  strncpy(mnemonic, "PUSH.B", sizeof mnemonic);
 
       break;
     }
@@ -383,7 +383,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       break;
     }
     case 0x6: {
-      strncpy(mnemonic, "RETI", sizeof mnemonic);           
+      strncpy(mnemonic, "RETI", sizeof mnemonic);
       break;
     }
     default: {
@@ -395,32 +395,28 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
     strncat(mnemonic, "\t", sizeof mnemonic);
     strncat(mnemonic, asm_operand, sizeof mnemonic);
     strncat(mnemonic, "\n", sizeof mnemonic);
-    
+
     if (disassemble && emu->debugger->debug_mode) {
       int i;
       char one = 0, two = 0;
 
       // Make little endian big endian
       for (i = 0;i < strlen(hex_str);i += 4) {
-	one = hex_str[i];
-	two = hex_str[i + 1];
+	      one = hex_str[i];
+	      two = hex_str[i + 1];
 
-	hex_str[i] = hex_str[i + 2];
+	      hex_str[i] = hex_str[i + 2];
         hex_str[i + 1] = hex_str[i + 3];
 
-	hex_str[i + 2] = one;
-	hex_str[i + 3] = two;
+	      hex_str[i + 2] = one;
+      	hex_str[i + 3] = two;
       }
 
-      printf("%s", hex_str);
       print_console(emu, hex_str);
 
       for (i = strlen(hex_str);i < 12;i++) {
-	printf(" ");
-	print_console(emu, " ");
+	      print_console(emu, " ");
       }
-
-      printf("\t%s", mnemonic);
 
       print_console(emu, "\t");
       print_console(emu, mnemonic);

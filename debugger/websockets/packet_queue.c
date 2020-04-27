@@ -18,7 +18,7 @@
 
 #include "packet_queue.h"
 
-void init_packet_queue (Emulator *emu) 
+void init_packet_queue (Emulator *emu)
 {
   Server *s = emu->debugger->server;
 
@@ -33,14 +33,14 @@ void destroy_packet_queue (Emulator *emu)
 
 }
 
-bool packet_queue_full (Emulator *emu) 
+bool packet_queue_full (Emulator *emu)
 {
   Server *s = emu->debugger->server;
 
   return false;
 }
 
-bool packet_queue_empty (Emulator *emu) 
+bool packet_queue_empty (Emulator *emu)
 {
   Server *s = emu->debugger->server;
 
@@ -52,25 +52,24 @@ bool packet_queue_empty (Emulator *emu)
   }
 }
 
-void packet_enqueue (Emulator *emu, void *item, size_t size, 
+void packet_enqueue (Emulator *emu, void *item, size_t size,
 		     uint8_t opcode)
-{  
-  // NOP
-  /*Server *s = emu->debugger->server;
+{
+  Server *s = emu->debugger->server;
   Packet *head, *tail, *cur;
   void *heap_item;
-  
+
   while (s->spin_lock);
   s->spin_lock = true;
 
   if (s->pending_packets_head == NULL) {
-    head = tail = s->pending_packets_head = s->pending_packets_tail = 
-      (Packet *) calloc(1, sizeof(Packet));        
+    head = tail = s->pending_packets_head = s->pending_packets_tail =
+      (Packet *) calloc(1, sizeof(Packet));
 
     // copy item data onto the heap so it won't go out of scope
     heap_item = calloc(1, size);
     memcpy(heap_item, (const void *)item, size);
-    
+
     head->message = heap_item;
     head->length = size;
     head->opcode = opcode;
@@ -82,7 +81,7 @@ void packet_enqueue (Emulator *emu, void *item, size_t size,
     while (cur->next != NULL) {
       cur = cur->next;
     }
-  
+
     cur->next = tail = (Packet *) calloc(1, sizeof(Packet));
 
     // copy item data onto the heap so it won't go out of scope
@@ -97,10 +96,10 @@ void packet_enqueue (Emulator *emu, void *item, size_t size,
 
   s->packets_queued++;
   s->spin_lock = false;
-  return;*/
+  return;
 }
 
-void print_packet_queue (Emulator *emu) 
+void print_packet_queue (Emulator *emu)
 {
   Server *s = emu->debugger->server;
   Packet *cur = s->pending_packets_head;
@@ -109,18 +108,18 @@ void print_packet_queue (Emulator *emu)
   printf("packets: %u\n", s->packets_queued);
 
   while (cur != NULL) {
-    printf("I have %s, len %u, PACKET #%u\n", 
+    printf("I have %s, len %u, PACKET #%u\n",
 	   (char *)cur->message, (unsigned int)cur->length, packet++);
-    
+
     cur = cur->next;
   }
 }
 
-Packet packet_dequeue (Emulator *emu) 
+Packet packet_dequeue (Emulator *emu)
 {
   Server *s = emu->debugger->server;
   Packet *head, *tail, *saved, ret;
-  
+
   while (s->spin_lock);
   s->spin_lock = true;
 
@@ -134,9 +133,9 @@ Packet packet_dequeue (Emulator *emu)
     printf("EMPTY QUEUE...\n");
     return ret;
   }
-  
+
   s->pending_packets_head = head->next;
-  
+
   //if (s->packets_queued == 2) {
     //sleep(2);
   //}
@@ -145,7 +144,7 @@ Packet packet_dequeue (Emulator *emu)
   ret.length  = head->length;
   ret.opcode  = head->opcode;
   ret.next    = NULL;
-  
+
   //free(head->message);
   free(head);
   s->packets_queued--;

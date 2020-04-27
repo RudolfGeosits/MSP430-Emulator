@@ -30,6 +30,7 @@ static void printHelp()
 {
     printVersion();
     printf("The following options are supported:\n");
+    printf("-b NAME Load binary file\n");
     printf("-v Print program version\n");
     printf("-h Print this help\n");
     printf("-m [web|cli] Set mode to webserver(default)/commandline\n");
@@ -70,7 +71,8 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
     int option;
     emu->mode = Emulator_Mode_Web;
     emu->port = -1;
-    while ((option = getopt(argc, argv, "hvm:p:")) != -1)
+    emu->binary = NULL;
+    while ((option = getopt(argc, argv, "hvm:p:b:")) != -1)
     {
         switch (option)
         {
@@ -87,6 +89,8 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
             case 'p':
                 emu->port = strtoul(optarg, NULL, 10);
                 break;
+            case 'b':
+                emu->binary = optarg;
             default:
                 printf("Unknown option\n");
                 return false;
@@ -148,15 +152,32 @@ static void deinitializeMsp430(Emulator* const emu)
     free(cpu);
 }
 
-static void handleProcessingStep(Emulator* const emu)
+static void handleCommanding(Emulator* const emu)
 {
     Cpu* const cpu = emu->cpu;
     // Handle debugger when CPU is not running
     if (!cpu->running)
     {
-        usleep(10000);
-        return;
+        switch (emu->mode)
+        {
+            case Emulator_Mode_Web:
+                usleep(10000);
+                break;
+            case Emulator_Mode_Cli:
+                {
+                    char buffer[CLI_BUFFER_SIZE];
+                    scanf("%s", buffer);
+                    const int bufferLength = strlen(buffer);
+                    exec_cmd(emu, buffer, bufferLength);
+                }
+                break;
+        }
     }
+}
+
+static void handleProcessingStep(Emulator* const emu)
+{
+    Cpu* const cpu = emu->cpu;
     // Handle Breakpoints
     handle_breakpoints(emu);
     // Instruction Decoder
@@ -191,7 +212,11 @@ int main(int argc, char *argv[])
     {
         if (!startWebServer(emu))
             return -1;
-        load_firmware(emu, (char*)"tmp.bin", 0xC000);
+    }
+
+    if (emu->binary != NULL)
+    {
+        load_firmware(emu, emu->binary, 0xC000);
     }
 
     //register_signal(SIGINT); // Register Callback for CONTROL-c
@@ -204,6 +229,7 @@ int main(int argc, char *argv[])
     // Fetch-Decode-Execute Cycle (run machine)
     while (!deb->quit)
     {
+        handleCommanding(emu);
         handleProcessingStep(emu);
     }
 

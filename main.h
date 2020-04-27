@@ -18,6 +18,7 @@
 
 #pragma once
 
+#define CLI_BUFFER_SIZE 1024
 #define VERSION_STRING "1.0.0"
 #define PROGRAM_NAME "MSP430 Emulator"
 
@@ -72,5 +73,6 @@ struct Emulator
     Cpu *cpu;
     Debugger *debugger;
     Emulator_Mode mode;
+    char* binary;
     int port;
 };

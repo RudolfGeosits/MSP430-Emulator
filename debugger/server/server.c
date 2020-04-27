@@ -48,7 +48,7 @@ void web_send (char *buf)
     int len;
     char *msg, *begin;
 
-    // send message 
+    // send message
     len = strlen(buf);
 
     msg = (char *) malloc(len + LWS_SEND_BUFFER_PRE_PADDING
@@ -57,9 +57,9 @@ void web_send (char *buf)
     begin = msg + LWS_SEND_BUFFER_PRE_PADDING;
 
     strncpy(begin, buf, len);
-    int n = lws_write(ws, begin, len, LWS_WRITE_TEXT);
+    int n = lws_write(ws, (unsigned char*)begin, len, LWS_WRITE_TEXT);
     printf("sent %d bytes of %d len\n", n, len);
-    
+
     free(msg);
 }
 
@@ -79,7 +79,7 @@ int callback_emu ( struct lws *wsi,
 {
     static unsigned new_ws_port = 9001;
     char port_str[100] = {0};
-    
+
     switch (reason) {
         case LWS_CALLBACK_PROTOCOL_INIT: {
             ws = wsi;
@@ -89,9 +89,9 @@ int callback_emu ( struct lws *wsi,
         case LWS_CALLBACK_SERVER_WRITEABLE: {
             pid_t pid;
             sprintf(port_str, "%u", new_ws_port);
-    
-            // Child (pty)         
-            if( !(pid = fork()) ) {         
+
+            // Child (pty)
+            if( !(pid = fork()) ) {
 	printf("Child: Got pid #%u\n", pid);
 
 	char * const args[] = {
@@ -101,19 +101,19 @@ int callback_emu ( struct lws *wsi,
 	    NULL
 	};
 
-	setpgid(0, 0);         
+	setpgid(0, 0);
 	execvp(args[0], args);
-	exit(1);                                
+	exit(1);
             }
 
-            // Parent 
+            // Parent
             printf("Parent: Got pid #%u\n", pid);
             usleep(1000);
-        
+
             web_send(port_str);
             ++new_ws_port;
 
-            lws_close_reason(wsi, 0, NULL, 0);
+            lws_close_reason(wsi, LWS_CLOSE_STATUS_NOSTATUS, NULL, 0);
 
             break;
         };
@@ -126,13 +126,13 @@ int callback_emu ( struct lws *wsi,
         }
 
         default: {
-            printf("Some other thing: %d\n", reason); 
+            printf("Some other thing: %d\n", reason);
             break;
-            
+
             ws = wsi;
         }
     }
-    
+
     return 0;
 }
 
@@ -140,25 +140,24 @@ int main (int argc, char **argv)
 {
     int port = 9000;
 
-    struct lws_context_creation_info context_info =
-    {
-        .port = port,
-        .iface = NULL,
-        .protocols = protocols,
-        .ssl_cert_filepath = NULL,
-        .ssl_private_key_filepath = NULL,
-        .ssl_ca_filepath = NULL,
+    struct lws_context_creation_info context_info;
 
-        .gid = -1,
-        .uid = -1,
+    memset(&context_info, 0, sizeof(context_info));
 
-        .max_http_header_pool = 1,
-        .options = 0,
-    };
-    
+    context_info.port = port;
+    context_info.iface = NULL;
+    context_info.protocols = protocols;
+    context_info.ssl_cert_filepath = NULL;
+    context_info.ssl_private_key_filepath = NULL;
+    context_info.ssl_ca_filepath = NULL;
+    context_info.gid = -1;
+    context_info.uid = -1;
+    context_info.max_http_header_pool = 1;
+    context_info.options = 0;
+
     // create lws context representing this server
     context = lws_create_context(&context_info);
-    
+
     if (context == NULL)
     {
         puts("lws init failed\n");
@@ -187,6 +186,6 @@ int main (int argc, char **argv)
         usleep(1000);
     }
 
-    lws_context_destroy(context);    
+    lws_context_destroy(context);
     return 0;
 }

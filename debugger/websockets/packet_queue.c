@@ -55,7 +55,8 @@ bool packet_queue_empty (Emulator *emu)
 void packet_enqueue (Emulator *emu, void *item, size_t size, 
 		     uint8_t opcode)
 {  
-  Server *s = emu->debugger->server;
+  // NOP
+  /*Server *s = emu->debugger->server;
   Packet *head, *tail, *cur;
   void *heap_item;
   
@@ -96,7 +97,7 @@ void packet_enqueue (Emulator *emu, void *item, size_t size,
 
   s->packets_queued++;
   s->spin_lock = false;
-  return;
+  return;*/
 }
 
 void print_packet_queue (Emulator *emu) 

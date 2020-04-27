@@ -507,11 +507,13 @@ void setup_debugger(Emulator *emu)
   deb->disassemble_mode = false;
   deb->quit = false;
 
-  deb->web_interface = true;
+  //deb->web_interface = true;
+  deb->web_interface = false;
   deb->web_server_ready = false;
   deb->web_firmware_uploaded = false;
 
-  deb->console_interface = false;
+  //deb->console_interface = false;
+  deb->console_interface = true;
 
   memset(deb->bp_addresses, 0, sizeof(deb->bp_addresses));
   deb->num_bps = 0;

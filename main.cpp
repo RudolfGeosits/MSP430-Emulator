@@ -236,10 +236,13 @@ static void handleCommanding(Emulator* const emu)
 static void handleProcessingStep(Emulator* const emu)
 {
     Cpu* const cpu = emu->cpu;
+    if (!cpu->running)
+        return;    
     // Handle Breakpoints
-    handle_breakpoints(emu);
+    if (handle_breakpoints(emu))
+        return;
     // Instruction Decoder
-    decode(emu, fetch(emu), EXECUTE);
+    decode(emu, fetch(emu, true), EXECUTE);
     // Handle Peripherals
     handle_bcm(emu);
     handle_timer_a(emu);
@@ -284,7 +287,7 @@ int mainInernal(int argc, char *argv[], Emulator* const emu)
     // Fetch-Decode-Execute Cycle (run machine)
     while (!deb->quit)
     {
-        handleCommanding(emu);
+        handleCommanding(emu);        
         handleProcessingStep(emu);
     }
 

@@ -107,7 +107,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operand, "#0x%04X", source_value);
     }
     else if (source == 0) {            /* Source Symbolic */
-      source_offset = fetch(emu);
+      source_offset = fetch(emu, false);
       uint16_t virtual_addr = cpu->pc + source_offset;
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
@@ -118,7 +118,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operand, "0x%04X", virtual_addr);
     }
     else if (source == 2) {            /* Source Absolute */
-      source_offset = fetch(emu);
+      source_offset = fetch(emu, false);
       source_address = get_addr_ptr(source_offset);
       source_value = *source_address;
 
@@ -128,7 +128,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operand, "&0x%04X", (uint16_t) source_offset);
     }
     else {                             /* Source Indexed */
-      source_offset = fetch(emu);
+      source_offset = fetch(emu, false);
       source_address = get_addr_ptr(*reg + source_offset);
       source_value = *source_address;
 
@@ -167,7 +167,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operand, "#0x%04X", (uint16_t) source_value);
     }
     else if (source == 0) {            /* Source Immediate */
-      source_value = bogus_reg = fetch(emu);
+      source_value = bogus_reg = fetch(emu, false);
       source_address = &bogus_reg;
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_value);

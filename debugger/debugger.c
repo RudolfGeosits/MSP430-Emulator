@@ -65,7 +65,7 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       }
 
       for (i = 0;i < steps;i++) {
-	      decode(emu, fetch(emu), EXECUTE);
+	      decode(emu, fetch(emu, true), EXECUTE);
 
         // Handle Peripherals
 	      handle_bcm(emu);
@@ -93,7 +93,7 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       cpu->running = true;
       deb->debug_mode = false;
 
-      update_register_display(emu);
+      //update_register_display(emu);
     }
 
   // Display disassembly of N at HEX_ADDR: dis [N] [HEX_ADDR] //
@@ -471,7 +471,7 @@ void dump_memory ( Emulator *emu, uint8_t *MEM, uint32_t size, uint32_t start_ad
   for (i = 0; i < 32; i += 8) {
     sprintf(str, "0x%04X:\t", msp_addr);
 
-    printf("%s", str);
+    //printf("%s", str);
     print_console(emu, str);
 
     if ( stride == BYTE_STRIDE ) {
@@ -480,7 +480,7 @@ void dump_memory ( Emulator *emu, uint8_t *MEM, uint32_t size, uint32_t start_ad
 	      *(MEM+0),*(MEM+1),*(MEM+2),*(MEM+3),
 	      *(MEM+4),*(MEM+5),*(MEM+6),*(MEM+7));
 
-      printf("%s", str);
+      //printf("%s", str);
       print_console(emu, str);
     }
     else if ( stride == WORD_STRIDE ) {
@@ -545,7 +545,7 @@ void register_signal(int sig)
   signal(sig, handle_sigint);
 }
 
-void handle_breakpoints (Emulator *emu)
+bool handle_breakpoints (Emulator *emu)
 {
   int i;
   Cpu *cpu = emu->cpu;
@@ -558,15 +558,15 @@ void handle_breakpoints (Emulator *emu)
       cpu->running = false;
       deb->debug_mode = true;
 
-      sprintf(str, "\n\t[Breakpoint %d hit]\n\n", i + 1);
-      printf("%s", str);
+      sprintf(str, "\n\t[Breakpoint %d hit]\n\n", i + 1);      
       print_console(emu, str);
 
       display_registers(emu);
       disassemble(emu, cpu->pc, 1);
 
-      return;
+      return true;
     }
 
   }
+  return false;
 }

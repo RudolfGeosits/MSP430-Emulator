@@ -20,13 +20,19 @@
 #include "../../debugger/io.h"
 
 // ##########+++ CPU Fetch Cycle  +++##########
-uint16_t fetch(Emulator *emu)
+uint16_t fetch(Emulator *emu, bool report)
 {
     Cpu *cpu = emu->cpu;
     uint16_t word, *p;
-
+    
     p = (get_addr_ptr(cpu->pc));
     word = *p;
+    if (report)
+    {
+        char buffer[128];    
+        sprintf(buffer, "Fetching %x - %x\n", cpu->pc, word);
+        print_console(emu, buffer);
+    }
 
     cpu->pc += 2;
 

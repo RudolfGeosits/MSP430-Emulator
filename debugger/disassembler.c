@@ -38,7 +38,7 @@ void disassemble(Emulator *emu, uint16_t start_addr, uint8_t times)
 
     print_console(emu, addr_str);
 
-    opcode = fetch(emu);
+    opcode = fetch(emu, false);
     decode(emu, opcode, DISASSEMBLE);
   }
 

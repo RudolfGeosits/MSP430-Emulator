@@ -50,35 +50,35 @@ void *thrd (void *ctxt)
 	  *usci->UCA0RXBUF = (uint8_t) strtoul(buf, NULL, 16);
 	}
       }
-      else {    
+      else {
 	*usci->UCA0RXBUF = *(uint8_t *) buf;
       }
 
       *usci->IFG2 |= RXIFG;
     }
-  }  
+  }
 
   return NULL;
 }
 
-void open_pty (Emulator *emu) 
+void open_pty (Emulator *emu)
 {
   Cpu *cpu = emu->cpu;
 
   char slavename[64], buf[64];
   struct termios termios_p;
-  
+
   master = posix_openpt(O_RDWR);
 
   grantpt(master);
   unlockpt(master);
   ptsname_r(master, slavename, sizeof slavename);
   snprintf(buf, sizeof buf, "-S%s/%d", strrchr(slavename,'/')+1, master);
-  
+
   // Child (pty)
-  if( !fork() ) {   
+  if( !fork() ) {
     char * const args[] = {
-      "xterm", buf, 
+      "xterm", buf,
       NULL
     };
 
@@ -86,15 +86,15 @@ void open_pty (Emulator *emu)
     execvp(args[0], args);
     exit(1);
   }
-  // Parent                                                            
+  // Parent
 
-  sp = open(slavename, O_RDWR, O_NONBLOCK);  
+  sp = open(slavename, O_RDWR, O_NONBLOCK);
   read(sp, buf, 100);
 
   tcgetattr(sp, &termios_p);
   termios_p.c_lflag |= ECHO;
   tcsetattr(sp, 0, &termios_p);
-  
+
   pthread_t t;
   if( pthread_create(&t, NULL, thrd, (void *)cpu->usci ) ) {
     fprintf(stderr, "Error creating thread\n");
@@ -102,52 +102,87 @@ void open_pty (Emulator *emu)
 }
 */
 
-void handle_usci (Emulator *emu) 
+static void handle_transmission(Emulator* const emu)
+{
+  Cpu* const cpu = emu->cpu;
+  Usci* const usci = cpu->usci;
+  const uint8_t flags = memory_get_flags(usci->UCA0TXBUF);
+  if ((flags & MemoryCell_Flag_Written) != 0)
+  {
+    const uint8_t x = memory_read_byte(usci->UCA0TXBUF);
+    memory_write_byte(usci->UCA0TXBUF, 0);
+    memory_clear_flags(usci->UCA0TXBUF);
+    put_serial(emu, x);
+    uint8_t ifg2 = memory_read_byte(usci->IFG2);
+    // Flag is set when TX buf is empty -> it was just emptied
+    ifg2 |= TXIFG;
+    memory_write_byte(usci->IFG2, ifg2);
+  }
+}
+
+static void handle_reception(Emulator* const emu)
+{
+  Cpu* const cpu = emu->cpu;
+  Usci* const usci = cpu->usci;
+
+  uint8_t ifg2 = memory_read_byte(usci->IFG2);
+
+  // Flag clear attempt
+  if ((ifg2 & RXIFG) != 0)
+  {
+    // Receive buffer was not empty
+    const uint8_t flags = memory_get_flags(usci->UCA0RXBUF);
+    if ((flags & MemoryCell_Flag_Read) != 0)
+    {
+      // Receive buffer was read
+      memory_write_byte(usci->UCA0RXBUF, 0);
+      memory_clear_flags(usci->UCA0RXBUF);
+      ifg2 &= ~((uint8_t)RXIFG);
+      memory_write_byte(usci->IFG2, ifg2);
+    }
+  }
+
+  // Read attempt
+  if ((ifg2 & RXIFG) == 0)
+  {
+    // Receive buffer is empty
+    uint8_t x = 0;
+    if (get_serial(emu, &x))
+    {
+      // Next byte was received
+      memory_write_byte(usci->UCA0RXBUF, x);
+      memory_clear_flags(usci->UCA0RXBUF);
+      // Flag is set when a character is received
+      ifg2 |= RXIFG;
+      memory_write_byte(usci->IFG2, ifg2);
+    }
+  }
+
+
+}
+
+void handle_usci (Emulator *emu)
 {
   Cpu *cpu = emu->cpu;
   Debugger *deb = emu->debugger;
   Usci *usci = cpu->usci;
   Port_1 *p1 = cpu->p1;
-  
+
   static bool uart_active = false;
-  
-  // Handle sending from TX pin (P1.2) 
+
+  // Handle sending from TX pin (P1.2)
   if (p1->SEL_2 && p1->SEL2_2) {
     if (uart_active == false) {
       puts("UART TX pin activated on P1.2");
       uart_active = true;
     }
 
-    // UCAxTXIFG
-    if (*usci->IFG2 & TXIFG) {
-      uint8_t c = *usci->UCA0TXBUF;
-      unsigned char str[2];
-      str[0] = c;
-      str[1] = 0;
-
-      *usci->IFG2 &= ~TXIFG;
-
-      if (c & 0xFF) {
-	if (deb->web_interface) {
-	  print_serial(emu, (char*)&str[0]);
-	  //write(sp, usci->UCA0TXBUF, 1);
-	}
-	else if (deb->console_interface) {
-	  //write(sp, usci->UCA0TXBUF, 1);
-	}
-
-	*usci->UCA0TXBUF = 0;
-      }
-
-      //*usci->IFG2 &= TXIFG;
-      *usci->IFG2 |= TXIFG;
-    }
+    handle_reception(emu);
+    handle_transmission(emu);
   }
-
-  return;
 }
 
-void setup_usci (Emulator *emu) 
+void setup_usci (Emulator *emu)
 {
   Cpu *cpu = emu->cpu;
   Usci *usci = cpu->usci;
@@ -164,7 +199,7 @@ void setup_usci (Emulator *emu)
   static const uint16_t UCA0IRTCTL_VLOC = 0x5E; // IrDA transmit control reg
   static const uint16_t UCA0IRRCTL_VLOC = 0x5F; // IrDA Receive control reg
   static const uint16_t IFG2_VLOC       = 0x03; // Interrupt flag register 2
-  
+
   // Set initial values
   *(usci->UCA0CTL0   = (uint8_t *) get_addr_ptr(UCA0CTL0_VLOC))  = 0;
   *(usci->UCA0CTL1  = (uint8_t *) get_addr_ptr(UCA0CTL1_VLOC))   = 0x01;
@@ -176,7 +211,7 @@ void setup_usci (Emulator *emu)
   *(usci->UCA0TXBUF  = (uint8_t *) get_addr_ptr(UCA0TXBUF_VLOC)) = 0;
   *(usci->UCA0ABCTL  = (uint8_t *) get_addr_ptr(UCA0ABCTL_VLOC))   = 0;
   *(usci->UCA0IRTCTL  = (uint8_t *) get_addr_ptr(UCA0IRTCTL_VLOC)) = 0;
-  *(usci->UCA0IRRCTL  = (uint8_t *) get_addr_ptr(UCA0IRRCTL_VLOC)) = 0;  
+  *(usci->UCA0IRRCTL  = (uint8_t *) get_addr_ptr(UCA0IRRCTL_VLOC)) = 0;
 
   usci->IFG2  = (uint8_t *) get_addr_ptr(IFG2_VLOC);
   *usci->IFG2 |= TXIFG;

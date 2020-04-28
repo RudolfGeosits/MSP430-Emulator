@@ -27,10 +27,35 @@ void print_serial (Emulator *emu, char *buf)
             packet_enqueue(emu, buf, strlen(buf) + 1, SERIAL_PACKET_OPCODE);
             break;
         case Emulator_Mode_Cli:
-            // TODO
+            // This is just for compatibility, if another UART like peripheral
+            // was implemented independently
             printf("Serial %s\n", buf);
             break;
     }  
+}
+
+void put_serial(Emulator* const emu, const uint8_t x)
+{
+    switch (emu->mode)
+    {
+        case Emulator_Mode_Web:
+            {
+                char str[2];
+                str[0] = (char)x;
+                str[1] = 0;
+                print_serial(emu, str);
+            }
+            break;
+        case Emulator_Mode_Cli:
+            // TODO
+            break;
+    }  
+}
+
+bool get_serial(Emulator* const emu, uint8_t* const x)
+{
+    // TODO
+    return true;
 }
 
 void print_console (Emulator *emu, const char *buf)

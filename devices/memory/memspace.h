@@ -24,7 +24,23 @@
 #include <stdint.h>
 #include <string.h>
 
+#define ADDRESS_SPACE_SIZE 0x10000
+
+typedef enum {
+  MemoryCell_Flag_Written = 1,
+  MemoryCell_Flag_Read = 2
+} MemoryCell_Flag;
+
 void initialize_msp_memspace();
 void uninitialize_msp_memspace();
+
+uint8_t memory_read_byte(void* const address);
+uint16_t memory_read_word(void* const address);
+
+void memory_write_byte(void* const address, const uint8_t x);
+void memory_write_word(void* const address, const uint16_t x);
+
+uint8_t memory_get_flags(void* const address);
+void memory_clear_flags(void* const address);
 
 #endif

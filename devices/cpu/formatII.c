@@ -210,14 +210,18 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       bool CF = cpu->sr.carry;
 
       if (bw_flag == WORD) {
-	      cpu->sr.carry = *source_address & 0x0001;  /* Set CF from LSB */
-	      *source_address >>= 1;                /* Shift one right */
-	      CF ? *source_address |= 0x8000 : 0;   /* Set MSB from prev CF */
+        uint16_t x = memory_read_word(source_address);
+	      cpu->sr.carry = x & 0x0001;  /* Set CF from LSB */
+	      x >>= 1;                /* Shift one right */
+	      CF ? x |= 0x8000 : 0;   /* Set MSB from prev CF */
+        memory_write_word(source_address, x);
       }
       else if (bw_flag == BYTE){
-	      cpu->sr.carry = *(uint8_t *) source_address & 0x01;
-	      *(uint8_t *) source_address >>= 1;
-	      CF ? *(uint8_t *) source_address |= 0x80 : 0;
+        uint8_t x = memory_read_byte(source_address);
+	      cpu->sr.carry = x & 0x01;
+	      x >>= 1;
+	      CF ? x |= 0x80 : 0;
+        memory_write_byte(source_address, x);
       }
 
       cpu->sr.zero = is_zero(source_address, bw_flag);
@@ -233,10 +237,11 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
        */
     case 0x1:{
       uint8_t upper_nibble, lower_nibble;
-      upper_nibble = (*source_address & 0xFF00) >> 8;
-      lower_nibble = *source_address & 0x00FF;
+      uint16_t x = memory_read_word(source_address);
+      upper_nibble = (x & 0xFF00) >> 8;
+      lower_nibble = x & 0x00FF;
 
-      *source_address = ((uint16_t)0|(lower_nibble << 8)) | upper_nibble;
+       memory_write_word(source_address, ((uint16_t)0|(lower_nibble << 8)) | upper_nibble);
 
       break;
     }
@@ -251,16 +256,20 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
        */
     case 0x2:{
       if (bw_flag == WORD) {
-	      cpu->sr.carry = *source_address & 0x0001;
-	      bool msb = *source_address >> 15;
-	      *source_address >>= 1;
-	      msb ? *source_address |= 0x8000 : 0; /* Extend Sign */
+        uint16_t x = memory_read_word(source_address);
+	      cpu->sr.carry = x & 0x0001;
+	      bool msb = x >> 15;
+	      x >>= 1;
+	      msb ? x |= 0x8000 : 0; /* Extend Sign */
+        memory_write_word(source_address, x);
       }
       else if (bw_flag == BYTE) {
-	      cpu->sr.carry = *source_address & 0x0001;
-	      bool msb = *source_address >> 7;
-	      *source_address >>= 1;
-	      msb ? *source_address |= 0x0080 : 0;
+        uint16_t x = memory_read_word(source_address);
+	      cpu->sr.carry = x & 0x0001;
+	      bool msb = x >> 7;
+	      x >>= 1;
+	      msb ? x |= 0x0080 : 0;
+        memory_write_word(source_address, x);
       }
 
       cpu->sr.zero = is_zero(source_address, bw_flag);
@@ -281,12 +290,14 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
        */
 
     case 0x3:{
-      if (*source_address & 0x0080) {
-	      *source_address |= 0xFF00;
+      uint16_t x = memory_read_word(source_address);
+      if (x & 0x0080) {
+	      x |= 0xFF00;
       }
       else {
-	      *source_address &= 0x00FF;
+	      x &= 0x00FF;
       }
+      memory_write_word(source_address, x);
 
       cpu->sr.negative = is_negative((int16_t*)source_address, WORD);
       cpu->sr.zero = is_zero(source_address, WORD);
@@ -308,11 +319,13 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       uint16_t *stack_address = get_stack_ptr(emu);
 
       if (bw_flag == WORD) {
-	*stack_address = source_value;
+	      memory_write_word(stack_address, source_value);
       }
       else if (bw_flag == BYTE) {
-	*stack_address &= 0xFF00; /* Zero out bottom half for pushed byte */
-	*stack_address |= (uint8_t) source_value;
+        uint16_t x  = memory_read_word(stack_address);
+	      x &= 0xFF00; /* Zero out bottom half for pushed byte */
+	      x |= (uint8_t) source_value;
+        memory_write_word(stack_address, x);
       }
 
       break;
@@ -328,8 +341,8 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
       cpu->sp -= 2;
       uint16_t *stack_address = get_stack_ptr(emu);
-      *stack_address = cpu->pc;
-      cpu->pc = *source_address;
+      memory_write_word(stack_address, cpu->pc);
+      cpu->pc = memory_read_word(source_address);
 
       break;
     }

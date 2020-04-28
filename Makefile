@@ -1,4 +1,4 @@
-CFLAGS=-g 
+CFLAGS=-g
 
 all: MSP430 SERVER
 
@@ -78,7 +78,6 @@ clean :
 	rm server.o main.o utilities.o emu_server.o registers.o \
 	memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o \
-	formatII.o formatIII.o \
+	formatII.o formatIII.o io.o \
 	usci.o port1.o packet_queue.o bcm.o timer_a.o \
-	*.bin *.tmp *.elf \
 	MSP430 server;

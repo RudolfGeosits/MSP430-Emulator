@@ -75,4 +75,10 @@ struct Emulator
     Emulator_Mode mode;
     char* binary;
     int port;
+    char* usci_input_pipe_name;
+    char* usci_output_pipe_name;
+    FILE* usci_input_pipe;
+    FILE* usci_output_pipe;
+    int usci_input_pipe_fd;
+    int usci_output_pipe_fd;
 };

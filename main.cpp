@@ -19,6 +19,8 @@
 
 
 #include "main.h"
+#include <stdio.h>
+#include <fcntl.h>
 #include "debugger/io.h"
 
 static void printVersion()
@@ -36,6 +38,8 @@ static void printHelp()
     printf("-h Print this help\n");
     printf("-m [web|cli] Set mode to webserver(default)/commandline\n");
     printf("-p INTEGER Set webserver port\n");
+    printf("-i NAME Set USCI input pipe/file\n");
+    printf("-o NAME Set USCI output pipe/file\n");
 }
 
 static bool checkEmulatorConfig(Emulator* const emu)
@@ -73,7 +77,11 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
     emu->mode = Emulator_Mode_Web;
     emu->port = -1;
     emu->binary = NULL;
-    while ((option = getopt(argc, argv, "hvm:p:b:")) != -1)
+    emu->usci_input_pipe_fd = 0;
+    emu->usci_output_pipe_fd = 0;
+    emu->usci_input_pipe_name = NULL;
+    emu->usci_output_pipe_name = NULL;
+    while ((option = getopt(argc, argv, "hvm:p:b:i:o:")) != -1)
     {
         switch (option)
         {
@@ -92,6 +100,12 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
                 break;
             case 'b':
                 emu->binary = optarg;
+                break;
+            case 'i':
+                emu->usci_input_pipe_name = optarg;
+                break;
+            case 'o':
+                emu->usci_output_pipe_name = optarg;
                 break;
             default:
                 printf("Unknown option\n");
@@ -154,6 +168,48 @@ static void deinitializeMsp430(Emulator* const emu)
     free(cpu);
 }
 
+static bool openUsciPipes(Emulator* const emu)
+{
+    if (emu->usci_input_pipe_name != NULL)
+    {
+        emu->usci_input_pipe = fopen(emu->usci_input_pipe_name, "rb");
+        if (emu->usci_input_pipe == NULL)    
+        {
+            print_console(emu, "Cannot open USCI input pipe\n");
+            return false;
+        }
+        emu->usci_input_pipe_fd = fileno(emu->usci_input_pipe);
+        int flags = fcntl(emu->usci_input_pipe_fd, F_GETFL, 0);
+        fcntl(emu->usci_input_pipe_fd, F_SETFL, flags | O_NONBLOCK);
+    }
+    if (emu->usci_output_pipe_name != NULL)
+    {
+        emu->usci_output_pipe = fopen(emu->usci_output_pipe_name, "wb");
+        if (emu->usci_output_pipe == NULL)    
+        {
+            print_console(emu, "Cannot open USCI output pipe\n");
+            return false;
+        }
+        emu->usci_input_pipe_fd = fileno(emu->usci_output_pipe);
+    }
+    return true;
+}
+
+static bool closeUsciPipes(Emulator* const emu)
+{
+    if (emu->usci_input_pipe != NULL)
+    {
+        fclose(emu->usci_input_pipe);
+        emu->usci_input_pipe = NULL;
+    }
+    if (emu->usci_output_pipe != NULL)
+    {
+        fclose(emu->usci_output_pipe);
+        emu->usci_output_pipe = NULL;
+    }
+    return true;
+}
+
 static void handleCommanding(Emulator* const emu)
 {
     Cpu* const cpu = emu->cpu;
@@ -193,22 +249,15 @@ static void handleProcessingStep(Emulator* const emu)
     mclk_wait_cycles(emu, 4);
 }
 
-int main(int argc, char *argv[])
-{
-    Emulator *emu = (Emulator *) calloc( 1, sizeof(Emulator) );
-
+int mainInernal(int argc, char *argv[], Emulator* const emu)
+{    
+    Debugger* const deb = emu->debugger;
     if (!setEmulatorConfig(emu, argc, argv))
         return 0;
-
-    Cpu *cpu = NULL; Debugger *deb = NULL;
-
-    emu->debugger  = (Debugger *) calloc(1, sizeof(Debugger));
-    deb = emu->debugger;
-    deb->server = (Server *) calloc(1, sizeof(Server));
+    
     initializeMsp430(emu);
-    cpu = emu->cpu;
+    Cpu* const cpu = emu->cpu;
     setup_debugger(emu);
-
 
     if (emu->mode == Emulator_Mode_Web)
     {
@@ -216,13 +265,15 @@ int main(int argc, char *argv[])
             return -1;
     }
     if (emu->mode == Emulator_Mode_Cli)
-    {
         register_signal(SIGINT); // Register Callback for CONTROL-c
-    }
 
     if (emu->binary != NULL)
-    {
         load_firmware(emu, emu->binary, 0xC000);
+
+    if (!openUsciPipes(emu))
+    {
+        closeUsciPipes(emu);
+        return -1;
     }
 
     // display first round of registers
@@ -237,9 +288,21 @@ int main(int argc, char *argv[])
         handleProcessingStep(emu);
     }
 
+    closeUsciPipes(emu);
     deinitializeMsp430(emu);
-    free(deb->server);
-    free(deb);
-    free(emu);
     return 0;
+}
+
+int main(int argc, char *argv[])
+{    
+    Emulator *emu = (Emulator *) calloc( 1, sizeof(Emulator) );    
+    emu->debugger  = (Debugger *) calloc(1, sizeof(Debugger));    
+    emu->debugger->server = (Server *) calloc(1, sizeof(Server));
+
+    const int result = mainInernal(argc, argv, emu);
+    
+    free(emu->debugger->server);
+    free(emu->debugger);
+    free(emu);
+    return result;
 }

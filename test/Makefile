@@ -1,5 +1,5 @@
 TOP_DIR=$(realpath ../)
-EMU=${TOP_DIR}/MSP430
+EMU=${TOP_DIR}/msp430-emu
 OUT_DIR=${TOP_DIR}/test/build
 SRC_DIR=${TOP_DIR}/test/src
 

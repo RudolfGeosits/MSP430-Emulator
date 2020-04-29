@@ -45,7 +45,10 @@ void put_serial(Emulator* const emu, const uint8_t x)
     }
     else
     {
-        write(emu->usci_output_pipe_fd, &x, sizeof(uint8_t));
+        const ssize_t count = write(emu->usci_output_pipe_fd, &x, sizeof(uint8_t));
+        fflush(emu->usci_output_pipe);
+        if (count != 1)
+            print_console(emu, "Cannot write to serial output\n");
     }
 }
 

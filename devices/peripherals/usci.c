@@ -168,17 +168,11 @@ void handle_usci (Emulator *emu)
   Usci *usci = cpu->usci;
   Port_1 *p1 = cpu->p1;
 
-  static bool uart_active = false;
-
-  // Handle sending from TX pin (P1.2)
   if (p1->SEL_2 && p1->SEL2_2) {
-    if (uart_active == false) {
-      puts("UART TX pin activated on P1.2");
-      uart_active = true;
-    }
-
-    handle_reception(emu);
     handle_transmission(emu);
+  }
+  if (p1->SEL_1 && p1->SEL2_1) {
+    handle_reception(emu);
   }
 }
 

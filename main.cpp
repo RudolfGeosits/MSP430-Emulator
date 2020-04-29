@@ -180,7 +180,7 @@ static bool openUsciPipes(Emulator* const emu)
         }
         emu->usci_input_pipe_fd = fileno(emu->usci_input_pipe);
         int flags = fcntl(emu->usci_input_pipe_fd, F_GETFL, 0);
-        fcntl(emu->usci_input_pipe_fd, F_SETFL, flags | O_NONBLOCK);
+        fcntl(emu->usci_input_pipe_fd, F_SETFL, flags | O_NONBLOCK);        
     }
     if (emu->usci_output_pipe_name != NULL)
     {
@@ -190,7 +190,7 @@ static bool openUsciPipes(Emulator* const emu)
             print_console(emu, "Cannot open USCI output pipe\n");
             return false;
         }
-        emu->usci_input_pipe_fd = fileno(emu->usci_output_pipe);
+        emu->usci_output_pipe_fd = fileno(emu->usci_output_pipe);
     }
     return true;
 }

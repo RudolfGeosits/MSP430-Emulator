@@ -153,6 +153,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       uint16_t virtual_addr = *s_reg + source_offset - 2;
 
       source_value = *get_addr_ptr(virtual_addr);
+      
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -161,7 +162,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
     }
     else if (source == 2) {            /* Source Absolute */
       source_offset = fetch(emu, false);
-      source_value = *get_addr_ptr(source_offset);
+      source_value = memory_read_word(get_addr_ptr(source_offset));
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -171,7 +172,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
     }
     else {                             /* Source Indexed */
       source_offset = fetch(emu, false);
-      source_value = *get_addr_ptr(*s_reg + source_offset);
+      source_value = memory_read_word(get_addr_ptr(*s_reg + source_offset));
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -208,7 +209,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       source_offset = fetch(emu, false);
       uint16_t virtual_addr = cpu->pc + source_offset - 4;
 
-      source_value = *get_addr_ptr(virtual_addr);
+      source_value = memory_read_word(get_addr_ptr(virtual_addr));
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -217,7 +218,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
     }
     else if (source == 2) {            /* Source Absolute */
       source_offset = fetch(emu, false);
-      source_value = *get_addr_ptr(source_offset);
+      source_value = memory_read_word(get_addr_ptr(source_offset));
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -226,7 +227,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
     }
     else {                             /* Source Indexed */
       source_offset = fetch(emu, false);
-      source_value = *get_addr_ptr(*s_reg + source_offset);
+      source_value = memory_read_word(get_addr_ptr(*s_reg + source_offset));
 
       sprintf(hex_str_part, "%04X", (uint16_t)source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -266,7 +267,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "#0x%04X, %s", immediate_constant, d_reg_name);
     }
     else {                             /* Source Indirect */
-      source_value = *get_addr_ptr(*s_reg);
+      source_value = memory_read_word(get_addr_ptr(*s_reg));
       sprintf(asm_operands, "@%s, %s", s_reg_name, d_reg_name);
     }
 
@@ -294,7 +295,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "#0x%04X, ", source_value);
     }
     else {                             /* Source Indirect */
-      source_value = *get_addr_ptr(*s_reg);
+      source_value = memory_read_word(get_addr_ptr(*s_reg));
       sprintf(asm_operands, "@%s, ", s_reg_name);
     }
 
@@ -341,7 +342,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       }
     }
     else {                              /* Source Indirect AutoIncrement */
-      source_value = *get_addr_ptr(*s_reg);
+      source_value = memory_read_word(get_addr_ptr(*s_reg));
 
       sprintf(asm_operands, "@%s+, %s", s_reg_name, d_reg_name);
 

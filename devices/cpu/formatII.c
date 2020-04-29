@@ -120,7 +120,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
     else if (source == 2) {            /* Source Absolute */
       source_offset = fetch(emu, false);
       source_address = get_addr_ptr(source_offset);
-      source_value = *source_address;
+      source_value = memory_read_word(source_address);
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_value);
       strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -130,7 +130,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
     else {                             /* Source Indexed */
       source_offset = fetch(emu, false);
       source_address = get_addr_ptr(*reg + source_offset);
-      source_value = *source_address;
+      source_value = memory_read_word(source_address);
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -150,7 +150,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
     }
     else {                             /* Source Indirect */
       source_address = get_addr_ptr(*reg);
-      source_value = *source_address;
+      source_value = memory_read_word(source_address);
 
       sprintf(asm_operand, "@%s", reg_name);
     }
@@ -182,7 +182,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
     }
     else {                              /* Source Indirect AutoIncrement */
       source_address = get_addr_ptr(*reg);
-      source_value = *source_address;
+      source_value = memory_read_word(source_address);
 
       sprintf(asm_operand, "@%s+", reg_name);
       bw_flag == WORD ? *reg += 2 : (*reg += 1);

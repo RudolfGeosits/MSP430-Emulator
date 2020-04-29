@@ -139,3 +139,18 @@ static inline uint8_t uart_read(void)
         asm volatile ("nop;");
     return *UCA0RXBUF;
 }
+
+static inline void uart_read_string(char* const x, const size_t maxSize, const char terminator)
+{
+    size_t count = 0;
+    while (count < maxSize)
+    {
+        x[count] = uart_read();
+        if (x[count] == terminator)
+        {
+            x[count] = 0;
+            return;
+        }
+        count++;
+    }
+}

@@ -75,7 +75,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
   int16_t source_value, source_offset;
   int16_t destination_offset;
   uint16_t *destination_addr;
-  char asm_operands[20] = {0}, asm_op2[20] = {0};
+  char asm_operands[64] = {0}, asm_op2[20] = {0};
 
   /* Register - Register;     Ex: MOV Rs, Rd */
   /* Constant Gen - Register; Ex: MOV #C, Rd */ /* 0 */
@@ -895,9 +895,12 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
 
     } //# End of switch
 
-    strncat(mnemonic, "\t", sizeof mnemonic);
-    strncat(mnemonic, asm_operands, sizeof mnemonic);
-    strncat(mnemonic, "\n", sizeof mnemonic);
+    // Changed from strincat(mnemonic, X, sizeof mnemonic)
+    // the previous form produced warnings
+    // and made no sense anyway, as DST must be larger than num
+    strcat(mnemonic, "\t");
+    strcat(mnemonic, asm_operands);
+    strcat(mnemonic, "\n");
 
     if (disassemble && emu->debugger->debug_mode) {
       int i;

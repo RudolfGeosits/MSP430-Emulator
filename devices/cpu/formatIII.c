@@ -212,9 +212,12 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
 
     } //# End of Switch
 
-    strncat(mnemonic, "\t", sizeof(mnemonic));
-    strncat(mnemonic, value, sizeof(mnemonic));
-    strncat(mnemonic, "\n", sizeof(mnemonic));
+    // Changed from strincat(mnemonic, X, sizeof mnemonic)
+    // the previous form produced warnings
+    // and made no sense anyway, as DST must be larger than num
+    strcat(mnemonic, "\t");
+    strcat(mnemonic, value);
+    strcat(mnemonic, "\n");
 
     if (disassemble && emu->debugger->debug_mode) {
       int i;

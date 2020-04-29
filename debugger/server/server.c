@@ -94,10 +94,15 @@ int callback_emu ( struct lws *wsi,
             if( !(pid = fork()) ) {
 	printf("Child: Got pid #%u\n", pid);
 
+    char arg1[] = "nice";
+    char arg2[] = "-20";
+    char arg3[] = "./msp430-emu";
+
 	char * const args[] = {
-	    "nice", "-20", "./MSP430", port_str,
-	    //"./MSP430", port_str,
-	    //"gdb", "-ex", "run", "--args", "./MSP430", port_str,
+	    arg1,
+        arg2,
+        arg3,
+        port_str,
 	    NULL
 	};
 

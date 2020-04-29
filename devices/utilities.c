@@ -30,7 +30,7 @@ extern uint8_t* MEMSPACE;
 void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr)
 {
     uint32_t size, result;
-    char str[100] = {0};
+    char str[STRING_BUFFER_SIZE] = {0};
 
     sprintf(str, "Loading firmware: ( %s )\n", file_name);
     print_console(emu, str);

@@ -27,6 +27,8 @@
 #include "cpu/registers.h"
 #include "memory/memspace.h"
 
+#define STRING_BUFFER_SIZE 16384
+
 void reg_num_to_name(uint8_t source_reg, char *reg_name);
 int16_t *get_reg_ptr(Emulator *emu, uint8_t reg);
 uint16_t *get_stack_ptr(Emulator *emu);

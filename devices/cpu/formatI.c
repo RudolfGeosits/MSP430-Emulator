@@ -153,7 +153,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       uint16_t virtual_addr = *s_reg + source_offset - 2;
 
       source_value = *get_addr_ptr(virtual_addr);
-      
+
 
       sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
@@ -333,12 +333,12 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
       if (bw_flag == WORD) {
-	sprintf(asm_operands, "#0x%04X, %s",
-		(uint16_t) source_value, d_reg_name);
+	      sprintf(asm_operands, "#0x%04X, %s",
+	      	(uint16_t) source_value, d_reg_name);
       }
       else if (bw_flag == BYTE) {
-	sprintf(asm_operands, "#0x%04X, %s",
-		(uint8_t) source_value, d_reg_name);
+	      sprintf(asm_operands, "#0x%04X, %s",
+		      (uint8_t) source_value, d_reg_name);
       }
     }
     else {                              /* Source Indirect AutoIncrement */
@@ -347,7 +347,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "@%s+, %s", s_reg_name, d_reg_name);
 
       if (!disassemble) {
-	bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
+	      bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
       }
     }
 
@@ -386,7 +386,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "@%s+, ", s_reg_name);
 
       if (!disassemble) {
-	bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
+	      bw_flag == WORD ? *s_reg += 2 : (*s_reg += 1);
       }
     }
 
@@ -642,13 +642,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
        */
       case 0xA:{
 
-        if (bw_flag == WORD) {
-
-        }
-        else if (bw_flag == BYTE) {
-
-        }
-
+        print_console(emu, "Unimplemented instruction = DADD\n");
         break;
       }
 
@@ -693,7 +687,10 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
         if (bw_flag == WORD) {
           //*destination_addr &= (uint16_t) ~source_value;
           uint16_t x = memory_read_word(destination_addr);
+          const uint16_t old_x = x;
           x &= (uint16_t) ~source_value;
+          //printf("BIC DST %x SRC %x -> DST %x\n", old_x, source_value, x);
+          //printf("DST @ %p SR @ %p\n", destination_addr, &(emu->cpu->sr));
           memory_write_word(destination_addr, x);
         }
         else if (bw_flag == BYTE) {
@@ -798,6 +795,9 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
 
         break;
       }
+    default:{
+      print_console(emu, "Unknown Single operand instruction\n");
+    }
 
     } //# End of switch
 

@@ -30,7 +30,7 @@ void initialize_msp_registers(Emulator *emu)
 
   /* Initialize Program Counter to *0xFFFE at boot or reset (WARM)*/
   cpu->pc = 0xC000;
-  
+
   /* Stack pointer typically begins at the top of RAM after reset */
   cpu->sp = 0x400;
 
@@ -40,19 +40,19 @@ void initialize_msp_registers(Emulator *emu)
   cpu->running = false;
   cpu->cg2 = 0;
 
-  cpu->r4 = cpu->r5 = cpu->r6 = cpu->r7 = cpu->r8 = 
-    cpu->r9 = cpu->r10 = cpu->r11 = cpu->r12 = cpu->r13 = 
+  cpu->r4 = cpu->r5 = cpu->r6 = cpu->r7 = cpu->r8 =
+    cpu->r9 = cpu->r10 = cpu->r11 = cpu->r12 = cpu->r13 =
     cpu->r14 = cpu->r15 = 0;
 }
 
-void update_register_display (Emulator *emu) 
+void update_register_display (Emulator *emu)
 {
-  Cpu *cpu = emu->cpu;  
-  char thing[50] = "....";  
+  Cpu *cpu = emu->cpu;
+  char thing[50] = "....";
 
   if (emu->cpu->running) {
     send_control(emu, UPDATE_ALL_REGS_PACKET, (void *)thing, strlen(thing));
-    
+
     return;
   }
 
@@ -63,52 +63,52 @@ void update_register_display (Emulator *emu)
   send_control(emu, UPDATE_REG_R1_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X", sr_to_value(emu));
-  send_control(emu, UPDATE_REG_R2_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R2_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X",(uint16_t) cpu->cg2);
-  send_control(emu, UPDATE_REG_R3_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R3_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X",(uint16_t) cpu->r4);
-  send_control(emu, UPDATE_REG_R4_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R4_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X",(uint16_t) cpu->r5);
-  send_control(emu, UPDATE_REG_R5_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R5_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X",(uint16_t) cpu->r6);
-  send_control(emu, UPDATE_REG_R6_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R6_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X",(uint16_t) cpu->r7);
-  send_control(emu, UPDATE_REG_R7_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R7_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X",(uint16_t) cpu->r8);
-  send_control(emu, UPDATE_REG_R8_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R8_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X",(uint16_t) cpu->r9);
-  send_control(emu, UPDATE_REG_R9_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R9_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X", (uint16_t)cpu->r10);
-  send_control(emu, UPDATE_REG_R10_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R10_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X", (uint16_t)cpu->r11);
-  send_control(emu, UPDATE_REG_R11_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R11_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X", (uint16_t)cpu->r12);
-  send_control(emu, UPDATE_REG_R12_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R12_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X", (uint16_t)cpu->r13);
-  send_control(emu, UPDATE_REG_R13_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R13_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X", (uint16_t)cpu->r14);
-  send_control(emu, UPDATE_REG_R14_PACKET, (void *)thing, strlen(thing));  
+  send_control(emu, UPDATE_REG_R14_PACKET, (void *)thing, strlen(thing));
 
   sprintf(thing, "%04X", (uint16_t)cpu->r15);
   send_control(emu, UPDATE_REG_R15_PACKET, (void *)thing, strlen(thing));
 }
 
 //##########+++ Set SR struct Value +++##########
-void set_sr_value (Emulator *emu, uint16_t value) 
+void set_sr_value (Emulator *emu, uint16_t value)
 {
-  Cpu *cpu = emu->cpu;  
+  Cpu *cpu = emu->cpu;
 
   // reset SR to set it properly...
   memset(&cpu->sr, 0, sizeof(Status_reg));
@@ -135,7 +135,7 @@ void set_sr_value (Emulator *emu, uint16_t value)
 
 //##########+++ Return value from SR struct +++##########
 uint16_t sr_to_value(Emulator *emu)
-{ 
+{
   Cpu *cpu = emu->cpu;
   uint16_t r2 = 0;
 
@@ -163,13 +163,13 @@ uint16_t sr_to_value(Emulator *emu)
   }
 
   if (cpu->sr.overflow) {
-    r2 |= 0x0100; 
+    r2 |= 0x0100;
   }
-  
+
   if (cpu->sr.SCG1) {
     r2 |= 0x0080;
   }
-  
+
   if (cpu->sr.SCG0) {
     r2 |= 0x0040;
   }
@@ -189,14 +189,14 @@ uint16_t sr_to_value(Emulator *emu)
   if (cpu->sr.negative) {
     r2 |= 0x0004;
   }
-  
+
   if (cpu->sr.zero) {
     r2 |= 0x0002;
   }
-  
+
   if (cpu->sr.carry) {
     r2 |= 0x0001;
   }
-  
+
   return r2;
 }

@@ -27,17 +27,17 @@
 
 /* r2 or SR, the status register */
 typedef struct Status_reg {
-  uint8_t reserved : 7;   // Reserved bits
-  uint8_t overflow : 1;   // Overflow flag
-  uint8_t SCG1 : 1;  // System Clock Generator SMCLK; ON = 0; OFF = 1;
-  uint8_t SCG0 : 1;  // System Clock Generator DCOCLK DCO ON = 0; DCO OFF = 1;
-  uint8_t OSCOFF : 1;    // Oscillator Off. LFXT1CLK ON = 0; LFXT1CLK OFF = 1;
-  uint8_t CPUOFF : 1;     // CPU off; CPU OFF = 1; CPU ON = 0;
-  uint8_t GIE : 1;    // General Inter enabl; Enbl maskable ints = 1; 0 = dont
-  uint8_t negative : 1;   // Negative flag
-  uint8_t zero : 1;       // Zero flag
-  uint8_t carry : 1;      // Carry flag; Set when result produces a carry
-} Status_reg;
+  uint16_t carry : 1;      // Carry flag; Set when result produces a carry
+  uint16_t zero : 1;       // Zero flag
+  uint16_t negative : 1;   // Negative flag
+  uint16_t GIE : 1;    // General Inter enable; Enable maskable ints = 1; 0 = dont
+  uint16_t CPUOFF : 1;     // CPU off; CPU OFF = 1; CPU ON = 0;
+  uint16_t OSCOFF : 1;    // Oscillator Off. LFXT1CLK ON = 0; LFXT1CLK OFF = 1;
+  uint16_t SCG0 : 1;  // System Clock Generator DCOCLK DCO ON = 0; DCO OFF = 1;
+  uint16_t SCG1 : 1;  // System Clock Generator SMCLK; ON = 0; OFF = 1;
+  uint16_t overflow : 1;   // Overflow flag
+  uint16_t reserved : 7;   // Reserved bits
+} __attribute__((packed)) Status_reg;
 
 // Main CPU structure //
 typedef struct Cpu {
@@ -52,7 +52,6 @@ typedef struct Cpu {
   int16_t r12, r13, r14, r15;
 
   Port_1 *p1;
-  //Port_2 *p2;
   Usci *usci;
   Bcm *bcm;
   Timer_a *timer_a;

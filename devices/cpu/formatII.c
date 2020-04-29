@@ -349,11 +349,11 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
       //# RETI Return from interrupt: Pop SR then pop PC
     case 0x6:{
-
+      print_console(emu,"Unimplemented - RETI\n");
       break;
     }
     default:{
-      printf("Unknown Single operand instruction.\n");
+      print_console(emu, "Unknown Single operand instruction\n");
     }
 
     } //# End of Switch

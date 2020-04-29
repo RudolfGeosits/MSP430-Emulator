@@ -45,7 +45,7 @@ bool exec_cmd (Emulator *emu, char *line, int len)
   if ( !strncasecmp("reset", cmd, sizeof "reset") ||
        !strncasecmp("restart", cmd, sizeof "restart"))
     {
-      // Reset interrupt      
+      // Reset interrupt
       uint16_t resetIntHandlerAddress = ((uint16_t*)MEMSPACE)[0xfffe / 2];
       cpu->pc = resetIntHandlerAddress;
 
@@ -558,7 +558,7 @@ bool handle_breakpoints (Emulator *emu)
       cpu->running = false;
       deb->debug_mode = true;
 
-      sprintf(str, "\n\t[Breakpoint %d hit]\n\n", i + 1);      
+      sprintf(str, "\n\t[Breakpoint %d hit]\n\n", i + 1);
       print_console(emu, str);
 
       display_registers(emu);

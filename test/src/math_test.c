@@ -17,12 +17,19 @@ static uint16_t doCalculation(uint32_t a, uint32_t b)
 void main()
 {
     uart_init();
+    char buffer[8];
     const uint32_t a = 17;
     const uint32_t b = 111;
     const uint16_t result = doCalculation(a,b);
-    char buffer[128];
-    sprintf(buffer, "Test calculation from %d and %d yields %d", a, b, result);
-    uart_write_string(buffer);    
+    uart_write_string("Test calculation from ");
+    sprintf(buffer, "%d", a);
+    uart_write_string(buffer);
+    uart_write_string(" and ");
+    sprintf(buffer, "%d", b);
+    uart_write_string(buffer);
+    uart_write_string(" yields ");
+    sprintf(buffer, "%d", result);
+    uart_write_string(buffer);
     while (true)
         asm volatile ("nop");
 }

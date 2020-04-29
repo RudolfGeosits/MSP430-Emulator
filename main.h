@@ -81,4 +81,5 @@ struct Emulator
     FILE* usci_output_pipe;
     int usci_input_pipe_fd;
     int usci_output_pipe_fd;
+    bool do_trace;
 };

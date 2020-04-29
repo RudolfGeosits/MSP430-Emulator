@@ -27,7 +27,7 @@ uint16_t fetch(Emulator *emu, bool report)
     
     p = (get_addr_ptr(cpu->pc));
     word = *p;
-    if (report)
+    if (emu->do_trace && report)
     {
         char buffer[128];    
         sprintf(buffer, "Fetching %x - %x\n", cpu->pc, word);

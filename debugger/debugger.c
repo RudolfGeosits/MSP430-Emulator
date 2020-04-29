@@ -243,6 +243,20 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       disassemble(emu, cpu->pc, 1);
     }
 
+  // Show instruction trace //
+  else if ( !strncasecmp("trace", cmd, sizeof "trace"))
+    {
+      char trace_mode[sizeof line];
+      sscanf(line, "%s %s", bogus1, trace_mode);
+      if (strncasecmp("on", trace_mode, sizeof "on") == 0)
+        emu->do_trace = true;
+      if (strncasecmp("off", trace_mode, sizeof "off") == 0)
+        emu->do_trace = false;
+
+      print_console(emu, "Tracing is ");
+      print_console(emu, emu->do_trace ? "on\n" : "off\n");
+    }
+
   // help, display a list of debugger cmds //
   else if ( !strncasecmp("help", cmd, sizeof "help") ||
 	    !strncasecmp("h", cmd, sizeof "h") )

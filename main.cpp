@@ -74,6 +74,7 @@ static bool parseMode(char* const modeString, Emulator_Mode* const mode)
 static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
 {
     int option;
+    emu->do_trace = false;
     emu->mode = Emulator_Mode_Web;
     emu->port = -1;
     emu->binary = NULL;

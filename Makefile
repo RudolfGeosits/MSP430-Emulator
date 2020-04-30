@@ -1,5 +1,6 @@
-CC=g++
-CFLAGS=-g
+CXX=g++
+CXXFLAGS=-g
+LDLIBS=-lreadline -lwebsockets -lpthread -lrt -lssl -lcrypto
 SERVER=server
 EMULATOR=msp430-emu
 
@@ -12,72 +13,72 @@ all: ${EMULATOR} ${SERVER}
 ${EMULATOR} : main.o emu_server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
 	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o bcm.o \
 	timer_a.o packet_queue.o io.o
-	${CC} ${CFLAGS} -o $@ $^ -lreadline -lwebsockets -lpthread -lrt -lssl -lcrypto;
+	${CXX} ${CXXFLAGS} -o $@ $^ ${LDLIBS}
 
 main.o : main.cpp
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 utilities.o : devices/utilities.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 registers.o : devices/cpu/registers.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 memspace.o : devices/memory/memspace.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 debugger.o : debugger/debugger.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 disassembler.o : debugger/disassembler.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 register_display.o : debugger/register_display.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 decoder.o : devices/cpu/decoder.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 flag_handler.o : devices/cpu/flag_handler.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 formatI.o : devices/cpu/formatI.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 formatII.o : devices/cpu/formatII.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 formatIII.o : devices/cpu/formatIII.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 bcm.o : devices/peripherals/bcm.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 timer_a.o : devices/peripherals/timer_a.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 usci.o : devices/peripherals/usci.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 port1.o : devices/peripherals/port1.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 io.o: debugger/io.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 emu_server.o : debugger/websockets/emu_server.cpp
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 packet_queue.o : debugger/websockets/packet_queue.c
-	${CC} ${CFLAGS} -c debugger/websockets/packet_queue.c
+	${CXX} ${CXXFLAGS} -c debugger/websockets/packet_queue.c
 
 # Server Program
 
 ${SERVER} : server.o
-	${CC} ${CFLAGS} -o $@ $^ -lrt -lpthread -lwebsockets -lssl -lcrypto;
+	${CXX} ${CXXFLAGS} -o $@ $^ ${LDLIBS}
 
 server.o : debugger/server/server.c
-	${CC} ${CFLAGS} -c $<
+	${CXX} ${CXXFLAGS} -c $<
 
 
 clean :
@@ -87,7 +88,7 @@ clean :
 		formatII.o formatIII.o io.o \
 		usci.o port1.o packet_queue.o bcm.o timer_a.o \
 		${EMULATOR} ${SERVER}
-	make -C test clean
+	${MAKE} -C test clean
 
-test: ${EMULATOR} test/Makefile
-	make -C test test
+test : ${EMULATOR} test/Makefile
+	${MAKE} -C test test

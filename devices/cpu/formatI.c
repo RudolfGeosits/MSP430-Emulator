@@ -48,7 +48,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
   char hex_str[100] = {0};
   char hex_str_part[10] = {0};
 
-  sprintf(hex_str, "%04X", instruction);
+  sprintf(hex_str, "%04hX", instruction);
 
   /* Source Register pointer */
   int16_t *s_reg = get_reg_ptr(emu, source);
@@ -83,7 +83,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
     if (constant_generator_active) {   /* Source Constant */
       source_value = immediate_constant;
 
-      sprintf(asm_operands, "#0x%04X, %s",
+      sprintf(asm_operands, "#0x%04hX, %s",
 	      (uint16_t) source_value, d_reg_name);
     }
     else {                             /* Source register */
@@ -107,14 +107,14 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
   else if (as_flag == 0 && ad_flag == 1) {
     destination_offset = fetch(emu, false);
 
-    sprintf(hex_str_part, "%04X", (uint16_t) destination_offset);
+    sprintf(hex_str_part, "%04hX", (uint16_t) destination_offset);
     strncat(hex_str, hex_str_part, sizeof hex_str);
 
     destination_addr = get_addr_ptr(*d_reg + destination_offset);
 
     if (constant_generator_active) {   /* Source Constant */
       source_value = immediate_constant;
-      sprintf(asm_operands, "#0x%04X, ", source_value);
+      sprintf(asm_operands, "#0x%04hX, ", source_value);
     }
     else {                             /* Source from register */
       source_value = *s_reg;
@@ -125,14 +125,14 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       uint16_t virtual_addr = *d_reg + destination_offset - 2;
       destination_addr = get_addr_ptr(virtual_addr);
 
-      sprintf(asm_op2, "0x%04X", (uint16_t) virtual_addr);
+      sprintf(asm_op2, "0x%04hX", (uint16_t) virtual_addr);
     }
     else if (destination == 2) {       /* Destination Absolute */
       destination_addr = get_addr_ptr(destination_offset);
-      sprintf(asm_op2, "&0x%04X", (uint16_t) destination_offset);
+      sprintf(asm_op2, "&0x%04hX", (uint16_t) destination_offset);
     }
     else {                             /* Destination Indexed */
-      sprintf(asm_op2, "0x%04X(%s)",
+      sprintf(asm_op2, "0x%04hX(%s)",
 	      (uint16_t) destination_offset, d_reg_name);
     }
 
@@ -146,7 +146,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
   else if (as_flag == 1 && ad_flag == 0) {
     if (constant_generator_active) {   /* Source Constant */
       source_value = immediate_constant;
-      sprintf(asm_operands, "#0x%04X, %s", source_value, d_reg_name);
+      sprintf(asm_operands, "#0x%04hX, %s", source_value, d_reg_name);
     }
     else if (source == 0) {            /* Source Symbolic */
       source_offset = fetch(emu, false);
@@ -155,29 +155,29 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       source_value = *get_addr_ptr(virtual_addr);
 
 
-      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      sprintf(hex_str_part, "%04hX", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
-      sprintf(asm_operands, "0x%04X, %s", virtual_addr, d_reg_name);
+      sprintf(asm_operands, "0x%04hX, %s", virtual_addr, d_reg_name);
     }
     else if (source == 2) {            /* Source Absolute */
       source_offset = fetch(emu, false);
       source_value = memory_read_word(get_addr_ptr(source_offset));
 
-      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      sprintf(hex_str_part, "%04hX", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
-      sprintf(asm_operands, "&0x%04X, %s",
+      sprintf(asm_operands, "&0x%04hX, %s",
 	      (uint16_t) source_offset, d_reg_name);
     }
     else {                             /* Source Indexed */
       source_offset = fetch(emu, false);
       source_value = memory_read_word(get_addr_ptr(*s_reg + source_offset));
 
-      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      sprintf(hex_str_part, "%04hX", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
-      sprintf(asm_operands, "0x%04X(%s), %s",
+      sprintf(asm_operands, "0x%04hX(%s), %s",
 	      (uint16_t) source_offset, s_reg_name, d_reg_name);
     }
 

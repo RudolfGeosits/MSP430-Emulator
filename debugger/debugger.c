@@ -110,8 +110,8 @@ bool exec_cmd (Emulator *emu, char *line, int len)
 	sscanf(line, "%s %u", bogus1, &num);
       }
       else if (ops == 3) {
-	sscanf(line, "%s %u %X", bogus1, &num,
-		     (unsigned int *)&start_addr);
+	sscanf(line, "%s %u %hX", bogus1, &num,
+		     (uint16_t *)&start_addr);
       }
 
       disassemble(emu, start_addr, num);

@@ -54,7 +54,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
   char hex_str[100] = {0};
   char hex_str_part[10] = {0};
 
-  sprintf(hex_str, "%04X", instruction);
+  sprintf(hex_str, "%04hX", instruction);
 
   /*
   printf("Opcode: 0x%01X  Source bits: 0x%01X\nAS_Flag: 0x%01X  "\
@@ -83,7 +83,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       source_value = bogus_reg = immediate_constant;
       source_address = &bogus_reg;
 
-      sprintf(asm_operand, "#0x%04X", (uint16_t) source_value);
+      sprintf(asm_operand, "#0x%04hX", (uint16_t) source_value);
     }
     else {                             /* Source Register */
       source_value = *reg;
@@ -104,38 +104,38 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       source_value = bogus_reg = immediate_constant;
       source_address = &bogus_reg;
 
-      sprintf(asm_operand, "#0x%04X", source_value);
+      sprintf(asm_operand, "#0x%04hX", source_value);
     }
     else if (source == 0) {            /* Source Symbolic */
       source_offset = fetch(emu, false);
       uint16_t virtual_addr = cpu->pc + source_offset;
 
-      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      sprintf(hex_str_part, "%04hX", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
       source_address = get_addr_ptr(virtual_addr);
 
-      sprintf(asm_operand, "0x%04X", virtual_addr);
+      sprintf(asm_operand, "0x%04hX", virtual_addr);
     }
     else if (source == 2) {            /* Source Absolute */
       source_offset = fetch(emu, false);
       source_address = get_addr_ptr(source_offset);
       source_value = memory_read_word(source_address);
 
-      sprintf(hex_str_part, "%04X", (uint16_t) source_value);
+      sprintf(hex_str_part, "%04hX", (uint16_t) source_value);
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
-      sprintf(asm_operand, "&0x%04X", (uint16_t) source_offset);
+      sprintf(asm_operand, "&0x%04hX", (uint16_t) source_offset);
     }
     else {                             /* Source Indexed */
       source_offset = fetch(emu, false);
       source_address = get_addr_ptr(*reg + source_offset);
       source_value = memory_read_word(source_address);
 
-      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      sprintf(hex_str_part, "%04hX", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
-      sprintf(asm_operand, "0x%04X(%s)", (uint16_t) source_offset, reg_name);
+      sprintf(asm_operand, "0x%04hX(%s)", (uint16_t) source_offset, reg_name);
     }
   }
 
@@ -146,7 +146,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       source_value = bogus_reg = immediate_constant;
       source_address = &bogus_reg;
 
-      sprintf(asm_operand, "#0x%04X", immediate_constant);
+      sprintf(asm_operand, "#0x%04hX", immediate_constant);
     }
     else {                             /* Source Indirect */
       source_address = get_addr_ptr(*reg);
@@ -164,20 +164,20 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       source_value = bogus_reg = immediate_constant;
       source_address = &bogus_reg;
 
-      sprintf(asm_operand, "#0x%04X", (uint16_t) source_value);
+      sprintf(asm_operand, "#0x%04hX", (uint16_t) source_value);
     }
     else if (source == 0) {            /* Source Immediate */
       source_value = bogus_reg = fetch(emu, false);
       source_address = &bogus_reg;
 
-      sprintf(hex_str_part, "%04X", (uint16_t) source_value);
+      sprintf(hex_str_part, "%04hX", (uint16_t) source_value);
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
       if (bw_flag == WORD) {
-        sprintf(asm_operand, "#0x%04X", (uint16_t) source_value);
+        sprintf(asm_operand, "#0x%04hX", (uint16_t) source_value);
       }
       else if (bw_flag == BYTE) {
-        sprintf(asm_operand, "#0x%04X", (uint8_t) source_value);
+        sprintf(asm_operand, "#0x%04hX", (uint8_t) source_value);
       }
     }
     else {                              /* Source Indirect AutoIncrement */

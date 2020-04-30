@@ -42,7 +42,7 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   /* String to show hex value of instruction */
   char hex_str[100] = {0};
 
-  sprintf(hex_str, "%04X", instruction);
+  sprintf(hex_str, "%04hX", instruction);
 
   if (negative) { /* Sign Extend for Arithmetic Operations */
     signed_offset |= 0xF800;
@@ -165,44 +165,44 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
 
     case 0x0:{
       sprintf(mnemonic, "JNZ");
-      sprintf(value, "0x%04X", cpu->pc + signed_offset);
+      sprintf(value, "0x%04hX", cpu->pc + signed_offset);
       break;
     }
     case 0x1:{
       sprintf(mnemonic, "JZ");
-      sprintf(value, "0x%04X", cpu->pc + signed_offset);
+      sprintf(value, "0x%04hX", cpu->pc + signed_offset);
       break;
     }
     case 0x2:{
       sprintf(mnemonic, "JNC");
-      sprintf(value, "0x%04X", cpu->pc + signed_offset);
+      sprintf(value, "0x%04hX", cpu->pc + signed_offset);
       break;
     }
     case 0x3:{
       sprintf(mnemonic, "JC");
-      sprintf(value, "0x%04X", cpu->pc + signed_offset);
+      sprintf(value, "0x%04hX", cpu->pc + signed_offset);
       break;
     }
     case 0x4:{
       sprintf(mnemonic, "JN");
-      sprintf(value, "0x%04X", cpu->pc + signed_offset);
+      sprintf(value, "0x%04hX", cpu->pc + signed_offset);
       break;
     }
     case 0x5:{
       sprintf(mnemonic, "JGE");
-      sprintf(value, "0x%04X", cpu->pc + signed_offset);
+      sprintf(value, "0x%04hX", cpu->pc + signed_offset);
 
       break;
     }
     case 0x6:{
       sprintf(mnemonic, "JL");
-      sprintf(value, "0x%04X", cpu->pc + signed_offset);
+      sprintf(value, "0x%04hX", cpu->pc + signed_offset);
 
       break;
     }
     case 0x7:{
       sprintf(mnemonic, "JMP");
-      sprintf(value, "0x%04X", cpu->pc + signed_offset);
+      sprintf(value, "0x%04hX", cpu->pc + signed_offset);
       break;
     }
     default:{

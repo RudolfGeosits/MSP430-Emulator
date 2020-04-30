@@ -1,50 +1,53 @@
 MSP430 Emulator
 ===============
 
-You can use this emulator online now at: http://www.msp430emulator.com/emu.html
+This is a fork of the MSP430 Emulator created by Rudolf Geosits and available at: https://github.com/RudolfGeosits/MSP430-Emulator. Please visit that site for more information.
 
-- Providing a complete software model of the MSP430 16-bit instruction set
-- An interactive debugger for advanced development and in depth firmware/hardware analysis
-- Peripherals include:
-  - GPIO Ports (LEDs and other pins)
-  - UART Serial Communication (via USCI Module) 
-  - Timer_A (in progress)
-  - BCM+ (in progress)
+The main purpose of the fork is to re-enable a pure command-line usage, for deployment in Continuous Integration testing environments.
 
-  The project goal is to emulate all peripherals and devices on the TI MSP430 Launchpad starter kit, 
-  to be able to run all firmware that would run on the physical device and test hardware inputs like UART or some of the other digital ports via programmable means. 
-  The emulator/simulator written in C is server which can be ran as a daemon. The user interface is accessed through the browser. This server and interface is available online at the link above.
-  
-  Please feel free to contribute! (TODO list below!) Also, we would like to hear from you if you are using this software! 
+The emulator's feature-set is based on MSP430G2553 MCU.
 
-  Please contact me at rgeosits@live.esu.edu if you are using this for something or would like more information on how to contribute. Let me know if you need something specific emulated!
-  Thank you!
-  
-![Interface.PNG](http://www.msp430emulator.com/images/Interface.PNG)
-  
+This fork contains the following changes with respect to the parent project:
+- Main function rewrite to support more command line arguments and command-line usage
+- USCI module rewrite so that is supports both transmission and reception to/from pipes/files
+- Memory access flags to enable implementation of peripherals that act upon a register read/write
+- Automated integration tests for validating basic usage scenarios
+- Dockerfile for reproducible, host-independend builds
+- Some bugfixes (see futher below) and code clean-up to remove basic warnings
+
+The following things have been tested to work (please consult the test folder):
+- Function calls
+- Basic arithmetic (including libc emulation of addition and division)
+- Basic string operations (sprintf)
+- USCI I/O in UART mode (no interrupts, no baud rate control, only 8-bit)
+
+Major limitations:
+- No proper interrupt support (RTOS will not work)
+- No memory layout/size configuration (MSP430G2553 layout is hardcoded)
+- only MSP430 instruction set (no MSP430X support, so proper simulation of MSP430FR5969 is not possible)
+
+The following bugfixes have been implemented:
+- Pointer to SR register now points to the actual register, not a proxy (resolves issue with CLCR instruction emulated via BIC with SR as an argument)
+- Reset starts execution from the address pointed to by the reset vector instead of 0xC000 (programs compiled with TI GCC usually do not start at 0xC000)
+
 --------------------------------------------------------------------------------------------------------------------------
 
-- Build Instructions (You will need the following packages)
+- Build Instructions (via make):
   - Install dependancies via ./install_deps.sh
-  - navigate to the root of the source tree
-  - type 'make'
+  - Navigate to the root of the source tree
+  - Type 'make all' to build the emulator
+  - Type 'make test' to build and run the integration tests
 
-- User Instructions
-  - Log onto http://www.msp430emulator.com/emu.html to use the online emulation server.
+- Build Instructions (via docker):
+  - Navigate to the root of the source tree
+  - Type 'docker build --tag YOURTAG .'
 
-  - How to use a local instance of this server (for time sensitive applications where latency would cause errors)
-    - Build this emulation server (instructions above)
-    - Run the emulation server on your machine (./server)
-    - Log onto http://www.msp430emulator.com/emu.html and select the checkbox for "Run Local" at the bottom left of the interface.
-    - You will be connected! Enjoy.
+- Sample usage (please consult the test folder):
+  - Bin file can be prepared from elf file using 'msp430-objcopy -O binary SOURCE_ELF TARGET_BIN'; elf file is created by compiling a program using MSP430 GCC
+  - Type './msp430-emu -m cli -b BIN_FILE_TO_LOAD -i UART_INPUT_PIPE -o UART_OUTPUT_PIPE' to start the emulator in command line mode, load the BIN_FILE_TO_LOAD, read USCI UART data from UART_INPUT_PIPE and write USCI UART data to UART_OUTPUT_PIPE
+  - NOTE: if pipes are used, they must be opened by a sink/source program beforehand; fopen waits for the other end of communication to be available; this limitation does not apply if regular files are used
+  - (inside emulator) type 'help' for available commands
+  - (inside emulator) type 'reset' to invoke a reset, which sets up the correct PC value (not needed for programs with entry point @0xC000)
+  - (inside emulator) type 'run' to run the program until a breakpoint hits, an error occurrs or the end of time; type 's 1000' to run 1000 instructions of the program
+  - (inside emulator) type 'quit' to quit the emulator
 
-- Documentation & Sample Programs:
-  - Sample Programs: http://www.msp430emulator.com/examples.html
-  - User Guide: http://www.msp430emulator.com/help.html
-
-- TODO
-  - Basic Clock Module / Timer
-  
-  - Instructions
-    - DADD (BCD math)
-    - RETI (Return from Interrupt)

@@ -160,14 +160,9 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       if (res != -1) {  // If its a reg name
 	reg_name = reg_name_or_addr;
 	printf("In reg part...\n");
-
-	if (res == 2) { // SR (R2)
-	  set_sr_value(emu, value);
-	}
-	else { // All others
-	  uint16_t *p = (uint16_t*)get_reg_ptr(emu, res);
-	  *p = value;
-	}
+	
+	uint16_t *p = (uint16_t*)get_reg_ptr(emu, res);
+	*p = value;	
 
 	display_registers(emu);
 	disassemble(emu, cpu->pc, 1);

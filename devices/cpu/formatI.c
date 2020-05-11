@@ -471,13 +471,14 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
           memory_write_byte(destination_addr, x);
         }
 
-        cpu->sr.zero = is_zero(destination_addr, bw_flag);
-        cpu->sr.negative = is_negative((int16_t*)destination_addr, bw_flag);
+        Status_reg fields = get_sr_fields(emu);
 
-        cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
-
-        cpu->sr.overflow = is_overflowed(source_value, original_dst_value,
+        fields.zero = is_zero(destination_addr, bw_flag);
+        fields.negative = is_negative((int16_t*)destination_addr, bw_flag);
+        fields.carry = is_carried(original_dst_value, source_value, bw_flag);
+        fields.overflow = is_overflowed(source_value, original_dst_value,
           			  destination_addr, bw_flag);
+        set_sr_from_fields(emu, fields);
 
         break;
       }
@@ -496,25 +497,25 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       case 0x6:{
 
         uint16_t original_dst_value = memory_read_word(destination_addr);
+        Status_reg fields = get_sr_fields(emu);
 
         if (bw_flag == WORD) {
           uint16_t x = memory_read_word(destination_addr);
-          x += source_value + cpu->sr.carry;
+          x += source_value + fields.carry;
           memory_write_word(destination_addr, x);
         }
         else if (bw_flag == BYTE) {
           uint8_t x = memory_read_byte(destination_addr);
-          x += (uint8_t) source_value + cpu->sr.carry;
+          x += (uint8_t) source_value + fields.carry;
           memory_write_byte(destination_addr, x);
         }
 
-        cpu->sr.zero = is_zero(destination_addr, bw_flag);
-        cpu->sr.negative = is_negative((int16_t*)destination_addr, bw_flag);
-
-        cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
-
-        cpu->sr.overflow = is_overflowed(source_value, original_dst_value,
+        fields.zero = is_zero(destination_addr, bw_flag);
+        fields.negative = is_negative((int16_t*)destination_addr, bw_flag);
+        fields.carry = is_carried(original_dst_value, source_value, bw_flag);
+        fields.overflow = is_overflowed(source_value, original_dst_value,
           			  destination_addr, bw_flag);
+        set_sr_from_fields(emu, fields);
         break;
       }
 
@@ -533,27 +534,27 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
        */
       case 0x7:{
 
+        Status_reg fields = get_sr_fields(emu);
         int16_t original_dst_value = memory_read_word(destination_addr);
         source_value = ~source_value; /* 1's comp */
 
         if (bw_flag == WORD) {
           int16_t x = memory_read_word(destination_addr);
-          x += source_value + cpu->sr.carry;
+          x += source_value + fields.carry;
           memory_write_word(destination_addr, x);
         }
         else if (bw_flag == BYTE) {
           int8_t x = memory_read_byte(destination_addr);
-          x += (int8_t) source_value + cpu->sr.carry;
+          x += (int8_t) source_value + fields.carry;
           memory_write_byte(destination_addr, x);
         }
 
-        cpu->sr.zero = is_zero(destination_addr, bw_flag);
-        cpu->sr.negative = is_negative((int16_t*)destination_addr, bw_flag);
-
-        cpu->sr.carry = is_carried(original_dst_value, source_value, bw_flag);
-
-        cpu->sr.overflow = is_overflowed(source_value, original_dst_value,
+        fields.zero = is_zero(destination_addr, bw_flag);
+        fields.negative = is_negative((int16_t*)destination_addr, bw_flag);
+        fields.carry = is_carried(original_dst_value, source_value, bw_flag);
+        fields.overflow = is_overflowed(source_value, original_dst_value,
           			  destination_addr, bw_flag);
+        set_sr_from_fields(emu, fields);
         break;
       }
 
@@ -572,6 +573,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
 
       case 0x8:{
 
+        Status_reg fields = get_sr_fields(emu);
         const int16_t original_dst_value = memory_read_word(destination_addr);
         source_value = ~source_value + 1;
 
@@ -586,17 +588,18 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
           memory_write_byte(destination_addr, x);
         }
 
-        cpu->sr.zero = is_zero(destination_addr, bw_flag);
-        cpu->sr.negative = is_negative((int16_t*)destination_addr, bw_flag);
+        fields.zero = is_zero(destination_addr, bw_flag);
+        fields.negative = is_negative((int16_t*)destination_addr, bw_flag);
 
         if ( is_carried(~source_value, 1, bw_flag) ||
              is_carried(original_dst_value, source_value, bw_flag) ) {
 
-          cpu->sr.carry = true;
+          fields.carry = true;
         }
 
-        cpu->sr.overflow = is_overflowed(source_value, original_dst_value,
+        fields.overflow = is_overflowed(source_value, original_dst_value,
           			  destination_addr, bw_flag);
+        set_sr_from_fields(emu, fields);
         break;
       }
 
@@ -609,6 +612,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
        * TODO: Fix overflow error
        */
       case 0x9:{
+        Status_reg fields = get_sr_fields(emu);
         const int16_t original_dst_value = memory_read_word(destination_addr);
         uint16_t unsigned_source_value = ((uint16_t)~source_value + 1);
         int16_t result;
@@ -622,18 +626,19 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
           result = memory_read_byte(destination_addr) + (uint8_t)unsigned_source_value;
         }
 
-        cpu->sr.negative = is_negative(&result, bw_flag);
-        cpu->sr.zero = is_zero((uint16_t*)&result, bw_flag);
+        fields.negative = is_negative(&result, bw_flag);
+        fields.zero = is_zero((uint16_t*)&result, bw_flag);
 
         /* Check if the carry happens durring conversion to 2's comp */
         if (! early_carry) {
-          cpu->sr.carry = is_carried(original_dst_value, unsigned_source_value, bw_flag);
+          fields.carry = is_carried(original_dst_value, unsigned_source_value, bw_flag);
         }
         else {
-          cpu->sr.carry = true;
+          fields.carry = true;
         }
 
-        cpu->sr.overflow = is_overflowed(unsigned_source_value, original_dst_value, (uint16_t*)&result, bw_flag);
+        fields.overflow = is_overflowed(unsigned_source_value, original_dst_value, (uint16_t*)&result, bw_flag);
+        set_sr_from_fields(emu, fields);
         break;
       }
 
@@ -654,27 +659,27 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
        * V: Reset
       */
       case 0xB:{
-
+        Status_reg fields = get_sr_fields(emu);
         if (bw_flag == WORD) {
           uint16_t x = memory_read_word(destination_addr);
           uint16_t result = ((uint16_t) source_value) & x;
 
-          cpu->sr.zero = (result == 0);
-          cpu->sr.negative = result >> 15;
-          cpu->sr.carry = (result != 0);
+          fields.zero = (result == 0);
+          fields.negative = result >> 15;
+          fields.carry = (result != 0);
         }
         else if (bw_flag == BYTE) {
           uint8_t x = memory_read_byte(destination_addr);
           uint8_t result =
             ((uint8_t) source_value) & x;
 
-          cpu->sr.zero = (result == 0);
-          cpu->sr.negative = result >> 7;
-          cpu->sr.carry = (result != 0);
+          fields.zero = (result == 0);
+          fields.negative = result >> 7;
+          fields.carry = (result != 0);
         }
 
-        cpu->sr.overflow = false;
-
+        fields.overflow = false;
+        set_sr_from_fields(emu, fields);
         break;
       }
 
@@ -732,29 +737,30 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
        * V: Set if both operands are negative
        */
       case 0xE:{
-
+        Status_reg fields = get_sr_fields(emu);
         if (bw_flag == WORD) {
           uint16_t x = memory_read_word(destination_addr);
-          cpu->sr.overflow =
+          fields.overflow =
             (x >> 15) && ((uint16_t)source_value >> 15);
 
           x ^= (uint16_t)source_value;
 
-          cpu->sr.negative = (x >> 15);
-          cpu->sr.zero = (x == 0);
-          cpu->sr.carry = (x != 0);
+          fields.negative = (x >> 15);
+          fields.zero = (x == 0);
+          fields.carry = (x != 0);
           memory_write_word(destination_addr, x);
         }
         else if (bw_flag == BYTE) {
           uint8_t x = memory_read_byte((uint8_t*)destination_addr);
-          cpu->sr.overflow =
+          fields.overflow =
             (x >> 7) && ((uint8_t)source_value >> 7);
 
           x ^= (uint8_t) source_value;
 
-          cpu->sr.negative = (x >> 7);
-          cpu->sr.zero = (x == 0);
-          cpu->sr.carry = (x != 0);
+          fields.negative = (x >> 7);
+          fields.zero = (x == 0);
+          fields.carry = (x != 0);
+          set_sr_from_fields(emu, fields);
           memory_write_byte(destination_addr, x);
         }
 
@@ -769,16 +775,16 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
        *  V: Reset
        */
       case 0xF:{
-
+        Status_reg fields = get_sr_fields(emu);
         if (bw_flag == WORD) {
           //*destination_addr &= (uint16_t)source_value;
           uint16_t x = memory_read_word(destination_addr);
           x &= (uint16_t)source_value;
           memory_write_word(destination_addr, x);
 
-          cpu->sr.negative = (x >> 15);
-          cpu->sr.zero = (x == 0);
-          cpu->sr.carry = (x != 0);
+          fields.negative = (x >> 15);
+          fields.zero = (x == 0);
+          fields.carry = (x != 0);
         }
         else if (bw_flag == BYTE) {
           //*(uint8_t *) destination_addr &= (uint8_t) source_value;
@@ -786,13 +792,13 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
           x &= (uint8_t) source_value;
           memory_write_byte(destination_addr, x);
 
-          cpu->sr.negative = (x >> 7);
-          cpu->sr.zero = (x == 0);
-          cpu->sr.carry = (x != 0);
+          fields.negative = (x >> 7);
+          fields.zero = (x == 0);
+          fields.carry = (x != 0);
         }
 
-        cpu->sr.overflow = false;
-
+        fields.overflow = false;
+        set_sr_from_fields(emu, fields);
         break;
       }
     default:{

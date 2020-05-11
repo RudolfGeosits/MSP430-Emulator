@@ -44,7 +44,7 @@ typedef struct Cpu {
   bool running;      /* CPU running or not */
 
   uint16_t pc, sp;   /* R0 and R1 respectively */
-  Status_reg sr;     /* Status register fields */
+  uint16_t sr;     /* Status register fields */
   int16_t cg2;       /* R3 or Constant Generator #2 */
 
   int16_t r4, r5, r6, r7;   /* R4-R15 General Purpose Registers */
@@ -57,8 +57,8 @@ typedef struct Cpu {
   Timer_a *timer_a;
 } Cpu;
 
-uint16_t sr_to_value (Emulator *emu);
-void set_sr_value (Emulator *emu, uint16_t value);
+Status_reg get_sr_fields (Emulator *emu);
+void set_sr_from_fields(Emulator *emu, const Status_reg fields);
 void initialize_msp_registers (Emulator *emu);
 void update_register_display (Emulator *emu);
 

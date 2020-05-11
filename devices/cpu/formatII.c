@@ -207,27 +207,28 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
        * TODO: UNDEFINED BEHAVIOR DURRING CONSTANT MANIPULATION, BROKEN
        */
     case 0x0:{
-      bool CF = cpu->sr.carry;
+      Status_reg fields = get_sr_fields(emu);
+      bool CF = fields.carry;
 
       if (bw_flag == WORD) {
         uint16_t x = memory_read_word(source_address);
-	      cpu->sr.carry = x & 0x0001;  /* Set CF from LSB */
+	      fields.carry = x & 0x0001;  /* Set CF from LSB */
 	      x >>= 1;                /* Shift one right */
 	      CF ? x |= 0x8000 : 0;   /* Set MSB from prev CF */
         memory_write_word(source_address, x);
       }
       else if (bw_flag == BYTE){
         uint8_t x = memory_read_byte(source_address);
-	      cpu->sr.carry = x & 0x01;
+	      fields.carry = x & 0x01;
 	      x >>= 1;
 	      CF ? x |= 0x80 : 0;
         memory_write_byte(source_address, x);
       }
 
-      cpu->sr.zero = is_zero(source_address, bw_flag);
-      cpu->sr.negative = is_negative((int16_t*)source_address, bw_flag);
-      cpu->sr.overflow = false;
-
+      fields.zero = is_zero(source_address, bw_flag);
+      fields.negative = is_negative((int16_t*)source_address, bw_flag);
+      fields.overflow = false;
+      set_sr_from_fields(emu, fields);
       break;
     }
 
@@ -255,9 +256,10 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
        * V: Reset
        */
     case 0x2:{
+      Status_reg fields = get_sr_fields(emu);
       if (bw_flag == WORD) {
         uint16_t x = memory_read_word(source_address);
-	      cpu->sr.carry = x & 0x0001;
+	      fields.carry = x & 0x0001;
 	      bool msb = x >> 15;
 	      x >>= 1;
 	      msb ? x |= 0x8000 : 0; /* Extend Sign */
@@ -265,16 +267,17 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       }
       else if (bw_flag == BYTE) {
         uint16_t x = memory_read_word(source_address);
-	      cpu->sr.carry = x & 0x0001;
+	      fields.carry = x & 0x0001;
 	      bool msb = x >> 7;
 	      x >>= 1;
 	      msb ? x |= 0x0080 : 0;
         memory_write_word(source_address, x);
       }
 
-      cpu->sr.zero = is_zero(source_address, bw_flag);
-      cpu->sr.negative = is_negative((int16_t*)source_address, bw_flag);
-      cpu->sr.overflow = false;
+      fields.zero = is_zero(source_address, bw_flag);
+      fields.negative = is_negative((int16_t*)source_address, bw_flag);
+      fields.overflow = false;
+      set_sr_from_fields(emu, fields);
       break;
     }
 
@@ -298,12 +301,12 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 	      x &= 0x00FF;
       }
       memory_write_word(source_address, x);
-
-      cpu->sr.negative = is_negative((int16_t*)source_address, WORD);
-      cpu->sr.zero = is_zero(source_address, WORD);
-      cpu->sr.carry = ! cpu->sr.zero;
-      cpu->sr.overflow = false;
-
+      Status_reg fields = get_sr_fields(emu);
+      fields.negative = is_negative((int16_t*)source_address, WORD);
+      fields.zero = is_zero(source_address, WORD);
+      fields.carry = !fields.zero;
+      fields.overflow = false;
+      set_sr_from_fields(emu, fields);
       break;
     }
 

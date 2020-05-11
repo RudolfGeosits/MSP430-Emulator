@@ -57,7 +57,8 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   * If Z = 1: execute following instruction
   */
   case 0x0:{
-    if (cpu->sr.zero == false) {
+    const Status_reg fields = get_sr_fields(emu);
+    if (fields.zero == false) {
       cpu->pc += signed_offset;
     }
 
@@ -69,7 +70,8 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
    * If Z = 0: execute following instruction
   */
   case 0x1:{
-    if (cpu->sr.zero == true) {
+    const Status_reg fields = get_sr_fields(emu);
+    if (fields.zero == true) {
       cpu->pc += signed_offset;
     }
 
@@ -82,7 +84,8 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   *  if C = 1: execute following instruction
   */
   case 0x2:{
-    if (cpu->sr.carry == false) {
+    const Status_reg fields = get_sr_fields(emu);
+    if (fields.carry == false) {
       cpu->pc += signed_offset;
     }
 
@@ -95,7 +98,8 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   * If C = 0: execute following instruction
   */
   case 0x3:{
-    if (cpu->sr.carry == true) {
+    const Status_reg fields = get_sr_fields(emu);
+    if (fields.carry == true) {
       cpu->pc += signed_offset;
     }
 
@@ -108,7 +112,8 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   *  if N = 0: execute following instruction
   */
   case 0x4:{
-    if (cpu->sr.negative == true) {
+    const Status_reg fields = get_sr_fields(emu);
+    if (fields.negative == true) {
       cpu->pc += signed_offset;
     }
 
@@ -121,7 +126,8 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   *  If (N .XOR. V) = 1 then execute the following instruction
   */
   case 0x5:{
-    if ((cpu->sr.negative ^ cpu->sr.overflow) == false) {
+    const Status_reg fields = get_sr_fields(emu);
+    if ((fields.negative ^ fields.overflow) == false) {
       cpu->pc += signed_offset;
     }
 
@@ -134,7 +140,8 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   *  If (N .XOR. V) = 0 then execute following instruction
   */
   case 0x6:{
-    if ((cpu->sr.negative ^ cpu->sr.overflow) == true) {
+    const Status_reg fields = get_sr_fields(emu);
+    if ((fields.negative ^ fields.overflow) == true) {
       cpu->pc += signed_offset;
     }
 

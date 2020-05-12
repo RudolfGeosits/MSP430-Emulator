@@ -49,6 +49,7 @@ struct Port_1 {
 };
 
 void setup_port_1(Emulator *emu);
+void handle_port_1_io(Emulator *emu);
 void handle_port_1(Emulator *emu);
 
 #endif

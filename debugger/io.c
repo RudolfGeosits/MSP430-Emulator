@@ -19,6 +19,20 @@
 #include "io.h"
 #include "websockets/packet_queue.h"
 
+#define BIT_COUNT 8
+
+static void digitalIoToString(char* const output, const uint8_t mask, const uint8_t x)
+{
+    for (size_t i = 0; i < BIT_COUNT; i++)
+    {
+        const uint8_t bit = 1 << i;
+        const bool valid = (mask & bit) != 0;
+        const bool one = (x & bit) != 0;
+        output[i] = valid ? (one ? '1' : '0') : 'X';
+    }
+    output[BIT_COUNT + 1] = 0;
+}
+
 void print_serial (Emulator *emu, char *buf)
 {
     switch (emu->mode)
@@ -31,6 +45,27 @@ void print_serial (Emulator *emu, char *buf)
             // was implemented independently
             printf("Serial %s\n", buf);
             break;
+    }
+}
+
+void put_port1(Emulator* const emu, const uint8_t mask, const uint8_t x)
+{
+
+    char str[BIT_COUNT + 1];
+    digitalIoToString(str, mask, x);
+    if (emu->port1_output_pipe == NULL)
+    {
+        print_console(emu, "PORT1:");
+        print_console(emu, str);
+        print_console(emu, "\n");
+    }
+    else
+    {
+        str[BIT_COUNT] = '\n';
+        const ssize_t count = write(emu->port1_output_pipe_fd, str, BIT_COUNT + 1);
+        fflush(emu->port1_output_pipe);
+        if (count != BIT_COUNT + 1)
+            print_console(emu, "Cannot write to port 1 output\n");
     }
 }
 

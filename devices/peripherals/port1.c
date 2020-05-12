@@ -17,6 +17,7 @@
 */
 
 #include "port1.h"
+#include "../../debugger/io.h"
 
 /* Cheat Sheet:
  *  PxIN :  0 = LOW input, 1 = HIGH input
@@ -25,21 +26,35 @@
  *  PxREN:  0 = Pull Up/Down DISABLED, 1 = Pull Up/Down ENABLED
  *
  *  PxSEL2 | PxSEL | Explaination
- *       0 |     0 | I/O function selected 
+ *       0 |     0 | I/O function selected
  *       0 |     1 | Primary Peripheral module function selected
  *       1 |     0 | Reserved ?
  *       1 |     1 | Secondary Peripheral module function selected
  *  [NOTE: P1 and P2 port pin INTs are disabled when PxSEL = 1]
  *
  *  PxIFG:  0 = No interrupt pending, 1 = Interrupt Pending
- *  PxIES:  PxIFG set with a [0 = LOW-HIGH, 1 = HIGH-LOW] transition 
+ *  PxIES:  PxIFG set with a [0 = LOW-HIGH, 1 = HIGH-LOW] transition
  *  PxIE :  0 = interrupt disabled, 1 = interrupt enabled
  */
+
+void handle_port_1_io(Emulator *emu)
+{
+    Cpu *cpu = emu->cpu;
+    Port_1 *p = cpu->p1;
+    const uint8_t out_flags = memory_get_flags(p->OUT);
+    if ((out_flags & MemoryCell_Flag_Written) != 0)
+    {
+        put_port1(emu, *p->DIR, *p->OUT);
+        memory_clear_flags(p->OUT);
+    }
+}
 
 void handle_port_1 (Emulator *emu)
 {
     Cpu *cpu = emu->cpu;
     Port_1 *p = cpu->p1;
+
+    handle_port_1_io(emu);
 
     //////////////////// P1.0 ////////////////////////
 
@@ -54,21 +69,21 @@ void handle_port_1 (Emulator *emu)
             p->OUT_0 = false;      // Reset P1OUT.0 flag
     }
 
-    // Check INPUT 
-    else                 
-    {                                
+    // Check INPUT
+    else
+    {
         p->DIR_0 = false;
     }
-    
-    /// Check if Interrupt Enabled for pin 
+
+    /// Check if Interrupt Enabled for pin
     if (*p->IE & 0x01)
-    {         
+    {
         p->IE_0 = true;
 
-        // Check For Interrupt Pending 
+        // Check For Interrupt Pending
         if (*p->IFG & 0x01)
-        {    
-            // Set p->IFG.0 flag indicating INT 
+        {
+            // Set p->IFG.0 flag indicating INT
             p->IFG_0 = true;
         }
         else
@@ -79,14 +94,14 @@ void handle_port_1 (Emulator *emu)
     else
     {
         p->IE_0 = false;
-    }    
-    
+    }
+
     // Check primary select
     if (*p->SEL & 0x01) {
         if (p->SEL_0 == false) {
             puts("P1_SEL_0 = 1");
         }
-        
+
         p->SEL_0 = true;
     }
     else {
@@ -102,7 +117,7 @@ void handle_port_1 (Emulator *emu)
         if (p->SEL2_0 == false) {
             puts("P1_SEL2_0 = 1");
         }
-        
+
         p->SEL2_0 = true;
     }
     else {
@@ -110,7 +125,7 @@ void handle_port_1 (Emulator *emu)
             puts("P1_SEL2_0 = 0");
         }
 
-        p->SEL2_0 = false;        
+        p->SEL2_0 = false;
     }
 
     //////////////////// P1.1 ////////////////////////
@@ -169,7 +184,7 @@ void handle_port_1 (Emulator *emu)
     }
     else {
         if (p->SEL2_1 == true) {
-            p->SEL2_1 = false;        
+            p->SEL2_1 = false;
             puts("P1_SEL2_1 = 0");
         }
     }
@@ -215,11 +230,11 @@ void handle_port_1 (Emulator *emu)
     // Check primary select
     if (*p->SEL & 0x04)
     {
-        if (p->SEL_2 == false) 
+        if (p->SEL_2 == false)
         {
             puts("P1_SEL_2 = 1");
         }
-        
+
         p->SEL_2 = true;
     }
     else
@@ -237,7 +252,7 @@ void handle_port_1 (Emulator *emu)
         if (p->SEL2_2 == false) {
             puts("P1_SEL2_2 = 1");
         }
-        
+
         p->SEL2_2 = true;
     }
     else {
@@ -245,12 +260,12 @@ void handle_port_1 (Emulator *emu)
             puts("P1_SEL2_2 = 0");
         }
 
-        p->SEL2_2 = false;        
+        p->SEL2_2 = false;
     }
 
     ////////////////////////////////////////////////
 
-    // Handler P1.3 
+    // Handler P1.3
     if (*p->DIR & 0x08) {
         p->DIR_3 = true;
         if (*p->OUT & 0x08) {
@@ -280,7 +295,7 @@ void handle_port_1 (Emulator *emu)
 
     ///////////////////////////////////////////////////////////////
 
-    // Handler P1.4 
+    // Handler P1.4
     if (*p->DIR & 0x10) {
         p->DIR_4 = true;
         if (*p->OUT & 0x10) {
@@ -310,7 +325,7 @@ void handle_port_1 (Emulator *emu)
 
     /////////////////////////////////////////////////
 
-    // Handler P1.5 
+    // Handler P1.5
     if (*p->DIR & 0x20) {
         p->DIR_5 = true;
         if (*p->OUT & 0x20) {
@@ -340,7 +355,7 @@ void handle_port_1 (Emulator *emu)
 
     ////////////////////////////////////////////////////
 
-    // Handler P1.6 
+    // Handler P1.6
     if (*p->DIR & 0x40)
     {
         p->DIR_6 = true;
@@ -378,7 +393,7 @@ void handle_port_1 (Emulator *emu)
 
     ////////////////////////////////////////////////////
 
-    // Handler P1.7 
+    // Handler P1.7
     if (*p->DIR & 0x80) {
         p->DIR_7 = true;
         if (*p->OUT & 0x80) {
@@ -411,7 +426,7 @@ void setup_port_1 (Emulator *emu)
 {
     Cpu *cpu = emu->cpu;
     Port_1 *p = cpu->p1;
-  
+
     static const uint16_t IN_VLOC   = 0x20;   // Input
     static const uint16_t OUT_VLOC  = 0x21;   // Output
     static const uint16_t DIR_VLOC  = 0x22;   // Direction
@@ -421,7 +436,7 @@ void setup_port_1 (Emulator *emu)
     static const uint16_t SEL_VLOC  = 0x26;   // Select
     static const uint16_t SEL2_VLOC = 0x41;   // Select 2
     static const uint16_t REN_VLOC  = 0x27;   // Resistor Enable
-  
+
     *(p->IN   = (uint8_t *) get_addr_ptr(IN_VLOC))   = 0;
     *(p->OUT  = (uint8_t *) get_addr_ptr(OUT_VLOC))  = 0;
     *(p->DIR  = (uint8_t *) get_addr_ptr(DIR_VLOC))  = 0;
@@ -432,41 +447,41 @@ void setup_port_1 (Emulator *emu)
     *(p->SEL2 = (uint8_t *) get_addr_ptr(SEL2_VLOC)) = 0;
     *(p->REN  = (uint8_t *) get_addr_ptr(REN_VLOC))  = 0;
 
-  
-    p->DIR_0 = false; p->OUT_0 = false; p->IFG_0 = false; 
+
+    p->DIR_0 = false; p->OUT_0 = false; p->IFG_0 = false;
     p->IE_0 = false; p->SEL_0 = false; p->SEL2_0 = false;
-    
-    p->DIR_1 = false; p->OUT_1 = false; p->IFG_1 = false; 
+
+    p->DIR_1 = false; p->OUT_1 = false; p->IFG_1 = false;
     p->IE_1 = false; p->SEL_1 = false; p->SEL2_1 = false;
-    
-    p->DIR_2 = false; p->OUT_2 = false; p->IFG_2 = false; 
+
+    p->DIR_2 = false; p->OUT_2 = false; p->IFG_2 = false;
     p->IE_2 = false; p->SEL_2 = false; p->SEL2_2 = false;
-    
-    p->DIR_3 = false; p->OUT_3 = false; p->IFG_3 = false; 
+
+    p->DIR_3 = false; p->OUT_3 = false; p->IFG_3 = false;
     p->IE_3 = false; p->SEL_3 = false; p->SEL2_3 = false;
-    
-    p->DIR_4 = false; p->OUT_4 = false; p->IFG_4 = false; 
+
+    p->DIR_4 = false; p->OUT_4 = false; p->IFG_4 = false;
     p->IE_4 = false; p->SEL_4 = false; p->SEL2_4 = false;
-    
-    p->DIR_5 = false; p->OUT_5 = false; p->IFG_5 = false; 
+
+    p->DIR_5 = false; p->OUT_5 = false; p->IFG_5 = false;
     p->IE_5 = false; p->SEL_5 = false; p->SEL2_5 = false;
-    
-    p->DIR_6 = false; p->OUT_6 = false; p->IFG_6 = false; 
+
+    p->DIR_6 = false; p->OUT_6 = false; p->IFG_6 = false;
     p->IE_6 = false; p->SEL_6 = false; p->SEL2_6 = false;
-    
-    p->DIR_7 = false; p->OUT_7 = false; p->IFG_7 = false; 
+
+    p->DIR_7 = false; p->OUT_7 = false; p->IFG_7 = false;
     p->IE_7 = false; p->SEL_7 = false; p->SEL2_7 = false;
 }
 
-/* POWER UP CLEAR (PUC)      
+/* POWER UP CLEAR (PUC)
  *
  * A PUC is always generated when a POR is generated, but a POR is not
- * generated by a PUC. The following events trigger a PUC:  
- *                                                
- * A POR signal                             
+ * generated by a PUC. The following events trigger a PUC:
+ *
+ * A POR signal
  * Watchdog timer expiration when in watchdog mode only
- * Watchdog timer security key violation          
- * A Flash memory security key violation        
+ * Watchdog timer security key violation
+ * A Flash memory security key violation
  * A CPU instruct fetch from the peripheral address range 0h to 01FFh
 
 void power_up_clear () {

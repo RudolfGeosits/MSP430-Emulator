@@ -16,25 +16,15 @@
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef _UTILITIES_H_
-#define _UTILITIES_H_
+#ifndef IO_H
+#define IO_H
 
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdlib.h>
+#include "../main.h"
 
-#include "cpu/registers.h"
-#include "memory/memspace.h"
+void print_console (Emulator *emu, const char *buf);
+void print_serial (Emulator *emu, char *buf);
 
-#define STRING_BUFFER_SIZE 16384
-
-void reg_num_to_name(uint8_t source_reg, char *reg_name);
-int16_t *get_reg_ptr(Emulator *emu, uint8_t reg);
-uint16_t *get_stack_ptr(Emulator *emu);
-uint16_t *get_addr_ptr(uint16_t virt_addr);
-int8_t reg_name_to_num(char *name);
-void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr);
-void display_help(Emulator *emu);
+void put_serial(Emulator* const emu, const uint8_t x);
+bool get_serial(Emulator* const emu, uint8_t* const x);
 
 #endif

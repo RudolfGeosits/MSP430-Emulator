@@ -18,6 +18,10 @@
 
 #pragma once
 
+#define CLI_BUFFER_SIZE 1024
+#define VERSION_STRING "1.0.0"
+#define PROGRAM_NAME "MSP430 Emulator"
+
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
@@ -32,6 +36,11 @@
 #include <libwebsockets.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+
+typedef enum {
+  Emulator_Mode_Web,
+  Emulator_Mode_Cli
+} Emulator_Mode;
 
 typedef struct Emulator Emulator;
 
@@ -63,4 +72,14 @@ struct Emulator
 {
     Cpu *cpu;
     Debugger *debugger;
+    Emulator_Mode mode;
+    char* binary;
+    int port;
+    char* usci_input_pipe_name;
+    char* usci_output_pipe_name;
+    FILE* usci_input_pipe;
+    FILE* usci_output_pipe;
+    int usci_input_pipe_fd;
+    int usci_output_pipe_fd;
+    bool do_trace;
 };

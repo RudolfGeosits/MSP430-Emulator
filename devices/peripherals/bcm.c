@@ -60,14 +60,14 @@ void handle_bcm (Emulator *emu)
   
 
   // HANDLE LOW POWER MODES --------
-
+  const Status_reg fields = get_sr_fields(emu);
   // Active Mode (CPU is active, all enabled clocks are active)
-  if (!cpu->sr.SCG1 && !cpu->sr.SCG0 && !cpu->sr.OSCOFF && !cpu->sr.CPUOFF) {
+  if (!fields.SCG1 && !fields.SCG0 && !fields.OSCOFF && !fields.CPUOFF) {
 
   }
 
   // LPM0 (CPU, MCLK are disabled, SMCLK, ACLK are active)
-  else if (!cpu->sr.SCG1 && !cpu->sr.SCG0 && !cpu->sr.OSCOFF && cpu->sr.CPUOFF){
+  else if (!fields.SCG1 && !fields.SCG0 && !fields.OSCOFF && fields.CPUOFF){
 
   }
 
@@ -75,23 +75,23 @@ void handle_bcm (Emulator *emu)
      disabled if the DCO is not used for SMCLK. ACLK is
      active.)
   */
-  else if (!cpu->sr.SCG1 && cpu->sr.SCG0 && !cpu->sr.OSCOFF && cpu->sr.CPUOFF){
+  else if (!fields.SCG1 && fields.SCG0 && !fields.OSCOFF && fields.CPUOFF){
 
   }
 
   /* LPM2 (CPU, MCLK, SMCLK, DCO are disabled. DC generator remains enabled. 
      ACLK is active.) */
-  else if (cpu->sr.SCG1 && !cpu->sr.SCG0 && !cpu->sr.OSCOFF && cpu->sr.CPUOFF){
+  else if (fields.SCG1 && !fields.SCG0 && !fields.OSCOFF && fields.CPUOFF){
 
   }
 
   // LPM3 (CPU, MCLK, SMCLK, DCO are disabled. DC generatordisabled.ACLK active.
-  else if (cpu->sr.SCG1 && cpu->sr.SCG0 && !cpu->sr.OSCOFF && cpu->sr.CPUOFF){
+  else if (fields.SCG1 && fields.SCG0 && !fields.OSCOFF && fields.CPUOFF){
 
   }
 
   // LPM4 (CPU and all clocks are disabled)
-  else if (cpu->sr.SCG1 && cpu->sr.SCG0 && cpu->sr.OSCOFF && cpu->sr.CPUOFF){
+  else if (fields.SCG1 && fields.SCG0 && fields.OSCOFF && fields.CPUOFF){
     
   }
 

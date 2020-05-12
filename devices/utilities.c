@@ -17,20 +17,9 @@
 */
 
 #include "utilities.h"
+#include "../debugger/io.h"
 
 extern uint8_t* MEMSPACE;
-
-/**
- * @brief This function loads the default TI bootloader code into virtual mem
- * @param virt_addr The location in virtual memory to load the bootloader
- */
-void load_bootloader(uint16_t virt_addr)
-{
-    uint16_t *real_addr = get_addr_ptr(virt_addr);
-  
-    memmove(real_addr, blc, sizeof blc);
-    printf("Loaded booloader code into address 0x%04X\n", virt_addr);
-}
 
 /**
  * @brief This function loads firmware from a binary file on disk into the
@@ -41,15 +30,13 @@ void load_bootloader(uint16_t virt_addr)
 void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr)
 {
     uint32_t size, result;
-    char str[100] = {0};
+    char str[STRING_BUFFER_SIZE] = {0};
 
     sprintf(str, "Loading firmware: ( %s )\n", file_name);
-  
-    printf("%s", str);
     print_console(emu, str);
 
     FILE *fd = fopen(file_name, "rb+");
-  
+
     if (fd == NULL)
     {
         printf("Could not open %s, exiting.\n", file_name);
@@ -64,7 +51,6 @@ void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr)
     // check size
     if (size > (0x10000 - 0x0C000))
     {
-        printf("SizeTooBig\n");
         print_console(emu, "Flash Size too small to fit your binary. Quitting, please refresh to try again. Ensure you are compiling for the right MSP version.\n");
         usleep(20000);
         exit(1);
@@ -75,7 +61,6 @@ void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr)
     result = fread(real_addr, 1, size, fd);
 
     sprintf(str, "Placed %d bytes into flash\n\n", result);
-    printf("%s", str);
     print_console(emu, str);
 
     fclose(fd);
@@ -84,7 +69,7 @@ void load_firmware(Emulator *emu, char *file_name, uint16_t virt_addr)
 uint16_t *get_stack_ptr(Emulator *emu)
 {
     Cpu *cpu = emu->cpu;
-  
+
     return (uint16_t *) (MEMSPACE + cpu->sp);
 }
 
@@ -109,19 +94,11 @@ int16_t *get_reg_ptr(Emulator *emu, uint8_t reg)
 {
     Cpu *cpu = emu->cpu;
 
-    static int16_t r2 = 0;
-    
     switch (reg)
-    {    
+    {
         case 0x0: return (int16_t *) &cpu->pc;
         case 0x1: return (int16_t *) &cpu->sp;
-
-        case 0x2:
-        {
-            r2 = sr_to_value(emu);
-            return &r2;
-        }
-            
+        case 0x2: return (int16_t *) &cpu->sr;
         case 0x3: return &cpu->cg2;
         case 0x4: return &cpu->r4;
         case 0x5: return &cpu->r5;
@@ -135,7 +112,7 @@ int16_t *get_reg_ptr(Emulator *emu, uint8_t reg)
         case 0xD: return &cpu->r13;
         case 0xE: return &cpu->r14;
         case 0xF: return &cpu->r15;
-            
+
         default:
         {
             puts("Invalid Register Number");
@@ -147,7 +124,7 @@ int16_t *get_reg_ptr(Emulator *emu, uint8_t reg)
 /**
  * @brief Convert register ASCII name to it's respective numeric value
  * @param name The register's ASCII name
- * @return The numeric equivalent for the register on success, -1 if an 
+ * @return The numeric equivalent for the register on success, -1 if an
  * invalid name was supplied
  */
 int8_t reg_name_to_num(char *name)
@@ -170,91 +147,91 @@ int8_t reg_name_to_num(char *name)
 	        !strncasecmp("r2", name, sizeof "r2")     ||
 	        !strncasecmp("%sr", name, sizeof "%sr")     ||
 	        !strncasecmp("sr", name, sizeof "sr") ) {
-    
+
         return 2;
     }
     else if ( !strncasecmp("%r3", name, sizeof "%r3") ||
 	        !strncasecmp("r3", name, sizeof "r3")     ||
 	        !strncasecmp("%cg2", name, sizeof "%cg2") ||
-	        !strncasecmp("cg2", name, sizeof "cg2") ) {                        
-        
+	        !strncasecmp("cg2", name, sizeof "cg2") ) {
+
         return 3;
     }
     else if ( !strncasecmp("%r4", name, sizeof "%r4") ||
 	        !strncasecmp("r4", name, sizeof "r4") ) {
-    
+
         return 4;
     }
     else if ( !strncasecmp("%r5", name, sizeof "%r5") ||
 	        !strncasecmp("r5", name, sizeof "r5") ) {
-    
+
         return 5;
     }
     else if ( !strncasecmp("%r6", name, sizeof "%r6") ||
 	        !strncasecmp("r6", name, sizeof "r6") ) {
-    
+
         return 6;
     }
     else if ( !strncasecmp("%r7", name, sizeof "%r7") ||
 	        !strncasecmp("r7", name, sizeof "r7") ) {
-    
+
         return 7;
     }
     else if ( !strncasecmp("%r8", name, sizeof "%r8") ||
 	        !strncasecmp("r8", name, sizeof "r8") ) {
-    
+
         return 8;
     }
     else if ( !strncasecmp("%r9", name, sizeof "%r9") ||
 	        !strncasecmp("r9", name, sizeof "r9") ) {
-    
+
         return 9;
     }
     else if ( !strncasecmp("%r10", name, sizeof "%r10") ||
 	        !strncasecmp("r10", name, sizeof "r10") ) {
-    
+
         return 10;
     }
     else if ( !strncasecmp("%r11", name, sizeof "%r11") ||
 	        !strncasecmp("r11", name, sizeof "r11") ) {
-    
+
         return 11;
     }
     else if ( !strncasecmp("%r12", name, sizeof "%r12") ||
 	        !strncasecmp("r12", name, sizeof "r12") ) {
-    
+
         return 12;
     }
     else if ( !strncasecmp("%r13", name, sizeof "%r13") ||
 	        !strncasecmp("r13", name, sizeof "r13") ) {
-    
+
         return 13;
     }
     else if ( !strncasecmp("%r14", name, sizeof "%r14") ||
 	        !strncasecmp("r14", name, sizeof "r14") ) {
-    
+
         return 14;
     }
     else if ( !strncasecmp("%r15", name, sizeof "%r15") ||
 	        !strncasecmp("r15", name, sizeof "r15") ) {
-    
+
         return 15;
     }
-    
+
     return -1;
 }
 
 /**
  * @brief Convert register number into its ASCII name
- * @param number The register number (0, 1, 2, ...) associated with a 
+ * @param number The register number (0, 1, 2, ...) associated with a
  * register's name like (R0, R1, R2, ...)
  * @param name A pointer to an allocated character array to fill up with
  * the register's ASCII name
  */
 void reg_num_to_name(uint8_t number, char *name)
-{    
+{
     switch (number)
-    { 
+    {
         case 0x0:
         {
             strncpy(name, "PC\0", 3);
@@ -345,12 +322,12 @@ void reg_num_to_name(uint8_t number, char *name)
 
 /**
  * @brief This function displays the help menu to the user if he (or - but in
- * practice all too seldom - she) enters incorrect parameters or prompts the 
+ * practice all too seldom - she) enters incorrect parameters or prompts the
  * help menu with "help" or "h"
  */
 const char* LocalHelpStr =
 "**************************************************\n"\
-"*\t\tMSP430-Emulator\n*\n*\tUsage: ./msp430 BINARY_FIRMWARE\n*\n"\
+"*\t\tMSP430-Emulator\n"\
 "* run\t\t\t[Run Program Until Breakpoint is Hit]\n"\
 "* step [N]\t\t[Step Into Instruction]\n"\
 "* dump [HEX_ADDR|Rn]\t[Dump Memory direct or at register value]\n"\
@@ -361,6 +338,7 @@ const char* LocalHelpStr =
 "* regs\t\t\t[Display Registers]\n"\
 "* CTRL+C\t\t[Pause Execution]\n"\
 "* reset\t\t\t[Reset Machine]\n"\
+"* trace [ON|OFF]\t\t\t[Enable/disable instruction trace]\n"\
 "* quit\t\t\t[Exit program]\n"\
 "**************************************************\n";
 
@@ -376,6 +354,7 @@ const char* WebHelpStr =
 " bps\t\t\t[Display Breakpoints]\n"\
 " regs\t\t\t[Display Registers]\n"\
 " reset\t\t\t[Reset Machine]\n"\
+" trace [ON|OFF]\t\t\t[Enable/disable instruction trace]\n"\
 " quit\t\t\t[Exit program]\n"\
 "--------------------------------------------------\n";
 

@@ -19,15 +19,16 @@
 //##########+++ Decode Format II Instructions +++#########
 //# Format II are single operand of the form:
 //#   [0001][00CC][CBAA][SSSS]
-//# 
-//# Where C = Opcode, B = Byte/Word flag, 
+//#
+//# Where C = Opcode, B = Byte/Word flag,
 //#       A = Addressing mode for source
-//#       S = Source 
+//#       S = Source
 //########################################################
 
 #include "formatII.h"
 #include "decoder.h"
 #include "../utilities.h"
+#include "../../debugger/io.h"
 
 void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 {
@@ -38,10 +39,10 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
   uint8_t bw_flag = (instruction & 0x0040) >> 6;
   uint8_t as_flag = (instruction & 0x0030) >> 4;
   uint8_t source = (instruction & 0x000F);
-  
+
   char reg_name[10];
   reg_num_to_name(source, reg_name);
-  
+
   uint16_t *reg = (uint16_t * )get_reg_ptr(emu, source);
   uint16_t bogus_reg; /* For immediate values to be operated on */
 
@@ -53,7 +54,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
   char hex_str[100] = {0};
   char hex_str_part[10] = {0};
 
-  sprintf(hex_str, "%04X", instruction);
+  sprintf(hex_str, "%04hX", instruction);
 
   /*
   printf("Opcode: 0x%01X  Source bits: 0x%01X\nAS_Flag: 0x%01X  "\
@@ -82,7 +83,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       source_value = bogus_reg = immediate_constant;
       source_address = &bogus_reg;
 
-      sprintf(asm_operand, "#0x%04X", (uint16_t) source_value);
+      sprintf(asm_operand, "#0x%04hX", (uint16_t) source_value);
     }
     else {                             /* Source Register */
       source_value = *reg;
@@ -103,38 +104,38 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       source_value = bogus_reg = immediate_constant;
       source_address = &bogus_reg;
 
-      sprintf(asm_operand, "#0x%04X", source_value);
+      sprintf(asm_operand, "#0x%04hX", source_value);
     }
     else if (source == 0) {            /* Source Symbolic */
-      source_offset = fetch(emu);
+      source_offset = fetch(emu, false);
       uint16_t virtual_addr = cpu->pc + source_offset;
 
-      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      sprintf(hex_str_part, "%04hX", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
       source_address = get_addr_ptr(virtual_addr);
 
-      sprintf(asm_operand, "0x%04X", virtual_addr);
+      sprintf(asm_operand, "0x%04hX", virtual_addr);
     }
     else if (source == 2) {            /* Source Absolute */
-      source_offset = fetch(emu);
+      source_offset = fetch(emu, false);
       source_address = get_addr_ptr(source_offset);
-      source_value = *source_address;
+      source_value = memory_read_word(source_address);
 
-      sprintf(hex_str_part, "%04X", (uint16_t) source_value);
+      sprintf(hex_str_part, "%04hX", (uint16_t) source_value);
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
-      sprintf(asm_operand, "&0x%04X", (uint16_t) source_offset);
+      sprintf(asm_operand, "&0x%04hX", (uint16_t) source_offset);
     }
     else {                             /* Source Indexed */
-      source_offset = fetch(emu);
+      source_offset = fetch(emu, false);
       source_address = get_addr_ptr(*reg + source_offset);
-      source_value = *source_address;
+      source_value = memory_read_word(source_address);
 
-      sprintf(hex_str_part, "%04X", (uint16_t) source_offset);
+      sprintf(hex_str_part, "%04hX", (uint16_t) source_offset);
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
-      sprintf(asm_operand, "0x%04X(%s)", (uint16_t) source_offset, reg_name);
+      sprintf(asm_operand, "0x%04hX(%s)", (uint16_t) source_offset, reg_name);
     }
   }
 
@@ -145,11 +146,11 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       source_value = bogus_reg = immediate_constant;
       source_address = &bogus_reg;
 
-      sprintf(asm_operand, "#0x%04X", immediate_constant);
+      sprintf(asm_operand, "#0x%04hX", immediate_constant);
     }
     else {                             /* Source Indirect */
       source_address = get_addr_ptr(*reg);
-      source_value = *source_address;
+      source_value = memory_read_word(source_address);
 
       sprintf(asm_operand, "@%s", reg_name);
     }
@@ -163,25 +164,25 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       source_value = bogus_reg = immediate_constant;
       source_address = &bogus_reg;
 
-      sprintf(asm_operand, "#0x%04X", (uint16_t) source_value);
+      sprintf(asm_operand, "#0x%04hX", (uint16_t) source_value);
     }
     else if (source == 0) {            /* Source Immediate */
-      source_value = bogus_reg = fetch(emu);
+      source_value = bogus_reg = fetch(emu, false);
       source_address = &bogus_reg;
 
-      sprintf(hex_str_part, "%04X", (uint16_t) source_value);
+      sprintf(hex_str_part, "%04hX", (uint16_t) source_value);
       strncat(hex_str, hex_str_part, sizeof hex_str);
 
       if (bw_flag == WORD) {
-        sprintf(asm_operand, "#0x%04X", (uint16_t) source_value);
+        sprintf(asm_operand, "#0x%04hX", (uint16_t) source_value);
       }
       else if (bw_flag == BYTE) {
-        sprintf(asm_operand, "#0x%04X", (uint8_t) source_value);
+        sprintf(asm_operand, "#0x%04hX", (uint8_t) source_value);
       }
     }
     else {                              /* Source Indirect AutoIncrement */
       source_address = get_addr_ptr(*reg);
-      source_value = *source_address;
+      source_value = memory_read_word(source_address);
 
       sprintf(asm_operand, "@%s+", reg_name);
       bw_flag == WORD ? *reg += 2 : (*reg += 1);
@@ -191,12 +192,12 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
   if (!disassemble) {
     switch (opcode) {
-        
+
       /*  RRC Rotate right through carry
        *    C → MSB → MSB-1 .... LSB+1 → LSB → C
-       *  
-       *  Description The destination operand is shifted right one position 
-       *  as shown in Figure 3-18. The carry bit (C) is shifted into the MSB, 
+       *
+       *  Description The destination operand is shifted right one position
+       *  as shown in Figure 3-18. The carry bit (C) is shifted into the MSB,
        *  the LSB is shifted into the carry bit (C).
        *
        * N: Set if result is negative, reset if positive
@@ -206,65 +207,77 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
        * TODO: UNDEFINED BEHAVIOR DURRING CONSTANT MANIPULATION, BROKEN
        */
     case 0x0:{
-      bool CF = cpu->sr.carry;
+      Status_reg fields = get_sr_fields(emu);
+      bool CF = fields.carry;
 
       if (bw_flag == WORD) {
-	cpu->sr.carry = *source_address & 0x0001;  /* Set CF from LSB */
-	*source_address >>= 1;                /* Shift one right */
-	CF ? *source_address |= 0x8000 : 0;   /* Set MSB from prev CF */
+        uint16_t x = memory_read_word(source_address);
+	      fields.carry = x & 0x0001;  /* Set CF from LSB */
+	      x >>= 1;                /* Shift one right */
+	      CF ? x |= 0x8000 : 0;   /* Set MSB from prev CF */
+        memory_write_word(source_address, x);
       }
       else if (bw_flag == BYTE){
-	cpu->sr.carry = *(uint8_t *) source_address & 0x01;
-	*(uint8_t *) source_address >>= 1;
-	CF ? *(uint8_t *) source_address |= 0x80 : 0;
+        uint8_t x = memory_read_byte(source_address);
+	      fields.carry = x & 0x01;
+	      x >>= 1;
+	      CF ? x |= 0x80 : 0;
+        memory_write_byte(source_address, x);
       }
 
-      cpu->sr.zero = is_zero(source_address, bw_flag);
-      cpu->sr.negative = is_negative((int16_t*)source_address, bw_flag);
-      cpu->sr.overflow = false;
-
+      fields.zero = is_zero(source_address, bw_flag);
+      fields.negative = is_negative((int16_t*)source_address, bw_flag);
+      fields.overflow = false;
+      set_sr_from_fields(emu, fields);
       break;
     }
-    
+
       /* SWPB Swap bytes
        * bw flag always 0 (word)
        * Bits 15 to 8 ↔ bits 7 to 0
        */
-    case 0x1:{	
+    case 0x1:{
       uint8_t upper_nibble, lower_nibble;
-      upper_nibble = (*source_address & 0xFF00) >> 8;
-      lower_nibble = *source_address & 0x00FF;
-    
-      *source_address = ((uint16_t)0|(lower_nibble << 8)) | upper_nibble;
+      uint16_t x = memory_read_word(source_address);
+      upper_nibble = (x & 0xFF00) >> 8;
+      lower_nibble = x & 0x00FF;
+
+       memory_write_word(source_address, ((uint16_t)0|(lower_nibble << 8)) | upper_nibble);
 
       break;
     }
-    
-      /* RRA Rotate right arithmetic 
+
+      /* RRA Rotate right arithmetic
        *   MSB → MSB, MSB → MSB-1, ... LSB+1 → LSB, LSB → C
-       * 
+       *
        * N: Set if result is negative, reset if positive
        * Z: Set if result is zero, reset otherwise
        * C: Loaded from the LSB
        * V: Reset
        */
     case 0x2:{
+      Status_reg fields = get_sr_fields(emu);
       if (bw_flag == WORD) {
-	cpu->sr.carry = *source_address & 0x0001;
-	bool msb = *source_address >> 15;
-	*source_address >>= 1;
-	msb ? *source_address |= 0x8000 : 0; /* Extend Sign */
+        uint16_t x = memory_read_word(source_address);
+	      fields.carry = x & 0x0001;
+	      bool msb = x >> 15;
+	      x >>= 1;
+	      msb ? x |= 0x8000 : 0; /* Extend Sign */
+        memory_write_word(source_address, x);
       }
       else if (bw_flag == BYTE) {
-	cpu->sr.carry = *source_address & 0x0001;
-	bool msb = *source_address >> 7;
-	*source_address >>= 1;
-	msb ? *source_address |= 0x0080 : 0;
+        uint16_t x = memory_read_word(source_address);
+	      fields.carry = x & 0x0001;
+	      bool msb = x >> 7;
+	      x >>= 1;
+	      msb ? x |= 0x0080 : 0;
+        memory_write_word(source_address, x);
       }
 
-      cpu->sr.zero = is_zero(source_address, bw_flag);
-      cpu->sr.negative = is_negative((int16_t*)source_address, bw_flag);
-      cpu->sr.overflow = false;
+      fields.zero = is_zero(source_address, bw_flag);
+      fields.negative = is_negative((int16_t*)source_address, bw_flag);
+      fields.overflow = false;
+      set_sr_from_fields(emu, fields);
       break;
     }
 
@@ -272,7 +285,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
        *   bw flag always 0 (word)
        *
        * Bit 7 → Bit 8 ......... Bit 15
-       * 
+       *
        * N: Set if result is negative, reset if positive
        * Z: Set if result is zero, reset otherwise
        * C: Set if result is not zero, reset otherwise (.NOT. Zero)
@@ -280,23 +293,25 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
        */
 
     case 0x3:{
-      if (*source_address & 0x0080) {
-	*source_address |= 0xFF00;
+      uint16_t x = memory_read_word(source_address);
+      if (x & 0x0080) {
+	      x |= 0xFF00;
       }
       else {
-	*source_address &= 0x00FF;
+	      x &= 0x00FF;
       }
-    
-      cpu->sr.negative = is_negative((int16_t*)source_address, WORD);
-      cpu->sr.zero = is_zero(source_address, WORD);
-      cpu->sr.carry = ! cpu->sr.zero;
-      cpu->sr.overflow = false;
-
+      memory_write_word(source_address, x);
+      Status_reg fields = get_sr_fields(emu);
+      fields.negative = is_negative((int16_t*)source_address, WORD);
+      fields.zero = is_zero(source_address, WORD);
+      fields.carry = !fields.zero;
+      fields.overflow = false;
+      set_sr_from_fields(emu, fields);
       break;
     }
-  
+
       /* PUSH push value on to the stack
-       *   
+       *
        *   SP - 2 → SP
        *   src → @SP
        *
@@ -305,75 +320,77 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
       cpu->sp -= 2; /* Yes, even for BYTE Instructions */
       uint16_t *stack_address = get_stack_ptr(emu);
-    
+
       if (bw_flag == WORD) {
-	*stack_address = source_value;
+	      memory_write_word(stack_address, source_value);
       }
       else if (bw_flag == BYTE) {
-	*stack_address &= 0xFF00; /* Zero out bottom half for pushed byte */
-	*stack_address |= (uint8_t) source_value;
+        uint16_t x  = memory_read_word(stack_address);
+	      x &= 0xFF00; /* Zero out bottom half for pushed byte */
+	      x |= (uint8_t) source_value;
+        memory_write_word(stack_address, x);
       }
 
       break;
     }
 
-      /* CALL SUBROUTINE: 
+      /* CALL SUBROUTINE:
        *     PUSH PC and PC = SRC
-       *     
+       *
        *     This is always a word instruction. Supporting all addressing modes
        */
-    
+
     case 0x5:{
-    
+
       cpu->sp -= 2;
       uint16_t *stack_address = get_stack_ptr(emu);
-      *stack_address = cpu->pc;
-      cpu->pc = *source_address;
+      memory_write_word(stack_address, cpu->pc);
+      cpu->pc = memory_read_word(source_address);
 
       break;
     }
-  
+
       //# RETI Return from interrupt: Pop SR then pop PC
     case 0x6:{
-       
+      print_console(emu,"Unimplemented - RETI\n");
       break;
     }
     default:{
-      printf("Unknown Single operand instruction.\n");
+      print_console(emu, "Unknown Single operand instruction\n");
     }
 
     } //# End of Switch
   } //# end if
-  
 
-  else {    
+
+  else {
     switch (opcode) {
     case 0x0: {
       bw_flag == WORD ?
 	strncpy(mnemonic, "RRC", sizeof mnemonic) :
-	strncpy(mnemonic, "RRC.B", sizeof mnemonic);    
+	strncpy(mnemonic, "RRC.B", sizeof mnemonic);
 
       break;
     }
     case 0x1: {
-      strncpy(mnemonic, "SWPB", sizeof mnemonic);    
+      strncpy(mnemonic, "SWPB", sizeof mnemonic);
       break;
     }
     case 0x2: {
       bw_flag == WORD ?
 	strncpy(mnemonic, "RRA", sizeof mnemonic) :
-	strncpy(mnemonic, "RRA.B", sizeof mnemonic);     
+	strncpy(mnemonic, "RRA.B", sizeof mnemonic);
 
       break;
     }
     case 0x3: {
-      strncpy(mnemonic, "SXT", sizeof mnemonic);    
+      strncpy(mnemonic, "SXT", sizeof mnemonic);
       break;
     }
     case 0x4: {
       bw_flag == WORD ?
-	strncpy(mnemonic, "PUSH", sizeof mnemonic) :
-	strncpy(mnemonic, "PUSH.B", sizeof mnemonic);    
+	  strncpy(mnemonic, "PUSH", sizeof mnemonic) :
+	  strncpy(mnemonic, "PUSH.B", sizeof mnemonic);
 
       break;
     }
@@ -382,7 +399,7 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
       break;
     }
     case 0x6: {
-      strncpy(mnemonic, "RETI", sizeof mnemonic);           
+      strncpy(mnemonic, "RETI", sizeof mnemonic);
       break;
     }
     default: {
@@ -391,35 +408,34 @@ void decode_formatII(Emulator *emu, uint16_t instruction, bool disassemble)
 
     } //# End of Switch
 
-    strncat(mnemonic, "\t", sizeof mnemonic);
-    strncat(mnemonic, asm_operand, sizeof mnemonic);
-    strncat(mnemonic, "\n", sizeof mnemonic);
-    
+    // Changed from strincat(mnemonic, X, sizeof mnemonic)
+    // the previous form produced warnings
+    // and made no sense anyway, as DST must be larger than num
+    strcat(mnemonic, "\t");
+    strcat(mnemonic, asm_operand);
+    strcat(mnemonic, "\n");
+
     if (disassemble && emu->debugger->debug_mode) {
       int i;
       char one = 0, two = 0;
 
       // Make little endian big endian
       for (i = 0;i < strlen(hex_str);i += 4) {
-	one = hex_str[i];
-	two = hex_str[i + 1];
+	      one = hex_str[i];
+	      two = hex_str[i + 1];
 
-	hex_str[i] = hex_str[i + 2];
+	      hex_str[i] = hex_str[i + 2];
         hex_str[i + 1] = hex_str[i + 3];
 
-	hex_str[i + 2] = one;
-	hex_str[i + 3] = two;
+	      hex_str[i + 2] = one;
+      	hex_str[i + 3] = two;
       }
 
-      printf("%s", hex_str);
       print_console(emu, hex_str);
 
       for (i = strlen(hex_str);i < 12;i++) {
-	printf(" ");
-	print_console(emu, " ");
+	      print_console(emu, " ");
       }
-
-      printf("\t%s", mnemonic);
 
       print_console(emu, "\t");
       print_console(emu, mnemonic);

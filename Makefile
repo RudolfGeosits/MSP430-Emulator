@@ -1,82 +1,94 @@
-CFLAGS=-g 
+CXX=g++
+CXXFLAGS=-g
+LDLIBS=-lreadline -lwebsockets -lpthread -lrt -lssl -lcrypto
+SERVER=server
+EMULATOR=msp430-emu
 
-all: MSP430 SERVER
+.PHONY: all test clean
 
-MSP430 : main.o utilities.o emu_server.o registers.o memspace.o debugger.o disassembler.o \
-	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o \
-	usci.o port1.o packet_queue.o bcm.o timer_a.o
+all: ${EMULATOR} ${SERVER}
 
-	g++ ${CFLAGS} -o MSP430 main.o emu_server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
-	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o bcm.o timer_a.o packet_queue.o -lreadline -lwebsockets -lpthread -lrt -lssl -lcrypto;
+# Main emulator program
 
-main.o : main.cpp
-	g++ ${CFLAGS} -c main.cpp
+${EMULATOR} : main.o emu_server.o utilities.o registers.o memspace.o debugger.o disassembler.o \
+	register_display.o decoder.o flag_handler.o formatI.o formatII.o formatIII.o usci.o port1.o bcm.o \
+	timer_a.o packet_queue.o io.o
+	${CXX} ${CXXFLAGS} -o $@ $^ ${LDLIBS}
 
-utilities.o : devices/utilities.c
-	g++ ${CFLAGS} -c devices/utilities.c
+main.o : main.cpp main.h
+	${CXX} ${CXXFLAGS} -c $<
 
-registers.o : devices/cpu/registers.c
-	g++ ${CFLAGS} -c devices/cpu/registers.c
+utilities.o : devices/utilities.c devices/utilities.h
+	${CXX} ${CXXFLAGS} -c $<
 
-memspace.o : devices/memory/memspace.c
-	g++ ${CFLAGS} -c devices/memory/memspace.c
+registers.o : devices/cpu/registers.c devices/cpu/registers.h
+	${CXX} ${CXXFLAGS} -c $<
 
-debugger.o : debugger/debugger.c
-	g++ ${CFLAGS} -c debugger/debugger.c
+memspace.o : devices/memory/memspace.c devices/memory/memspace.h
+	${CXX} ${CXXFLAGS} -c $<
 
-disassembler.o : debugger/disassembler.c
-	g++ ${CFLAGS} -c debugger/disassembler.c
+debugger.o : debugger/debugger.c debugger/debugger.h
+	${CXX} ${CXXFLAGS} -c $<
 
-register_display.o : debugger/register_display.c
-	g++ ${CFLAGS} -c debugger/register_display.c
+disassembler.o : debugger/disassembler.c debugger/disassembler.h
+	${CXX} ${CXXFLAGS} -c $<
 
-decoder.o : devices/cpu/decoder.c
-	g++ ${CFLAGS} -c devices/cpu/decoder.c
+register_display.o : debugger/register_display.c debugger/register_display.h
+	${CXX} ${CXXFLAGS} -c $<
 
-flag_handler.o : devices/cpu/flag_handler.c
-	g++ ${CFLAGS} -c devices/cpu/flag_handler.c
+decoder.o : devices/cpu/decoder.c devices/cpu/decoder.h
+	${CXX} ${CXXFLAGS} -c $<
 
-formatI.o : devices/cpu/formatI.c
-	g++ ${CFLAGS} -c devices/cpu/formatI.c
+flag_handler.o : devices/cpu/flag_handler.c devices/cpu/flag_handler.h
+	${CXX} ${CXXFLAGS} -c $<
 
-formatII.o : devices/cpu/formatII.c
-	g++ ${CFLAGS} -c devices/cpu/formatII.c
+formatI.o : devices/cpu/formatI.c devices/cpu/formatI.h
+	${CXX} ${CXXFLAGS} -c $<
 
-formatIII.o : devices/cpu/formatIII.c
-	g++ ${CFLAGS} -c devices/cpu/formatIII.c
+formatII.o : devices/cpu/formatII.c devices/cpu/formatII.h
+	${CXX} ${CXXFLAGS} -c $<
 
-bcm.o : devices/peripherals/bcm.c
-	g++ ${CFLAGS} -c devices/peripherals/bcm.c
+formatIII.o : devices/cpu/formatIII.c devices/cpu/formatIII.h
+	${CXX} ${CXXFLAGS} -c $<
 
-timer_a.o : devices/peripherals/timer_a.c
-	g++ ${CFLAGS} -c devices/peripherals/timer_a.c
+bcm.o : devices/peripherals/bcm.c devices/peripherals/bcm.h
+	${CXX} ${CXXFLAGS} -c $<
 
-usci.o : devices/peripherals/usci.c
-	g++ ${CFLAGS} -c devices/peripherals/usci.c
+timer_a.o : devices/peripherals/timer_a.c devices/peripherals/timer_a.h
+	${CXX} ${CXXFLAGS} -c $<
 
-port1.o : devices/peripherals/port1.c
-	g++ ${CFLAGS} -c devices/peripherals/port1.c
+usci.o : devices/peripherals/usci.c devices/peripherals/usci.h
+	${CXX} ${CXXFLAGS} -c $<
 
-emu_server.o : debugger/websockets/emu_server.cpp
-	g++ ${CFLAGS} -c debugger/websockets/emu_server.cpp
+port1.o : devices/peripherals/port1.c devices/peripherals/port1.h
+	${CXX} ${CXXFLAGS} -c $<
 
-packet_queue.o : debugger/websockets/packet_queue.c
-	g++ ${CFLAGS} -c debugger/websockets/packet_queue.c
+io.o: debugger/io.c debugger/io.h
+	${CXX} ${CXXFLAGS} -c $<
+
+emu_server.o : debugger/websockets/emu_server.cpp debugger/websockets/emu_server.h
+	${CXX} ${CXXFLAGS} -c $<
+
+packet_queue.o : debugger/websockets/packet_queue.c debugger/websockets/packet_queue.h
+	${CXX} ${CXXFLAGS} -c $<
 
 # Server Program
 
-SERVER : server.o
-	g++ ${CFLAGS} -o server server.o -lrt -lpthread -lwebsockets -lssl -lcrypto;
+${SERVER} : server.o
+	${CXX} ${CXXFLAGS} -o $@ $^ ${LDLIBS}
 
-server.o : debugger/server/server.c
-	g++ ${CFLAGS} -c debugger/server/server.c
+server.o : debugger/server/server.c debugger/server/server.h
+	${CXX} ${CXXFLAGS} -c $<
 
 
 clean :
-	rm server.o main.o utilities.o emu_server.o registers.o \
-	memspace.o debugger.o disassembler.o \
-	register_display.o decoder.o flag_handler.o formatI.o \
-	formatII.o formatIII.o \
-	usci.o port1.o packet_queue.o bcm.o timer_a.o \
-	*.bin *.tmp *.elf \
-	MSP430 server;
+	rm -f server.o main.o utilities.o emu_server.o registers.o \
+		memspace.o debugger.o disassembler.o \
+		register_display.o decoder.o flag_handler.o formatI.o \
+		formatII.o formatIII.o io.o \
+		usci.o port1.o packet_queue.o bcm.o timer_a.o \
+		${EMULATOR} ${SERVER}
+	${MAKE} -C test clean
+
+test : ${EMULATOR} test/Makefile
+	${MAKE} -C test test

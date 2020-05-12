@@ -17,24 +17,31 @@
 */
 
 #include "decoder.h"
+#include "../../debugger/io.h"
 
 // ##########+++ CPU Fetch Cycle  +++##########
-uint16_t fetch(Emulator *emu)
+uint16_t fetch(Emulator *emu, bool report)
 {
     Cpu *cpu = emu->cpu;
     uint16_t word, *p;
     
     p = (get_addr_ptr(cpu->pc));
     word = *p;
+    if (emu->do_trace && report)
+    {
+        char buffer[128];    
+        sprintf(buffer, "Fetching %x - %x\n", cpu->pc, word);
+        print_console(emu, buffer);
+    }
 
     cpu->pc += 2;
-    
+
     return word;
 }
 
 // ##########+++ CPU Decode Cycle +++##########
 void decode(Emulator *emu, uint16_t instruction, bool disassemble)
-{    
+{
     Cpu *cpu = emu->cpu;
     Debugger *debugger = emu->debugger;
 
@@ -47,8 +54,8 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
     if (FormatId == 0x1)
     {
         // format II (single operand) instruction
-        decode_formatII(emu, instruction, disassemble);    
-    }        
+        decode_formatII(emu, instruction, disassemble);
+    }
     else if (FormatId >= 0x2 && FormatId <= 3)
     {
         // format III (jump) instruction
@@ -59,14 +66,13 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
         // format I (two operand) instruction
         decode_formatI(emu, instruction, disassemble);
     }
-    else 
+    else
     {
         char inv[100] = {0};
 
         sprintf(inv, "%04X\t[INVALID INSTRUCTION]\n", instruction);
         print_console(emu, inv);
-        printf("%s", inv);
-        
+
         //cpu->pc -= 2;
         cpu->running = false;
         debugger->debug_mode = true;
@@ -74,7 +80,7 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
 }
 
 // Constant Generator
-int16_t run_constant_generator(uint8_t source, uint8_t as_flag) 
+int16_t run_constant_generator(uint8_t source, uint8_t as_flag)
 {
     int16_t generated_constant = 0;
 
@@ -99,10 +105,10 @@ int16_t run_constant_generator(uint8_t source, uint8_t as_flag)
 	                printf("Invalid as_flag for CG1\n");
                 }
             }
-            
+
             break;
         }
-            
+
         // Register R3/CG2
         case 3:
         {
@@ -137,11 +143,11 @@ int16_t run_constant_generator(uint8_t source, uint8_t as_flag)
 
             break;
         }
-            
+
         default:
         {
             printf("Invalid source register for constant generation.\n");
-        }    
+        }
     }
 
     return generated_constant;

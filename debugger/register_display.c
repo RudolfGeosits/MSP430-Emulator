@@ -17,11 +17,12 @@
 */
 
 #include "register_display.h"
+#include "io.h"
 
-/*   Display all 16 registers                                                  
- *   - Toggle between Common mode and Specific mode                         
- *     (Common: Display all as R0 - R15)                                   
- *     (Specific: Display Register usages like PC, SR, etc.)               
+/*   Display all 16 registers
+ *   - Toggle between Common mode and Specific mode
+ *     (Common: Display all as R0 - R15)
+ *     (Specific: Display Register usages like PC, SR, etc.)
  */
 
 void display_registers(Emulator *emu)
@@ -31,7 +32,7 @@ void display_registers(Emulator *emu)
 
   typedef enum {UNDEF, LINUX, WINDOWS} System_t;
   System_t this_system;
-  uint16_t r2 = sr_to_value(emu);
+  uint16_t r2 = cpu->sr;
 
   char full[1000] = {0};
 
@@ -60,7 +61,7 @@ void display_registers(Emulator *emu)
   const char *r12_name = "R12";
   const char *r13_name = "R13";
   const char *r14_name = "R14";
-  const char *r15_name = "R15";    
+  const char *r15_name = "R15";
 
 
   if (debugger->console_interface) {
@@ -101,7 +102,9 @@ void display_registers(Emulator *emu)
     z_flag = (char*)"Z";
     c_flag = (char*)"C";
   }
-  
+
+  const Status_reg flags = get_sr_fields(emu);
+
   sprintf(full,
 	  "\n%s%s%s:   %s%04X  "\
 	  "%s%s%s:   %s%04X  "	\
@@ -123,35 +126,34 @@ void display_registers(Emulator *emu)
 	  "%s%%%s%s%s: %s%04X  "\
 	  "%s%%%s%s%s: %s%04X  "\
 	  "%s%s%s: %s%d\n\n",
-	 
-	  red, r0_name, decor_col, value_col, (uint16_t)cpu->pc, 
-	  red, r1_name, decor_col, value_col, (uint16_t)cpu->sp, 
-	  red, r2_name, decor_col, value_col, (uint16_t)r2, 
-	  red, r3_name, decor_col, value_col, (uint16_t)cpu->cg2, 
 
-	  cyan, c_flag, decor_col, value_col, cpu->sr.carry,
+	  red, r0_name, decor_col, value_col, (uint16_t)cpu->pc,
+	  red, r1_name, decor_col, value_col, (uint16_t)cpu->sp,
+	  red, r2_name, decor_col, value_col, (uint16_t)r2,
+	  red, r3_name, decor_col, value_col, (uint16_t)cpu->cg2,
 
-	  decor_col, reg_col, r4_name, decor_col, value_col, (uint16_t)cpu->r4, 
-	  decor_col, reg_col, r5_name, decor_col, value_col, (uint16_t)cpu->r5, 
+	  cyan, c_flag, decor_col, value_col, flags.carry,
+
+	  decor_col, reg_col, r4_name, decor_col, value_col, (uint16_t)cpu->r4,
+	  decor_col, reg_col, r5_name, decor_col, value_col, (uint16_t)cpu->r5,
 	  decor_col, reg_col, r6_name, decor_col, value_col, (uint16_t)cpu->r6,
-	  decor_col, reg_col, r7_name, decor_col, value_col, (uint16_t)cpu->r7, 
+	  decor_col, reg_col, r7_name, decor_col, value_col, (uint16_t)cpu->r7,
 
-	  cyan, z_flag, decor_col, value_col, cpu->sr.zero,
+	  cyan, z_flag, decor_col, value_col, flags.zero,
 
-	  decor_col, reg_col, r8_name, decor_col,value_col, (uint16_t)cpu->r8, 
-	  decor_col, reg_col, r9_name, decor_col,value_col, (uint16_t)cpu->r9, 
+	  decor_col, reg_col, r8_name, decor_col,value_col, (uint16_t)cpu->r8,
+	  decor_col, reg_col, r9_name, decor_col,value_col, (uint16_t)cpu->r9,
 	  decor_col, reg_col, r10_name, decor_col,value_col,(uint16_t)cpu->r10,
-	  decor_col, reg_col, r11_name, decor_col,value_col,(uint16_t)cpu->r11, 
+	  decor_col, reg_col, r11_name, decor_col,value_col,(uint16_t)cpu->r11,
 
-	  cyan, n_flag, decor_col, value_col, cpu->sr.negative, 
+	  cyan, n_flag, decor_col, value_col, flags.negative,
 
-	  decor_col, reg_col, r12_name, decor_col,value_col,(uint16_t)cpu->r12, 
-	  decor_col, reg_col, r13_name, decor_col,value_col,(uint16_t)cpu->r13, 
+	  decor_col, reg_col, r12_name, decor_col,value_col,(uint16_t)cpu->r12,
+	  decor_col, reg_col, r13_name, decor_col,value_col,(uint16_t)cpu->r13,
 	  decor_col, reg_col, r14_name, decor_col,value_col,(uint16_t)cpu->r14,
 	  decor_col, reg_col, r15_name, decor_col,value_col,(uint16_t)cpu->r15,
 
-	  cyan, v_flag, decor_col, value_col, cpu->sr.overflow);
+	  cyan, v_flag, decor_col, value_col, flags.overflow);
 
-  printf("%s", full);
   print_console(emu, full);
 }

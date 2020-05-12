@@ -12,6 +12,7 @@ CFLAGS= -mmcu=$(DEVICE) -msmall -Wall -Os -g
 
 USCI_UART_TEST = usci_uart_test
 MATH_TEST = math_test
+DIO_TEST = dio_test
 
 .PHONY: all clean test ${USCI_UART_TEST} ${MATH_TEST}
 
@@ -28,10 +29,14 @@ ${OUT_DIR}/${MATH_TEST}.bin: ${SRC_DIR}/${MATH_TEST}.c ${OUT_DIR}
 	${CC} $< -o ${OUT_DIR}/${MATH_TEST}.elf -L ${SRC_DIR}
 	${OBJCOPY} -O binary ${OUT_DIR}/${MATH_TEST}.elf $@
 
+${OUT_DIR}/${DIO_TEST}.bin: ${SRC_DIR}/${DIO_TEST}.c ${OUT_DIR}
+	${CC} $< -o ${OUT_DIR}/${DIO_TEST}.elf -L ${SRC_DIR}
+	${OBJCOPY} -O binary ${OUT_DIR}/${DIO_TEST}.elf $@
+
 clean:
 	rm -r -f ${OUT_DIR}
 
-test: ${USCI_UART_TEST} ${MATH_TEST}
+test: ${USCI_UART_TEST} ${MATH_TEST} ${DIO_TEST}
 
 ${USCI_UART_TEST}: ${OUT_DIR}/${USCI_UART_TEST}.bin
 	# Setup input/output
@@ -61,3 +66,16 @@ ${MATH_TEST}: ${OUT_DIR}/${MATH_TEST}.bin
 	# Create reference file
 	printf "Test calculation from 17 and 111 yields 44" > ${OUT_DIR}/${MATH_TEST}_pipe.out.ref
 	diff ${OUT_DIR}/${MATH_TEST}_pipe.out ${OUT_DIR}/${MATH_TEST}_pipe.out.ref
+
+${DIO_TEST}: ${OUT_DIR}/${DIO_TEST}.bin
+	# Setup output
+	rm -r -f ${OUT_DIR}/${DIO_TEST}_pipe.out
+	touch ${OUT_DIR}/${DIO_TEST}_pipe.out
+	# Run the simulator with the test binary
+	printf "reset\ns 10000\nquit\n" |\
+		${EMU} -m cli -b ${OUT_DIR}/${DIO_TEST}.bin \
+		-d ${OUT_DIR}/${DIO_TEST}_pipe.out \
+		> /dev/null
+	# Create reference file
+	printf "0XXXXXXX\n1XXXXXXX\n0XXXXXXX\n" > ${OUT_DIR}/${DIO_TEST}_pipe.out.ref
+	diff ${OUT_DIR}/${DIO_TEST}_pipe.out ${OUT_DIR}/${DIO_TEST}_pipe.out.ref

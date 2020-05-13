@@ -1,7 +1,4 @@
-#include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include "bsp.h"
 
 static uint16_t doCalculation(uint32_t a, uint32_t b)

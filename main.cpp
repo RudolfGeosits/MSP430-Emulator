@@ -40,6 +40,7 @@ static void printHelp()
     printf("-p INTEGER Set webserver port\n");
     printf("-i NAME Set USCI input pipe/file\n");
     printf("-o NAME Set USCI output pipe/file\n");
+    printf("-d NAME Set DIGITAL I/O PORT 1 output pipe/file\n");
 }
 
 static bool checkEmulatorConfig(Emulator* const emu)
@@ -82,7 +83,7 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
     emu->usci_output_pipe_fd = 0;
     emu->usci_input_pipe_name = NULL;
     emu->usci_output_pipe_name = NULL;
-    while ((option = getopt(argc, argv, "hvm:p:b:i:o:")) != -1)
+    while ((option = getopt(argc, argv, "hvm:p:b:i:o:d:")) != -1)
     {
         switch (option)
         {
@@ -107,6 +108,9 @@ static bool setEmulatorConfig(Emulator* const emu, int argc, char *argv[])
                 break;
             case 'o':
                 emu->usci_output_pipe_name = optarg;
+                break;
+            case 'd':
+                emu->port1_output_pipe_name = optarg;
                 break;
             default:
                 printf("Unknown option\n");
@@ -174,19 +178,19 @@ static bool openUsciPipes(Emulator* const emu)
     if (emu->usci_input_pipe_name != NULL)
     {
         emu->usci_input_pipe = fopen(emu->usci_input_pipe_name, "rb");
-        if (emu->usci_input_pipe == NULL)    
+        if (emu->usci_input_pipe == NULL)
         {
             print_console(emu, "Cannot open USCI input pipe\n");
             return false;
         }
         emu->usci_input_pipe_fd = fileno(emu->usci_input_pipe);
         int flags = fcntl(emu->usci_input_pipe_fd, F_GETFL, 0);
-        fcntl(emu->usci_input_pipe_fd, F_SETFL, flags | O_NONBLOCK);        
+        fcntl(emu->usci_input_pipe_fd, F_SETFL, flags | O_NONBLOCK);
     }
     if (emu->usci_output_pipe_name != NULL)
     {
         emu->usci_output_pipe = fopen(emu->usci_output_pipe_name, "wb");
-        if (emu->usci_output_pipe == NULL)    
+        if (emu->usci_output_pipe == NULL)
         {
             print_console(emu, "Cannot open USCI output pipe\n");
             return false;
@@ -202,11 +206,39 @@ static bool closeUsciPipes(Emulator* const emu)
     {
         fclose(emu->usci_input_pipe);
         emu->usci_input_pipe = NULL;
+        emu->usci_input_pipe_fd = -1;
     }
     if (emu->usci_output_pipe != NULL)
     {
         fclose(emu->usci_output_pipe);
         emu->usci_output_pipe = NULL;
+        emu->usci_output_pipe_fd = -1;
+    }
+    return true;
+}
+
+static bool openDioPipes(Emulator* const emu)
+{
+    if (emu->port1_output_pipe_name != NULL)
+    {
+        emu->port1_output_pipe = fopen(emu->port1_output_pipe_name, "wb");
+        if (emu->port1_output_pipe == NULL)
+        {
+            print_console(emu, "Cannot open DIGITAL I.O PORT 1 output pipe\n");
+            return false;
+        }
+        emu->port1_output_pipe_fd = fileno(emu->port1_output_pipe);
+    }
+    return true;
+}
+
+static bool closeDioPipes(Emulator* const emu)
+{
+    if (emu->port1_output_pipe != NULL)
+    {
+        fclose(emu->port1_output_pipe);
+        emu->port1_output_pipe = NULL;
+        emu->port1_output_pipe_fd = -1;
     }
     return true;
 }
@@ -238,7 +270,7 @@ static void handleProcessingStep(Emulator* const emu)
 {
     Cpu* const cpu = emu->cpu;
     if (!cpu->running)
-        return;    
+        return;
     // Handle Breakpoints
     if (handle_breakpoints(emu))
         return;
@@ -254,11 +286,11 @@ static void handleProcessingStep(Emulator* const emu)
 }
 
 int mainInernal(int argc, char *argv[], Emulator* const emu)
-{    
+{
     Debugger* const deb = emu->debugger;
     if (!setEmulatorConfig(emu, argc, argv))
         return 0;
-    
+
     initializeMsp430(emu);
     Cpu* const cpu = emu->cpu;
     setup_debugger(emu);
@@ -280,6 +312,12 @@ int mainInernal(int argc, char *argv[], Emulator* const emu)
         return -1;
     }
 
+    if (!openDioPipes(emu))
+    {
+        closeDioPipes(emu);
+        return -1;
+    }
+
     // display first round of registers
     display_registers(emu);
     disassemble(emu, cpu->pc, 1);
@@ -288,23 +326,24 @@ int mainInernal(int argc, char *argv[], Emulator* const emu)
     // Fetch-Decode-Execute Cycle (run machine)
     while (!deb->quit)
     {
-        handleCommanding(emu);        
+        handleCommanding(emu);
         handleProcessingStep(emu);
     }
 
     closeUsciPipes(emu);
+    closeDioPipes(emu);
     deinitializeMsp430(emu);
     return 0;
 }
 
 int main(int argc, char *argv[])
-{    
-    Emulator *emu = (Emulator *) calloc( 1, sizeof(Emulator) );    
-    emu->debugger  = (Debugger *) calloc(1, sizeof(Debugger));    
+{
+    Emulator *emu = (Emulator *) calloc( 1, sizeof(Emulator) );
+    emu->debugger  = (Debugger *) calloc(1, sizeof(Debugger));
     emu->debugger->server = (Server *) calloc(1, sizeof(Server));
 
     const int result = mainInernal(argc, argv, emu);
-    
+
     free(emu->debugger->server);
     free(emu->debugger);
     free(emu);

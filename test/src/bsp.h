@@ -3,6 +3,8 @@
 */
 
 #include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
 
 static volatile uint8_t* IE1 = (uint8_t*)0x0000;
 static volatile uint8_t* IFG1 = (uint8_t*)0x0002;
@@ -99,7 +101,7 @@ static volatile uint8_t* CALDCO_1MHZ = (uint8_t*)0x10FE;
 static volatile uint8_t* CALBC1_1MHZ = (uint8_t*)0x10FF;
 
 static inline void uart_init(void)
-{    
+{
     // Reset start
     *UCA0CTL1 |= (uint8_t)0x1;
     *UCA0CTL0 = 0x00;

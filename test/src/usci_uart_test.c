@@ -1,7 +1,4 @@
-#include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include "bsp.h"
 
 #define BUFFER_SIZE 128

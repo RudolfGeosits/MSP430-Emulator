@@ -21,7 +21,7 @@
 
 #define BIT_COUNT 8
 
-static void digitalIoToString(char* const output, const uint8_t mask, const uint8_t x)
+static void digitalIoToString(char output[BIT_COUNT + 1], const uint8_t mask, const uint8_t x)
 {
     for (size_t i = 0; i < BIT_COUNT; i++)
     {
@@ -30,7 +30,7 @@ static void digitalIoToString(char* const output, const uint8_t mask, const uint
         const bool one = (x & bit) != 0;
         output[i] = valid ? (one ? '1' : '0') : 'X';
     }
-    output[BIT_COUNT + 1] = 0;
+    output[BIT_COUNT] = '\0';
 }
 
 void print_serial (Emulator *emu, char *buf)
@@ -50,7 +50,6 @@ void print_serial (Emulator *emu, char *buf)
 
 void put_port1(Emulator* const emu, const uint8_t mask, const uint8_t x)
 {
-
     char str[BIT_COUNT + 1];
     digitalIoToString(str, mask, x);
     if (emu->port1_output_pipe == NULL)

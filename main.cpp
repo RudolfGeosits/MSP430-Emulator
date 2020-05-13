@@ -206,11 +206,13 @@ static bool closeUsciPipes(Emulator* const emu)
     {
         fclose(emu->usci_input_pipe);
         emu->usci_input_pipe = NULL;
+        emu->usci_input_pipe_fd = -1;
     }
     if (emu->usci_output_pipe != NULL)
     {
         fclose(emu->usci_output_pipe);
         emu->usci_output_pipe = NULL;
+        emu->usci_output_pipe_fd = -1;
     }
     return true;
 }
@@ -236,6 +238,7 @@ static bool closeDioPipes(Emulator* const emu)
     {
         fclose(emu->port1_output_pipe);
         emu->port1_output_pipe = NULL;
+        emu->port1_output_pipe_fd = -1;
     }
     return true;
 }

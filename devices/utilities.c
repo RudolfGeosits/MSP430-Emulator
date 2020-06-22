@@ -338,7 +338,8 @@ const char* LocalHelpStr =
 "* regs\t\t\t[Display Registers]\n"\
 "* CTRL+C\t\t[Pause Execution]\n"\
 "* reset\t\t\t[Reset Machine]\n"\
-"* trace [ON|OFF]\t\t\t[Enable/disable instruction trace]\n"\
+"* stats\t\t\t[Display CPU Statistics]\n"\
+"* trace [ON|OFF]\t\t[Enable/disable instruction trace]\n"\
 "* quit\t\t\t[Exit program]\n"\
 "**************************************************\n";
 
@@ -354,7 +355,8 @@ const char* WebHelpStr =
 " bps\t\t\t[Display Breakpoints]\n"\
 " regs\t\t\t[Display Registers]\n"\
 " reset\t\t\t[Reset Machine]\n"\
-" trace [ON|OFF]\t\t\t[Enable/disable instruction trace]\n"\
+" stats\t\t\t[Display CPU Statistics]\n"\
+" trace [ON|OFF]\t\t[Enable/disable instruction trace]\n"\
 " quit\t\t\t[Exit program]\n"\
 "--------------------------------------------------\n";
 

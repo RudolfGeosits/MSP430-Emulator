@@ -33,7 +33,7 @@ bool exec_cmd (Emulator *emu, char *line, int len)
 
   char bogus1[100] = {0};
   uint32_t bogus2 = 0, bogus3 = 0;
-
+  deb->error = 0;
   ops = sscanf(line, "%s %u %u", cmd, &op1, &op2);
   //printf("Got %s, %u, %u - ops %d\n", cmd, op1, op2, ops);
 
@@ -49,6 +49,7 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       uint16_t resetIntHandlerAddress = ((uint16_t*)MEMSPACE)[0xfffe / 2];
       cpu->pc = resetIntHandlerAddress;
 
+      reset_cpu_stats(emu);
       display_registers(emu);
       disassemble(emu, cpu->pc, 1);
     }
@@ -72,6 +73,8 @@ bool exec_cmd (Emulator *emu, char *line, int len)
 	      handle_timer_a(emu);
 	      handle_port_1(emu);
 	      handle_usci(emu);
+        if (emu->debugger->error != 0)
+          break;
       }
 
       display_registers(emu);
@@ -160,9 +163,9 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       if (res != -1) {  // If its a reg name
 	reg_name = reg_name_or_addr;
 	printf("In reg part...\n");
-	
+
 	uint16_t *p = (uint16_t*)get_reg_ptr(emu, res);
-	*p = value;	
+	*p = value;
 
 	display_registers(emu);
 	disassemble(emu, cpu->pc, 1);
@@ -251,6 +254,12 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       print_console(emu, "Tracing is ");
       print_console(emu, emu->do_trace ? "on\n" : "off\n");
     }
+
+  // Show CPU statistics
+  else if (!strncasecmp("stats", cmd, sizeof "stats"))
+  {
+    display_cpu_stats(emu);
+  }
 
   // help, display a list of debugger cmds //
   else if ( !strncasecmp("help", cmd, sizeof "help") ||

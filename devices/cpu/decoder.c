@@ -69,7 +69,7 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
     else
     {
         char inv[100] = {0};
-
+        debugger->error = ERROR_ILLEGAL_INSTRUCTION;
         sprintf(inv, "%04X\t[INVALID INSTRUCTION]\n", instruction);
         print_console(emu, inv);
 
@@ -77,6 +77,7 @@ void decode(Emulator *emu, uint16_t instruction, bool disassemble)
         cpu->running = false;
         debugger->debug_mode = true;
     }
+    update_cpu_stats(emu);
 }
 
 // Constant Generator

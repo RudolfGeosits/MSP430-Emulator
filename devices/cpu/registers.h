@@ -39,6 +39,10 @@ typedef struct Status_reg {
   uint16_t reserved : 7;   // Reserved bits
 } __attribute__((packed)) Status_reg;
 
+typedef struct CpuStats {
+  uint16_t spLowWatermark;
+} CpuStats;
+
 // Main CPU structure //
 typedef struct Cpu {
   bool running;      /* CPU running or not */
@@ -55,11 +59,16 @@ typedef struct Cpu {
   Usci *usci;
   Bcm *bcm;
   Timer_a *timer_a;
+
+  CpuStats stats;
 } Cpu;
 
 Status_reg get_sr_fields (Emulator *emu);
 void set_sr_from_fields(Emulator *emu, const Status_reg fields);
 void initialize_msp_registers (Emulator *emu);
 void update_register_display (Emulator *emu);
+void update_cpu_stats(Emulator *emu);
+void display_cpu_stats(Emulator *emu);
+void reset_cpu_stats(Emulator *emu);
 
 #endif

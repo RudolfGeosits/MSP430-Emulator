@@ -25,14 +25,12 @@ void initialize_msp_registers(Emulator *emu)
   Cpu *cpu = emu->cpu;
   Debugger *debugger = emu->debugger;
 
-  /* Initialize PC to boot loader code on cold boot (COLD)*/
-  //cpu->pc = 0x0C00;
-
   /* Initialize Program Counter to *0xFFFE at boot or reset (WARM)*/
   cpu->pc = 0xC000;
 
-  /* Stack pointer typically begins at the top of RAM after reset */
-  cpu->sp = 0x400;
+  /* Stack pointer - set to the end of the address space, should be set by
+     the program */
+  cpu->sp = 0xFFFF;
 
   /* Initialize the status register */
   memset(&cpu->sr, 0, sizeof(Status_reg));
@@ -43,6 +41,8 @@ void initialize_msp_registers(Emulator *emu)
   cpu->r4 = cpu->r5 = cpu->r6 = cpu->r7 = cpu->r8 =
     cpu->r9 = cpu->r10 = cpu->r11 = cpu->r12 = cpu->r13 =
     cpu->r14 = cpu->r15 = 0;
+
+  reset_cpu_stats(emu);
 }
 
 void update_register_display (Emulator *emu)
@@ -199,4 +199,31 @@ void set_sr_from_fields(Emulator *emu, const Status_reg fields)
   }
 
   cpu->sr = r2;
+}
+
+void update_cpu_stats(Emulator *emu)
+{
+  if (emu->cpu->stats.spLowWatermark > emu->cpu->sp)
+  {
+    if (emu->do_trace)
+    {
+      char buffer[1024];
+      sprintf(buffer, "New SP low watermark - %04X\n", emu->cpu->sp);
+      print_console(emu, buffer);
+    }
+    emu->cpu->stats.spLowWatermark = emu->cpu->sp;
+  }
+}
+
+void display_cpu_stats(Emulator *emu)
+{
+  char stats[1024];
+  sprintf(stats, "CPU stats:\n \tSP low watermark - %04X\n",
+    emu->cpu->stats.spLowWatermark);
+  print_console(emu, stats);
+}
+
+void reset_cpu_stats(Emulator *emu)
+{
+  emu->cpu->stats.spLowWatermark = 0xFFFF;
 }

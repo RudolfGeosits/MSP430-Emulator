@@ -27,6 +27,8 @@ typedef enum { BYTE_STRIDE, WORD_STRIDE, DWORD_STRIDE } Stride;
 
 enum { MAX_BREAKPOINTS = 100 };
 
+enum {ERROR_ILLEGAL_INSTRUCTION = 1};
+
 typedef struct Debugger
 {
   bool disassemble_mode;
@@ -34,6 +36,7 @@ typedef struct Debugger
   bool web_interface;
   bool console_interface;
   bool quit;
+  int32_t error = 0;
 
   unsigned int ws_port;
 

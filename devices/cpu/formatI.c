@@ -152,7 +152,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       source_offset = fetch(emu, false);
       uint16_t virtual_addr = *s_reg + source_offset - 2;
 
-      source_value = *get_addr_ptr(virtual_addr);
+      source_value = memory_read_word(get_addr_ptr(virtual_addr));
 
 
       sprintf(hex_str_part, "%04hX", (uint16_t) source_offset);
@@ -381,7 +381,7 @@ void decode_formatI(Emulator *emu, uint16_t instruction, bool disassemble)
       sprintf(asm_operands, "#0x%04X, ", (uint16_t)source_value);
     }
     else {                             /* Source Indirect Auto Increment */
-      source_value = *get_addr_ptr(*s_reg);
+      source_value = memory_read_word(get_addr_ptr(*s_reg));
 
       sprintf(asm_operands, "@%s+, ", s_reg_name);
 

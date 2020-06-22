@@ -333,7 +333,8 @@ const char* LocalHelpStr =
 "* dump [HEX_ADDR|Rn]\t[Dump Memory direct or at register value]\n"\
 "* set [HEX_ADDR|Rn]\t[Set Memory or Register Location]\n"\
 "* dis [N][HEX_ADDR]\t[Disassemble Instructions]\n"\
-"* break ADDR\t\t[Set a Breakpoint]\n"\
+"* break ADDR\t\t[Set a PC Breakpoint]\n"\
+"* memorybreak ADDR\t\t[Set a Memory Breakpoint]\n"\
 "* bps\t\t\t[Display Breakpoints]\n"\
 "* regs\t\t\t[Display Registers]\n"\
 "* CTRL+C\t\t[Pause Execution]\n"\
@@ -351,7 +352,8 @@ const char* WebHelpStr =
 " dump [HEX_ADDR|Rn]\t[Dump Memory direct or at register value]\n"\
 " set [HEX_ADDR|Rn]\t[Set Memory or Register Location]\n"\
 " dis [N][HEX_ADDR]\t[Disassemble Instructions]\n"\
-" break ADDR\t\t[Set a Breakpoint]\n"\
+" break ADDR\t\t[Set a PC Breakpoint]\n"\
+" memorybreak ADDR\t\t[Set a Memory Breakpoint]\n"\
 " bps\t\t\t[Display Breakpoints]\n"\
 " regs\t\t\t[Display Registers]\n"\
 " reset\t\t\t[Reset Machine]\n"\

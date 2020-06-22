@@ -203,16 +203,23 @@ void set_sr_from_fields(Emulator *emu, const Status_reg fields)
 
 void update_cpu_stats(Emulator *emu)
 {
+  char buffer[1024];
   if (emu->cpu->stats.spLowWatermark > emu->cpu->sp)
   {
     if (emu->do_trace)
-    {
-      char buffer[1024];
+    {      
       sprintf(buffer, "New SP low watermark - %04X\n", emu->cpu->sp);
       print_console(emu, buffer);
     }
-    emu->cpu->stats.spLowWatermark = emu->cpu->sp;
+    emu->cpu->stats.spLowWatermark = emu->cpu->sp;    
   }
+  if (emu->cpu->stats.spLastValue != emu->cpu->sp && emu->do_trace)
+  {
+    sprintf(buffer, "SP - [%04X] == %04X\n", emu->cpu->sp, *get_addr_ptr(emu->cpu->sp));
+    print_console(emu, buffer);
+  }
+
+  emu->cpu->stats.spLastValue = emu->cpu->sp;
 }
 
 void display_cpu_stats(Emulator *emu)
@@ -226,4 +233,5 @@ void display_cpu_stats(Emulator *emu)
 void reset_cpu_stats(Emulator *emu)
 {
   emu->cpu->stats.spLowWatermark = 0xFFFF;
+  emu->cpu->stats.spLastValue = 0xFFFF;
 }

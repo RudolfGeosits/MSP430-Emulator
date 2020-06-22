@@ -62,10 +62,13 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       uint32_t i;
 
       if (ops == 2) {
-	steps = (int) op1;
+	       steps = (int) op1;
       }
 
       for (i = 0;i < steps;i++) {
+        // Let's handle breakpoints - except the one we are stopped on.
+        if (handle_breakpoints(emu) && i > 0)
+          break;
 	      decode(emu, fetch(emu, true), EXECUTE);
 
         // Handle Peripherals
@@ -185,28 +188,43 @@ bool exec_cmd (Emulator *emu, char *line, int len)
   else if ( !strncasecmp("break", cmd, sizeof "break") )
     {
       if (deb->num_bps >= MAX_BREAKPOINTS) {
-	//printf("Breakpoints are full.\n");
-	print_console(emu, "Breakpoints are full.\n");
-
-	return true;
+	      print_console(emu, "Breakpoints are full.\n");
+	      return true;
       }
 
       ops = sscanf(line, "%s %X", bogus1, &bogus2);
       char entry[100] = {0};
 
       if (ops == 2) {
-	sscanf(line, "%s %X", bogus1, (unsigned int *)
-	       &deb->bp_addresses[deb->num_bps]);
-
-	sprintf(entry, "\n\t[Breakpoint [%d] Set]\n", deb->num_bps + 1);
-	//printf("%s", entry);
-	print_console(emu, entry);
-
-	++deb->num_bps;
+	      sscanf(line, "%s %X", bogus1, (unsigned int *)&deb->bp_addresses[deb->num_bps]);
+	      sprintf(entry, "\n\t[Breakpoint PC[%d] Set]\n", deb->num_bps + 1);
+	      print_console(emu, entry);
+	      ++deb->num_bps;
       }
       else {
-	//printf("error\n");
-	print_console(emu, "error\n");
+	      print_console(emu, "error\n");
+      }
+    }
+
+  // memorybreak BREAKPOINT_ADDRESS - set memory breakpoint //
+  else if ( !strncasecmp("memorybreak", cmd, sizeof "memorybreak") )
+    {
+      if (deb->num_memory_bps >= MAX_BREAKPOINTS) {
+	      print_console(emu, "Breakpoints are full.\n");
+	      return true;
+      }
+
+      ops = sscanf(line, "%s %X", bogus1, &bogus2);
+      char entry[100] = {0};
+
+      if (ops == 2) {
+	      sscanf(line, "%s %X", bogus1, (unsigned int *)&deb->memory_bp_addresses[deb->num_memory_bps]);
+	      sprintf(entry, "\n\t[Breakpoint MEM[%d] Set]\n", deb->num_memory_bps + 1);
+	      print_console(emu, entry);
+	      ++deb->num_memory_bps;
+      }
+      else {
+	      print_console(emu, "error\n");
       }
     }
 
@@ -215,22 +233,20 @@ bool exec_cmd (Emulator *emu, char *line, int len)
     {
       char entry[100] = {0};
 
-      if (deb->num_bps > 0) {
-	deb->current_bp = 0;
+      if ((deb->num_bps > 0) || (deb->num_memory_bps > 0)) {
 
-	while (deb->current_bp < deb->num_bps) {
-	  sprintf(entry, "\t[%d] 0x%04X\n",
-		  deb->current_bp+1, deb->bp_addresses[deb->current_bp]);
+	      for (int i = 0; i < deb->num_bps; i++) {
+      	  sprintf(entry, "\tPC[%d] 0x%04X\n", i+1, deb->bp_addresses[i]);
+      	  print_console(emu, entry);
+      	}
 
-	  //printf("%s", entry);
-	  print_console(emu, entry);
-
-	  ++deb->current_bp;
-	}
+	      for (int i = 0; i < deb->num_memory_bps; i++) {
+      	  sprintf(entry, "\tMEM[%d] 0x%04X\n", i+1, deb->memory_bp_addresses[i]);
+      	  print_console(emu, entry);
+      	}
       }
       else {
-	//printf("You have not set any breakpoints!\n");
-	print_console(emu, "You have not set any breakpoints!\n");
+	      print_console(emu, "You have not set any breakpoints!\n");
       }
     }
 
@@ -547,7 +563,7 @@ void setup_debugger(Emulator *emu)
 
   memset(deb->bp_addresses, 0, sizeof(deb->bp_addresses));
   deb->num_bps = 0;
-  deb->current_bp = 0;
+  deb->num_memory_bps = 0;
 }
 
 void handle_sigint(int sig)
@@ -563,28 +579,41 @@ void register_signal(int sig)
   signal(sig, handle_sigint);
 }
 
+static void handle_breakpoint_hit(Emulator *emu)
+{
+  Cpu *cpu = emu->cpu;
+  Debugger *deb = emu->debugger;
+  cpu->running = false;
+  deb->debug_mode = true;
+
+  display_registers(emu);
+  disassemble(emu, cpu->pc, 1);
+}
+
 bool handle_breakpoints (Emulator *emu)
 {
-  int i;
+  uint16_t i;
   Cpu *cpu = emu->cpu;
   Debugger *deb = emu->debugger;
   char str[100] = {0};
 
   for (i = 0;i < deb->num_bps;i++) {
-
     if (cpu->pc == deb->bp_addresses[i]) {
-      cpu->running = false;
-      deb->debug_mode = true;
-
-      sprintf(str, "\n\t[Breakpoint %d hit]\n\n", i + 1);
+      sprintf(str, "\n\t[Breakpoint PC[%d] hit]\n\n", i + 1);
       print_console(emu, str);
-
-      display_registers(emu);
-      disassemble(emu, cpu->pc, 1);
-
+      handle_breakpoint_hit(emu);
       return true;
     }
+  }
 
+  for (i = 0;i < deb->num_memory_bps;i++) {
+    if (memory_get_flags_of_virtual_address(
+        (void*)((uintptr_t)(deb->memory_bp_addresses[i]))) != 0) {
+      sprintf(str, "\n\t[Breakpoint MEM[%d] hit]\n\n", i + 1);
+      print_console(emu, str);
+      handle_breakpoint_hit(emu);
+      return true;
+    }
   }
   return false;
 }

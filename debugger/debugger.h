@@ -49,7 +49,8 @@ typedef struct Debugger
   char mnemonic[50];
 
   uint16_t bp_addresses[MAX_BREAKPOINTS];
-  uint16_t current_bp;
+  uint16_t memory_bp_addresses[MAX_BREAKPOINTS];
+  uint16_t num_memory_bps;  
   uint32_t num_bps;
 
   // debug server for web interface

@@ -16,6 +16,7 @@
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+#include <stdio.h>
 #include "memspace.h"
 
 uint8_t* MEMSPACE;   /* Memory Space */
@@ -140,7 +141,8 @@ void memory_write_word(void* const address, const uint16_t x)
   {
     MEMSPACE_FLAGS[index] |= (uint8_t)MemoryCell_Flag_Written;
     MEMSPACE_FLAGS[index + 1] |= (uint8_t)MemoryCell_Flag_Written;
-  }
+    //printf("Write [%04X] <- %04X\n", index, x);
+  }  
   (*(uint16_t*)address) = x;
 }
 
@@ -150,6 +152,14 @@ uint8_t memory_get_flags(void* const address)
   if (index >= 0)
     return MEMSPACE_FLAGS[index];
   return 0;
+}
+
+uint8_t memory_get_flags_of_virtual_address(void* const address)
+{
+  uintptr_t index = (uintptr_t)address;
+  if (index >= ADDRESS_SPACE_SIZE)
+    return 0;
+  return MEMSPACE_FLAGS[index];
 }
 
 void memory_clear_flags(void* const address)

@@ -41,6 +41,7 @@ typedef struct Status_reg {
 
 typedef struct CpuStats {
   uint16_t spLowWatermark;
+  uint16_t spLastValue;
 } CpuStats;
 
 // Main CPU structure //

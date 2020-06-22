@@ -41,6 +41,7 @@ void memory_write_byte(void* const address, const uint8_t x);
 void memory_write_word(void* const address, const uint16_t x);
 
 uint8_t memory_get_flags(void* const address);
+uint8_t memory_get_flags_of_virtual_address(void* const address);
 void memory_clear_flags(void* const address);
 
 #endif

@@ -25,6 +25,8 @@
 #include <stdbool.h>
 #include "../../main.h"
 
+enum {CallTracer_MaxCallDepth = 128};
+
 /* r2 or SR, the status register */
 typedef struct Status_reg {
   uint16_t carry : 1;      // Carry flag; Set when result produces a carry
@@ -38,6 +40,17 @@ typedef struct Status_reg {
   uint16_t overflow : 1;   // Overflow flag
   uint16_t reserved : 7;   // Reserved bits
 } __attribute__((packed)) Status_reg;
+
+typedef struct CallEntry {
+  uint16_t targetPc;
+  uint16_t returnPc;
+  uint16_t sp;
+} CallEntry;
+
+typedef struct CallTracer {
+  CallEntry calls[CallTracer_MaxCallDepth];
+  uint32_t callDepth;
+} CallTracer;
 
 typedef struct CpuStats {
   uint16_t spLowWatermark;
@@ -61,6 +74,7 @@ typedef struct Cpu {
   Bcm *bcm;
   Timer_a *timer_a;
 
+  CallTracer callTracer;
   CpuStats stats;
 } Cpu;
 
@@ -71,5 +85,8 @@ void update_register_display (Emulator *emu);
 void update_cpu_stats(Emulator *emu);
 void display_cpu_stats(Emulator *emu);
 void reset_cpu_stats(Emulator *emu);
+void reset_call_tracer(Emulator* emu);
+void report_instruction_execution(Emulator* emu, const uint16_t instruction);
+
 
 #endif

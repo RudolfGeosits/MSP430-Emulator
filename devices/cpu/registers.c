@@ -43,6 +43,7 @@ void initialize_msp_registers(Emulator *emu)
     cpu->r14 = cpu->r15 = 0;
 
   reset_cpu_stats(emu);
+  reset_call_tracer(emu);
 }
 
 void update_register_display (Emulator *emu)
@@ -207,16 +208,16 @@ void update_cpu_stats(Emulator *emu)
   if (emu->cpu->stats.spLowWatermark > emu->cpu->sp)
   {
     if (emu->do_trace)
-    {      
+    {
       sprintf(buffer, "New SP low watermark - %04X\n", emu->cpu->sp);
-      print_console(emu, buffer);
+      //print_console(emu, buffer);
     }
-    emu->cpu->stats.spLowWatermark = emu->cpu->sp;    
+    emu->cpu->stats.spLowWatermark = emu->cpu->sp;
   }
   if (emu->cpu->stats.spLastValue != emu->cpu->sp && emu->do_trace)
   {
     sprintf(buffer, "SP - [%04X] == %04X\n", emu->cpu->sp, *get_addr_ptr(emu->cpu->sp));
-    print_console(emu, buffer);
+    //print_console(emu, buffer);
   }
 
   emu->cpu->stats.spLastValue = emu->cpu->sp;
@@ -234,4 +235,63 @@ void reset_cpu_stats(Emulator *emu)
 {
   emu->cpu->stats.spLowWatermark = 0xFFFF;
   emu->cpu->stats.spLastValue = 0xFFFF;
+}
+
+void reset_call_tracer(Emulator* emu)
+{
+  emu->cpu->callTracer.callDepth = 0;
+}
+
+static void print_spaces(Emulator* emu, const uint8_t count)
+{
+  for (uint8_t i = 0; i < count; i++)
+    print_console(emu, " ");
+}
+
+void report_instruction_execution(Emulator* emu, const uint16_t instruction)
+{
+  char buffer[1024];  
+  Cpu* const cpu = emu->cpu;
+  const uint16_t opcode = instruction & 0xFFC0u;
+  // Call instruction
+  if (opcode == 0x1280u)
+  {
+    cpu->callTracer.calls[cpu->callTracer.callDepth].returnPc = *get_addr_ptr(cpu->sp);
+    // SP + 2 to accomodate PC already on the stack
+    cpu->callTracer.calls[cpu->callTracer.callDepth].sp = cpu->sp + 2;
+    cpu->callTracer.calls[cpu->callTracer.callDepth].targetPc = cpu->pc;
+    if (emu->do_trace)
+    {
+      print_spaces(emu, cpu->callTracer.callDepth);
+      sprintf(buffer, "Call from %04X to %04X; [SP] == %04X\n",
+        cpu->callTracer.calls[cpu->callTracer.callDepth].returnPc,
+        cpu->callTracer.calls[cpu->callTracer.callDepth].targetPc,
+        cpu->callTracer.calls[cpu->callTracer.callDepth].sp);
+      print_console(emu, buffer);
+    }
+    cpu->callTracer.callDepth++;
+  }
+  else if (cpu->callTracer.callDepth > 0)
+  {
+    if (cpu->pc == cpu->callTracer.calls[cpu->callTracer.callDepth - 1].returnPc)
+    {
+      cpu->callTracer.callDepth--;
+      const bool hasSpChanged = cpu->callTracer.calls[cpu->callTracer.callDepth].sp != cpu->sp;
+      if (hasSpChanged)
+      {
+        cpu->running = false;
+        emu->debugger->debug_mode = true;
+      }
+      if (emu->do_trace || hasSpChanged)
+      {
+        print_spaces(emu, cpu->callTracer.callDepth);
+        sprintf(buffer, "Return from from %04X to %04X; [SP] == %04X, was %04X\n",
+          cpu->callTracer.calls[cpu->callTracer.callDepth].targetPc,
+          cpu->callTracer.calls[cpu->callTracer.callDepth].returnPc,
+          cpu->sp,
+          cpu->callTracer.calls[cpu->callTracer.callDepth].sp);
+        print_console(emu, buffer);
+      }
+    }
+  }
 }

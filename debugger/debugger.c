@@ -50,6 +50,7 @@ bool exec_cmd (Emulator *emu, char *line, int len)
       cpu->pc = resetIntHandlerAddress;
 
       reset_cpu_stats(emu);
+      reset_call_tracer(emu);
       display_registers(emu);
       disassemble(emu, cpu->pc, 1);
     }

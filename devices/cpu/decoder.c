@@ -31,7 +31,7 @@ uint16_t fetch(Emulator *emu, bool report)
     {
         char buffer[128];    
         sprintf(buffer, "Fetching %x - %x\n", cpu->pc, word);
-        //print_console(emu, buffer);
+        print_console(emu, buffer);
     }
 
     cpu->pc += 2;

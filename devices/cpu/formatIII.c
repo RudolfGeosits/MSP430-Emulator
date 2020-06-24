@@ -33,7 +33,7 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   Debugger *debugger = emu->debugger;
 
   uint8_t condition = (instruction & 0x1C00) >> 10;
-  int16_t signed_offset = (instruction & 0x03FF) * 2;
+  int16_t signed_offset = (instruction & 0x03FF);
   bool negative = signed_offset >> 9;
 
   char value[20];
@@ -45,8 +45,10 @@ void decode_formatIII(Emulator *emu, uint16_t instruction, bool disassemble)
   sprintf(hex_str, "%04hX", instruction);
 
   if (negative) { /* Sign Extend for Arithmetic Operations */
-    signed_offset |= 0xF800;
+    signed_offset |= 0xFC00;
   }
+
+  signed_offset *= 2;
 
   if (!disassemble) {
   switch(condition){

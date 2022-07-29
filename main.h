@@ -1,6 +1,6 @@
 /*
   MSP430 Emulator
-  Copyright (C) 2020 Rudolf Geosits (rgeosits@live.esu.edu)
+  Copyright (C) 2022 Rudolf Geosits (rgeosits@live.esu.edu)
 
   "MSP430 Emulator" is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by

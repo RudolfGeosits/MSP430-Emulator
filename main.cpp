@@ -1,6 +1,6 @@
 /*
   MSP430 Emulator
-  Copyright (C) 2020 Rudolf Geosits (rgeosits@live.esu.edu)
+  Copyright (C) 2022 Rudolf Geosits (rgeosits@live.esu.edu)
   
   "MSP430 Emulator" is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
         while (!deb->web_server_ready)
             usleep(10000);
 
-        print_console(emu, " [MSP430 Emulator]\n Copyright (C) 2020 Rudolf Geosits (rgeosits@live.esu.edu)\n");
+        print_console(emu, " [MSP430 Emulator]\n Copyright (C) 2022 Rudolf Geosits (rgeosits@live.esu.edu)\n");
         print_console(emu, " [!] Upload your firmware (ELF format only); Type 'h' for debugger options.\n\n");
 
         while (!deb->web_firmware_uploaded)
